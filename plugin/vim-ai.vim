@@ -1,4 +1,8 @@
-let g:openaiToken = system("cat ~/.config/openai.token")
+if $OPENAI_API_TOKEN != ''
+  let g:openaiToken = $OPENAI_API_TOKEN
+else
+  let g:openaiToken = system("cat ~/.config/openai.token")
+endif
 
 function! AIRun(...) range
   let prompt = getline(a:firstline, a:lastline)
