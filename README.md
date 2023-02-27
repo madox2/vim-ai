@@ -21,7 +21,7 @@ export OPENAI_API_TOKEN="YOUR_OPENAPI_TOKEN"
 
 Add plugin to your `.vimrc`, e.g. using `vim-plug`:
 
-```vimscript
+```vim
 Plug 'madox2/vim-ai'
 ```
 
@@ -35,7 +35,7 @@ Plug 'madox2/vim-ai'
 
 Map keys in your `.vimrc` to trigger `:AI` command.
 
-```vimscript
+```vim
 nnoremap <leader>a :AI<CR>
 vnoremap <leader>a :AI<CR>
 ```
@@ -44,7 +44,7 @@ vnoremap <leader>a :AI<CR>
 
 To customize and re-use prompts it is useful to put some context to the language model. You can do it with prepending text to `:AI` command.
 
-```vimscript
+```vim
 # key binding with custom context
 vnoremap <leader>s :AI fix grammar and spelling and use formal language<CR>
 nnoremap <leader>s :AI fix grammar and spelling and use formal language<CR>
