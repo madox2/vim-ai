@@ -1,0 +1,25 @@
+*vim-ai.txt*  Complete text using OpenAI API.
+
+Author:  Martin Bielik <https://madox2.poriadne.sk/>
+License: see https://github.com/madox2/vim-ai/blob/main/LICENSE
+
+INTRODUCTION                                    *vim-ai*
+
+This plugin can be used to generate code, edit text, brainstorm ideas,
+translate, etc.
+
+COMMANDS                                        *vim-ai-commands*
+
+To set-up key bindings and expamples see:
+https://github.com/madox2/vim-ai
+
+                                                *:AI*
+:AI {prompt}            Completes selected text (visual mode) or text on the
+                        current line (normal mode). Passing optional {prompt}
+                        parameter prepends it to the final prompt.
+
+ABOUT                                           *vim-ai-about*
+
+Contributions are welcome on GitHub:
+
+https://github.com/madox2/vim-ai
