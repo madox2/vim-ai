@@ -45,11 +45,11 @@ vnoremap <leader>a :AI<CR>
 To customize and re-use prompts it is useful to put some context to the language model. You can do it with prepending text to `:AI` command.
 
 ```vim
-# key binding with custom context
+" key binding with custom context
 vnoremap <leader>s :AI fix grammar and spelling and use formal language<CR>
 nnoremap <leader>s :AI fix grammar and spelling and use formal language<CR>
 
-# command with custom context
+" command with custom context
 command! -range -nargs=? AICode <line1>,<line2>call AIRun("Programming syntax is " . &filetype, <f-args>)
 ```
 ## License
