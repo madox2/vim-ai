@@ -1,14 +1,9 @@
 #!/bin/bash
 
-if [ -n "$(which pip3)" ]; then
-  pip3 install openai
-  exit 0
+if [ -z "$(which pip3)" ]; then
+  echo pip3 not found
+  exit 1
 fi
 
-if [ -n "$(which pip)" ]; then
-  pip install openai
-  exit 0
-fi
-
-echo missing pip3 or pip
-exit 1
+echo installing deps using pip3
+pip3 install openai

@@ -22,7 +22,7 @@ Add plugin to your `.vimrc` using `vim-plug`:
 Plug 'madox2/vim-ai', { 'do': './install.sh' }
 ```
 
-The plugin requires `python3` and `pip` to be installed.
+The plugin requires `python3` and `pip3` to be installed.
 
 ## Usage
 
