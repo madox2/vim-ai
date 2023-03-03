@@ -1,8 +1,5 @@
-if $OPENAI_API_TOKEN != ''
-  let g:openaiToken = $OPENAI_API_TOKEN
-else
-  let g:openaiToken = system("cat ~/.config/openai.token")
-endif
+let s:plugin_root = expand('<sfile>:p:h:h')
+let s:complete_script_file = s:plugin_root . "/py/complete.py"
 
 function! AIRun(...) range
   let prompt = getline(a:firstline, a:lastline)
@@ -16,7 +13,7 @@ function! AIRun(...) range
   let prompt = join(prompt, "\n")
 
   echo "Completing..."
-  let output = system("echo " . shellescape(prompt) . " | openai complete - -t " . g:openaiToken)
+  let output = system("echo " . shellescape(prompt) . " | python3 " . s:complete_script_file . " ")
   let output = trim(output)
 
   execute a:firstline . ',' . a:lastline . 'd'

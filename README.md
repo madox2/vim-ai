@@ -9,9 +9,6 @@ Complete text in vim using OpenAI.
 Prerequisites:
 
 ```sh
-# install https://github.com/peterdemin/openai-cli
-pip install openai-cli
-
 # configure openai api key https://platform.openai.com/account/api-keys
 echo "YOUR_OPENAPI_TOKEN" > ~/.config/openai.token
 
@@ -19,11 +16,13 @@ echo "YOUR_OPENAPI_TOKEN" > ~/.config/openai.token
 export OPENAI_API_TOKEN="YOUR_OPENAPI_TOKEN"
 ```
 
-Add plugin to your `.vimrc`, e.g. using `vim-plug`:
+Add plugin to your `.vimrc` using `vim-plug`:
 
 ```vim
-Plug 'madox2/vim-ai'
+Plug 'madox2/vim-ai', { 'do': './install.sh' }
 ```
+
+The plugin requires `python3` and `pip` to be installed.
 
 ## Usage
 
