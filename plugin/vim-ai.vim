@@ -18,11 +18,13 @@ function! AIRun(...) range
 
   execute a:firstline . ',' . a:lastline . 'd'
 
+  set paste
   if a:lastline == buff_lastline
     execute "normal! o" . output . "\<Esc>"
   else
     execute "normal! O" . output . "\<Esc>"
   endif
+  set nopaste
 
 endfunction
 
