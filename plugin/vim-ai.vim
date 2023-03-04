@@ -1,6 +1,7 @@
 let s:plugin_root = expand('<sfile>:p:h:h')
 let s:complete_py = s:plugin_root . "/py/complete.py"
 let s:chat_py = s:plugin_root . "/py/chat.py"
+let s:debug = 0
 
 function! ScratchWindow()
   below new
@@ -10,13 +11,24 @@ function! ScratchWindow()
 endfunction
 
 function! AIRun(...) range
-  let prompt = getline(a:firstline, a:lastline)
-  if a:0
-    let instruction = join(a:000, ", ") . ":"
-    call insert(prompt, instruction, 0)
+  let lines = trim(join(getline(a:firstline, a:lastline), "\n"))
+  let selection = trim(@*)
+  let is_selection = lines != "" && lines == selection
+  let has_instruction = a:0
+  let prompt = ""
+  if has_instruction
+    if is_selection
+      let prompt = a:1 . ":\n" . lines
+    else
+      let prompt = a:1
+    endif
+  else
+    let prompt = lines
   endif
 
-  let prompt = join(prompt, "\n")
+  if s:debug
+    echo prompt
+  endif
 
   echo "Completing..."
   let output = system("echo " . shellescape(prompt) . " | python3 " . s:complete_py . " ")
@@ -30,17 +42,17 @@ function! AIRun(...) range
 endfunction
 
 function! AIEditRun(...) range
-  if !a:0
-    echo "Missing edit prompt instruction"
-    return
+  let has_instruction = a:0
+  let prompt = trim(join(getline(a:firstline, a:lastline), "\n"))
+  if has_instruction
+    let prompt = a:1 . ":\n" . prompt
   endif
 
-  let prompt = getline(a:firstline, a:lastline)
-  let instruction = join(a:000, ", ") . ":"
-  call insert(prompt, instruction, 0)
-
   let buff_lastline = line('$')
-  let prompt = join(prompt, "\n")
+
+  if s:debug
+    echo prompt
+  endif
 
   echo "Editing..."
   let output = system("echo " . shellescape(prompt) . " | python3 " . s:complete_py . " ")
@@ -57,23 +69,38 @@ function! AIEditRun(...) range
   set nopaste
 endfunction
 
-function! AIChatRun(...)
-  let prompt = []
+function! AIChatRun(...) range
+  let lines = trim(join(getline(a:firstline, a:lastline), "\n"))
+  let selection = trim(@*)
+  let is_selection = lines != "" && lines == selection
+  let has_instruction = a:0
+
+  let prompt = ""
   if search('^>>> user$', 'nw') != 0
     " inside chat window
-    let prompt = getline(1, '$')
+    let prompt = trim(join(getline(1, '$'), "\n"))
   else
     " outside chat window
     call ScratchWindow()
-    if !a:0
-      execute "normal i>>> user\<Enter>\<Enter>"
-      return
+    if has_instruction
+      if is_selection
+        let prompt = a:1 . ":\n" . lines
+      else
+        let prompt = a:1
+      endif
+    else
+      if is_selection
+        let prompt = lines
+      else
+        execute "normal i>>> user\<Enter>\<Enter>"
+        return
+      endif
     endif
-    let instruction = join(a:000, ", ")
-    call insert(prompt, instruction, 0)
   endif
 
-  let prompt = join(prompt, "\n")
+  if s:debug
+    echo prompt
+  endif
 
   echo "Answering..."
   let output = system("echo " . shellescape(prompt) . " | python3 " . s:chat_py . " ")
@@ -85,6 +112,5 @@ function! AIChatRun(...)
 endfunction
 
 command! -range -nargs=? AI <line1>,<line2>call AIRun(<f-args>)
-command! -range -nargs=? AIComplete <line1>,<line2>call AIRun(<f-args>)
 command! -range -nargs=? AIEdit <line1>,<line2>call AIEditRun(<f-args>)
 command! -range -nargs=? AIChat <line1>,<line2>call AIChatRun(<f-args>)
