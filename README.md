@@ -66,11 +66,11 @@ To customize and re-use prompts it is useful to put some context to the language
 
 ```vim
 " key binding with custom context
-vnoremap <leader>s :AI fix grammar and spelling and use formal language<CR>
-nnoremap <leader>s :AI fix grammar and spelling and use formal language<CR>
+vnoremap <leader>s :AIEdit fix grammar and spelling and use formal language<CR>
+nnoremap <leader>s :AIEdit fix grammar and spelling and use formal language<CR>
 
-" command with custom context
-command! -range -nargs=? AICode <line1>,<line2>call AIRun("Programming syntax is " . &filetype, <f-args>)
+" command with custom context (vim-ai functions: AIRun, AIEditRun, AIChatRun)
+command! -range -nargs=? AICode <line1>,<line2>call AIRun("Programming syntax is " . &filetype . ", " . <f-args>)
 ```
 
 
