@@ -26,9 +26,30 @@ The plugin requires `python3` and `pip3` to be installed.
 
 ## Usage
 
-### Basic usage
+### :AI
 
-`:AI {prompt}` - completes selected text (visual mode) or text on the current line (normal mode). Passing optional `{prompt}` parameter prepends it to the final prompt.
+`:AI` - complete the text on the current line
+
+`:AI {prompt}` - complete the prompt
+
+`(visual selection) :AI` - complete the selection
+
+`(visual selection) :AI {instruction}` - complete the selection using the instruction
+
+### :AIEdit
+
+`(visual selection)? :AIEdit` - edit the current line or the selection
+
+`(visual selection)? :AIEdit {instruction}` - edit the current line or the selection using the instruction
+
+### :AIChat
+
+
+`:AIChat` - continue or start a new conversation.
+
+`(visual selection)? :AIChat {instruction}?` - start a new conversation given the selection, the instruction or both
+
+## Configuration
 
 ### Key bindings
 
