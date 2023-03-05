@@ -14,9 +14,24 @@ To set-up key bindings and expamples see:
 https://github.com/madox2/vim-ai
 
                                                 *:AI*
-:AI {prompt}            Completes selected text (visual mode) or text on the
-                        current line (normal mode). Passing optional {prompt}
-                        parameter prepends it to the final prompt.
+
+:AI                                 complete the text on the current line
+:AI {prompt}                        complete the prompt
+(selection) :AI                     complete the selection
+(selection) :AI {instruction}       complete the selection using the instruction
+
+                                                *:AIEdit*
+
+(selection)? :AIEdit                edit the current line or the selection
+(selection)? :AIEdit {instruction}  edit the current line or the selection using
+                                    the instruction
+
+                                                ### :AICh*a*
+
+
+:AIChat                             continue or start a new conversation.
+(selection)? :AIChat {instruction}? start a new conversation given the selection,
+                                    the instruction or both
 
 ABOUT                                           *vim-ai-about*
 
