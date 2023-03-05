@@ -1,12 +1,16 @@
 # vim-ai
 
-Complete text in vim using OpenAI.
+Complete text and chat with GPT in vim using OpenAI.
+
+## Features
+
+- Generate text or code, answer questions
+- Edit selected text in-place
+- Interactive conversation with ChatGPT
 
 ![vim-ai demo](./demo.gif)
 
 ## Installation
-
-Prerequisites:
 
 ```sh
 # configure openai api key https://platform.openai.com/account/api-keys
@@ -22,7 +26,7 @@ Add plugin to your `.vimrc` using `vim-plug`:
 Plug 'madox2/vim-ai', { 'do': './install.sh' }
 ```
 
-The plugin requires `python3` and `pip3` to be installed.
+The plugin requires `python3` and `pip3` to install and run [openai-python](https://github.com/openai/openai-python) library.
 
 ## Usage
 
