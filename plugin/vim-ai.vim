@@ -8,6 +8,7 @@ function! ScratchWindow()
   setlocal buftype=nofile
   setlocal bufhidden=hide
   setlocal noswapfile
+  setlocal ft=aichat
 endfunction
 
 function! AIRun(...) range
