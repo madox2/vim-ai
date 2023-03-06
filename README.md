@@ -12,6 +12,8 @@ Complete text and chat with GPT in vim using OpenAI.
 
 ## Installation
 
+The plugin is compatible with Vim 8+ (tested on Debian). Windows OS is not supported yet.
+
 ```sh
 # configure openai api key https://platform.openai.com/account/api-keys
 echo "YOUR_OPENAI_API_KEY" > ~/.config/openai.token
