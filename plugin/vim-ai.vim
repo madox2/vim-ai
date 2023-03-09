@@ -1,7 +1,10 @@
 let s:plugin_root = expand('<sfile>:p:h:h')
 let s:complete_py = s:plugin_root . "/py/complete.py"
 let s:chat_py = s:plugin_root . "/py/chat.py"
-let s:debug = 0
+
+if !exists('g:vim_ai_debug')
+  let g:vim_ai_debug = 0
+endif
 
 function! ScratchWindow()
   below new
@@ -27,8 +30,8 @@ function! AIRun(...) range
     let prompt = lines
   endif
 
-  if s:debug
-    echo prompt
+  if g:vim_ai_debug
+    echo "Prompt:\n" . prompt . "\n"
   endif
 
   echo "Completing..."
@@ -51,8 +54,8 @@ function! AIEditRun(...) range
 
   let buff_lastline = line('$')
 
-  if s:debug
-    echo prompt
+  if g:vim_ai_debug
+    echo "Prompt:\n" . prompt . "\n"
   endif
 
   echo "Editing..."
@@ -99,8 +102,8 @@ function! AIChatRun(...) range
     endif
   endif
 
-  if s:debug
-    echo prompt
+  if g:vim_ai_debug
+    echo "Prompt:\n" . prompt . "\n"
   endif
 
   echo "Answering..."

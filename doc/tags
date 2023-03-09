@@ -1,4 +1,5 @@
 :AI	vim-ai.txt	/*:AI*
+:AIEdit	vim-ai.txt	/*:AIEdit*
 vim-ai	vim-ai.txt	/*vim-ai*
 vim-ai-about	vim-ai.txt	/*vim-ai-about*
 vim-ai-commands	vim-ai.txt	/*vim-ai-commands*
