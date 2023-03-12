@@ -1,8 +1,8 @@
-import openai
-
+import requests
 import sys
 import os
-import openai
+
+file_content = vim.eval("prompt")
 
 config_file_path = os.path.join(os.path.expanduser("~"), ".config/openai.token")
 
@@ -14,12 +14,9 @@ try:
 except Exception:
     pass
 
-openai.api_key = api_key.strip()
+api_key = api_key.strip()
 
-lines = sys.stdin.readlines()
-
-file_content = "".join(lines)
-
+lines = file_content.splitlines()
 messages = []
 
 for line in lines:
@@ -40,11 +37,19 @@ if not messages:
     file_content = ">>> user\n\n" + file_content
     messages.append({"role": "user", "content": file_content })
 
-response = openai.ChatCompletion.create(
-  model="gpt-3.5-turbo",
-  messages=messages
-)
+
+url = "https://api.openai.com/v1/chat/completions"
+headers = {
+    'Content-Type': 'application/json',
+    'Authorization': F"Bearer {api_key}"
+}
+data = {
+    "model": "gpt-3.5-turbo",
+    "messages": messages
+}
+response = requests.post(url, headers=headers, json=data)
+response = response.json()
 
 answer = response['choices'][0]['message']['content']
 
-print(f"{file_content.strip()}\n\n<<< assistant\n\n{answer.strip()}\n\n>>> user\n")
+output = f"{file_content.strip()}\n\n<<< assistant\n\n{answer.strip()}\n\n>>> user\n"

@@ -33,9 +33,11 @@ function! AIRun(...) range
   if g:vim_ai_debug
     echo "Prompt:\n" . prompt . "\n"
   endif
-
   echo "Completing..."
-  let output = system("echo " . shellescape(prompt) . " | python3 " . s:complete_py . " ")
+  " WORKAROUND: without sleep is echo on prev line not displayed (when combining with py3)
+  execute 'silent sleep 1m'
+  execute "py3file " . s:complete_py
+  let output = py3eval('output')
   let output = trim(output)
 
   execute "normal! " . a:lastline . "G"
@@ -59,7 +61,10 @@ function! AIEditRun(...) range
   endif
 
   echo "Editing..."
-  let output = system("echo " . shellescape(prompt) . " | python3 " . s:complete_py . " ")
+  " WORKAROUND: without sleep is echo on prev line not displayed (when combining with py3)
+  execute 'silent sleep 1m'
+  execute "py3file " . s:complete_py
+  let output = py3eval('output')
   let output = trim(output)
 
   execute a:firstline . ',' . a:lastline . 'd'
@@ -107,7 +112,10 @@ function! AIChatRun(...) range
   endif
 
   echo "Answering..."
-  let output = system("echo " . shellescape(prompt) . " | python3 " . s:chat_py . " ")
+  " WORKAROUND: without sleep is echo on prev line not displayed (when combining with py3)
+  execute 'silent sleep 1m'
+  execute "py3file " . s:chat_py
+  let output = py3eval('output')
 
   set paste
   execute "normal! ggdG"

@@ -1,6 +1,8 @@
+import requests
 import sys
 import os
-import openai
+
+prompt = vim.eval("prompt")
 
 config_file_path = os.path.join(os.path.expanduser("~"), ".config/openai.token")
 
@@ -12,15 +14,20 @@ try:
 except Exception:
     pass
 
-openai.api_key = api_key.strip()
+api_key = api_key.strip()
 
-prompt = "".join(sys.stdin.readlines())
+url = "https://api.openai.com/v1/completions"
+headers = {
+    'Content-Type': 'application/json',
+    'Authorization': f"Bearer {api_key}"
+}
+data = {
+    "model": "text-davinci-003",
+    "prompt":prompt,
+    "max_tokens": 1000,
+    "temperature": 0.1
+}
+response = requests.post(url, headers=headers, json=data)
+response = response.json()
 
-completion = openai.Completion.create(
-    model="text-davinci-003",
-    prompt=prompt,
-    max_tokens=1000,
-    temperature=0.1
-)
-
-print(completion.choices[0].text)
+output = response['choices'][0]['text']
