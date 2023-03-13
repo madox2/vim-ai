@@ -1,20 +1,12 @@
-import requests
-import sys
-import os
+import openai
 
-file_content = vim.eval("prompt")
+# import utils
+plugin_root = vim.eval("s:plugin_root")
+vim.command(f"py3file {plugin_root}/py/utils.py")
 
-config_file_path = os.path.join(os.path.expanduser("~"), ".config/openai.token")
+openai.api_key = load_api_key()
 
-api_key = os.getenv("OPENAI_API_KEY")
-
-try:
-    with open(config_file_path, 'r') as file:
-        api_key = file.read()
-except Exception:
-    pass
-
-api_key = api_key.strip()
+file_content = vim.eval('trim(join(getline(1, "$"), "\n"))')
 
 lines = file_content.splitlines()
 messages = []
@@ -37,19 +29,20 @@ if not messages:
     file_content = ">>> user\n\n" + file_content
     messages.append({"role": "user", "content": file_content })
 
+vim.command("normal! Go\n<<< assistant\n\n")
+vim.command("redraw")
 
-url = "https://api.openai.com/v1/chat/completions"
-headers = {
-    'Content-Type': 'application/json',
-    'Authorization': F"Bearer {api_key}"
-}
-data = {
-    "model": "gpt-3.5-turbo",
-    "messages": messages
-}
-response = requests.post(url, headers=headers, json=data)
-response = response.json()
+response = openai.ChatCompletion.create(
+  model="gpt-3.5-turbo",
+  messages=messages,
+  stream=True,
+)
 
-answer = response['choices'][0]['message']['content']
+for resp in response:
+    if 'content' in resp['choices'][0]['delta']:
+        text = resp['choices'][0]['delta']['content']
+        vim.command("normal! a" + text)
+        vim.command("redraw")
 
-output = f"{file_content.strip()}\n\n<<< assistant\n\n{answer.strip()}\n\n>>> user\n"
+vim.command("normal! a\n\n>>> user\n")
+vim.command("redraw")

@@ -80,47 +80,24 @@ endfunction
 
 function! AIChatRun(...) range
   let lines = trim(join(getline(a:firstline, a:lastline), "\n"))
-  let selection = trim(@*)
-  let is_selection = lines != "" && lines == selection
-  let has_instruction = a:0
+  let is_selection = lines != "" && lines == trim(@*)
+  let instruction = a:0 ? trim(a:1) : ""
 
-  let prompt = ""
-  if search('^>>> user$', 'nw') != 0
-    " inside chat window
-    let prompt = trim(join(getline(1, '$'), "\n"))
-  else
-    " outside chat window
+  if search('^>>> user$', 'nw') == 0
+    " outside of chat window
     call ScratchWindow()
-    if has_instruction
-      if is_selection
-        let prompt = a:1 . ":\n" . lines
-      else
-        let prompt = a:1
-      endif
-    else
-      if is_selection
-        let prompt = lines
-      else
-        execute "normal i>>> user\<Enter>\<Enter>"
-        return
-      endif
+    let delimiter = instruction != "" && is_selection ? ":\n" : ""
+    let selection = is_selection ? lines : ""
+    let prompt = join([instruction, delimiter, selection], "")
+    execute "normal i>>> user\<Enter>\<Enter>" . prompt
+    if prompt == ""
+      " empty prompt, just opens chat window TODO: handle in python
+      return
     endif
   endif
 
-  if g:vim_ai_debug
-    echo "Prompt:\n" . prompt . "\n"
-  endif
-
   echo "Answering..."
-  " WORKAROUND: without sleep is echo on prev line not displayed (when combining with py3)
-  execute 'silent sleep 1m'
   execute "py3file " . s:chat_py
-  let output = py3eval('output')
-
-  set paste
-  execute "normal! ggdG"
-  execute "normal! i" . output . "\<Esc>"
-  set nopaste
 endfunction
 
 command! -range -nargs=? AI <line1>,<line2>call AIRun(<f-args>)
