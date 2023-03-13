@@ -10,10 +10,10 @@ function! ScratchWindow()
   setlocal ft=aichat
 endfunction
 
-function! MakePrompt(lines, args)
+function! MakePrompt(lines, instruction)
   let lines = trim(join(a:lines, "\n"))
   let is_selection = lines != "" && lines == trim(@*)
-  let instruction = trim(get(a:args, 0))
+  let instruction = trim(a:instruction)
   let delimiter = instruction != "" && is_selection ? ":\n" : ""
   let selection = is_selection ? lines : ""
   let prompt = join([instruction, delimiter, selection], "")
@@ -21,7 +21,7 @@ function! MakePrompt(lines, args)
 endfunction
 
 function! AIRun(...) range
-  let prompt = MakePrompt(getline(a:firstline, a:lastline), a:000)
+  let prompt = MakePrompt(getline(a:firstline, a:lastline), a:0 ? a:1 : "")
   set paste
   execute "normal! " . a:lastline . "Go"
   execute "py3file " . s:complete_py
@@ -30,7 +30,7 @@ function! AIRun(...) range
 endfunction
 
 function! AIEditRun(...) range
-  let prompt = MakePrompt(getline(a:firstline, a:lastline), a:000)
+  let prompt = MakePrompt(getline(a:firstline, a:lastline), a:0 ? a:1 : "")
   set paste
   execute "normal! " . a:firstline . "GV" . a:lastline . "Gc"
   execute "py3file " . s:complete_py
@@ -43,7 +43,7 @@ function! AIChatRun(...) range
   let is_outside_of_chat_window = search('^>>> user$', 'nw') == 0
   if is_outside_of_chat_window
     call ScratchWindow()
-    let prompt = MakePrompt(lines, a:000)
+    let prompt = MakePrompt(lines, a:0 ? a:1 : "")
     execute "normal i>>> user\n\n" . prompt
   endif
 
