@@ -8,11 +8,22 @@ prompt = vim.eval("prompt")
 
 openai.api_key = load_api_key()
 
-response = openai.Completion.create(
-    model="text-davinci-003",
-    prompt=prompt,
-    max_tokens=1000,
-    temperature=0.1
-)
+if prompt.strip():
 
-output = response['choices'][0]['text']
+    response = openai.Completion.create(
+        model="text-davinci-003",
+        prompt=prompt,
+        max_tokens=1000,
+        temperature=0.1,
+        stream=True,
+    )
+
+    generating_text = False
+    for resp in response:
+        text = resp['choices'][0].get('text', '')
+        if not text.strip() and not generating_text:
+            continue # trim newlines from the beginning
+
+        generating_text = True
+        vim.command("normal! a" + text)
+        vim.command("redraw")
