@@ -83,6 +83,7 @@ function! AIChatRun(...) range
   let is_selection = lines != "" && lines == trim(@*)
   let instruction = a:0 ? trim(a:1) : ""
 
+  set paste
   if search('^>>> user$', 'nw') == 0
     " outside of chat window
     call ScratchWindow()
@@ -98,6 +99,7 @@ function! AIChatRun(...) range
 
   echo "Answering..."
   execute "py3file " . s:chat_py
+  set nopaste
 endfunction
 
 command! -range -nargs=? AI <line1>,<line2>call AIRun(<f-args>)
