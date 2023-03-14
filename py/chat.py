@@ -29,24 +29,29 @@ if not messages:
     file_content = ">>> user\n\n" + file_content
     messages.append({"role": "user", "content": file_content })
 
-if messages[-1]["content"].strip():
-
-    vim.command("normal! Go\n<<< assistant\n\n")
-    vim.command("redraw")
-
-    response = openai.ChatCompletion.create(
-      model="gpt-3.5-turbo",
-      messages=messages,
-      stream=True,
-    )
-
-    generating_text = False
-    for resp in response:
-        text = resp['choices'][0]['delta'].get('content', '')
-        if not text.strip() and not generating_text:
-            continue # trim newlines from the beginning
-        vim.command("normal! a" + text)
+try:
+    if messages[-1]["content"].strip():
+        vim.command("normal! Go\n<<< assistant\n\n")
         vim.command("redraw")
 
-    vim.command("normal! a\n\n>>> user\n\n")
-    vim.command("redraw")
+        print('Answering...')
+        vim.command("redraw")
+
+        response = openai.ChatCompletion.create(
+          model="gpt-3.5-turbo",
+          messages=messages,
+          stream=True,
+        )
+
+        generating_text = False
+        for resp in response:
+            text = resp['choices'][0]['delta'].get('content', '')
+            if not text.strip() and not generating_text:
+                continue # trim newlines from the beginning
+            vim.command("normal! a" + text)
+            vim.command("redraw")
+
+        vim.command("normal! a\n\n>>> user\n\n")
+        vim.command("redraw")
+except KeyboardInterrupt:
+    vim.command("normal! a Ctrl-C...")
