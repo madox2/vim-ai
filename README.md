@@ -1,6 +1,6 @@
 # vim-ai
 
-Complete text and chat with GPT in vim using OpenAI.
+Complete text and chat with GPT in Vim/Neovim using OpenAI.
 
 ## Features
 
@@ -12,7 +12,7 @@ Complete text and chat with GPT in vim using OpenAI.
 
 ## Installation
 
-The plugin is compatible with Vim 8+ (tested on Debian). Windows OS is not supported yet.
+vim-ai requires Vim/Neovim compiled with python3 support and the [openai-python](https://github.com/openai/openai-python) library.
 
 ```sh
 # configure openai api key https://platform.openai.com/account/api-keys
@@ -25,10 +25,9 @@ export OPENAI_API_KEY="YOUR_OPENAI_API_KEY"
 Add plugin to your `.vimrc` using `vim-plug`:
 
 ```vim
+" ./install.sh script will automatically install openai-python
 Plug 'madox2/vim-ai', { 'do': './install.sh' }
 ```
-
-The plugin requires `python3` and `pip3` to install and run [openai-python](https://github.com/openai/openai-python) library.
 
 ## Usage
 
@@ -54,6 +53,8 @@ The plugin requires `python3` and `pip3` to install and run [openai-python](http
 `:AIChat` - continue or start a new conversation.
 
 `(visual selection)? :AIChat {instruction}?` - start a new conversation given the selection, the instruction or both
+
+Press `Ctrl-c` to cancel completion.
 
 #### Custom conversation prompts
 
