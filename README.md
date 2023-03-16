@@ -84,7 +84,7 @@ Map keys in your `.vimrc` to trigger `:AI` command.
 
 ```vim
 nnoremap <leader>a :AI<CR>
-vnoremap <leader>a :AI<CR>
+xnoremap <leader>a :AI<CR>
 ```
 
 ### Custom commands
@@ -93,11 +93,11 @@ To customize and re-use prompts it is useful to put some context to the language
 
 ```vim
 " key binding with custom context
-vnoremap <leader>s :AIEdit fix grammar and spelling and use formal language<CR>
+xnoremap <leader>s :AIEdit fix grammar and spelling and use formal language<CR>
 nnoremap <leader>s :AIEdit fix grammar and spelling and use formal language<CR>
 
 " key binding to trigger chat
-vnoremap <leader>c :AIChat <CR>
+xnoremap <leader>c :AIChat <CR>
 nnoremap <leader>c :AIChat <CR>
 
 " command with custom context (vim-ai functions: AIRun, AIEditRun, AIChatRun)
