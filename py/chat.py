@@ -38,9 +38,10 @@ try:
         vim.command("redraw")
 
         response = openai.ChatCompletion.create(
-          model="gpt-3.5-turbo",
-          messages=messages,
-          stream=True,
+            model="gpt-3.5-turbo",
+            messages=messages,
+            stream=True,
+            request_timeout=request_timeout_seconds,
         )
 
         generating_text = False

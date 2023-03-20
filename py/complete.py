@@ -20,6 +20,7 @@ try:
             max_tokens=1000,
             temperature=0.1,
             stream=True,
+            request_timeout=request_timeout_seconds,
         )
 
         generating_text = False
