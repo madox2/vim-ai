@@ -49,6 +49,8 @@ try:
             text = resp['choices'][0]['delta'].get('content', '')
             if not text.strip() and not generating_text:
                 continue # trim newlines from the beginning
+
+            generating_text = True
             vim.command("normal! a" + text)
             vim.command("redraw")
 
