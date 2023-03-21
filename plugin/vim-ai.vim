@@ -70,8 +70,10 @@ function! AIChatRun(is_selection, ...) range
   let is_outside_of_chat_window = search('^>>> user$', 'nw') == 0
   if is_outside_of_chat_window
     call ScratchWindow()
-    " use prompt only in visual mode
-    let prompt = a:is_selection ? MakePrompt(a:is_selection, lines, a:0 ? a:1 : "") : ""
+    let prompt = ""
+    if a:0 || a:is_selection
+      let prompt = MakePrompt(a:is_selection, lines, a:0 ? a:1 : "")
+    endif
     execute "normal i>>> user\n\n" . prompt
   endif
 
