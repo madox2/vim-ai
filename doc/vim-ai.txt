@@ -20,18 +20,45 @@ https://github.com/madox2/vim-ai
 (selection) :AI                     complete the selection
 (selection) :AI {instruction}       complete the selection using the instruction
 
+Options: >
+  let g:vim_ai_complete.options.model = "text-davinci-003"
+  let g:vim_ai_complete.options.max_tokens = 1000
+  let g:vim_ai_complete.options.temperature = 0.1
+  let g:vim_ai_complete.options.request_timeout = 10
+
+Check OpenAI docs for more infomration:
+https://platform.openai.com/docs/api-reference/completions
+
                                                 *:AIEdit*
 
 (selection)? :AIEdit                edit the current line or the selection
 (selection)? :AIEdit {instruction}  edit the current line or the selection using
                                     the instruction
 
-                                                ### :AICh*a*
+Options: >
+  let g:vim_ai_edit.options.model = "text-davinci-003"
+  let g:vim_ai_edit.options.max_tokens = 1000
+  let g:vim_ai_edit.options.temperature = 0.1
+  let g:vim_ai_edit.options.request_timeout = 10
+
+Check OpenAI docs for more infomration:
+https://platform.openai.com/docs/api-reference/completions
+
+                                                *:AIChat*
 
 
 :AIChat                             continue or start a new conversation.
 (selection)? :AIChat {instruction}? start a new conversation given the selection,
                                     the instruction or both
+
+Options: >
+  let g:vim_ai_chat.options.model = "gpt-3.5-turbo"
+  let g:vim_ai_chat.options.max_tokens = 1000
+  let g:vim_ai_chat.options.temperature = 1
+  let g:vim_ai_chat.options.request_timeout = 10
+
+Check OpenAI docs for more infomration:
+https://platform.openai.com/docs/api-reference/chat
 
 ABOUT                                           *vim-ai-about*
 
