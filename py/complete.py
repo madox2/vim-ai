@@ -5,6 +5,7 @@ plugin_root = vim.eval("s:plugin_root")
 vim.command(f"py3file {plugin_root}/py/utils.py")
 
 prompt = vim.eval("prompt")
+options = vim.eval("options")
 
 openai.api_key = load_api_key()
 
@@ -15,12 +16,12 @@ try:
         vim.command("redraw")
 
         response = openai.Completion.create(
-            model="text-davinci-003",
-            prompt=prompt,
-            max_tokens=1000,
-            temperature=0.1,
             stream=True,
-            request_timeout=request_timeout_seconds,
+            prompt=prompt,
+            model=options['model'],
+            max_tokens=int(options['max_tokens']),
+            temperature=float(options['temperature']),
+            request_timeout=float(options['request_timeout']),
         )
 
         generating_text = False

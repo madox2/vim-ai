@@ -1,3 +1,28 @@
+let g:vim_ai_complete = {
+\  "options": {
+\    "model": "text-davinci-003",
+\    "max_tokens": 1000,
+\    "temperature": 0.1,
+\    "request_timeout": 10,
+\  },
+\}
+let g:vim_ai_edit = {
+\  "options": {
+\    "model": "text-davinci-003",
+\    "max_tokens": 1000,
+\    "temperature": 0.1,
+\    "request_timeout": 10,
+\  },
+\}
+let g:vim_ai_chat = {
+\  "options": {
+\    "model": "gpt-3.5-turbo",
+\    "max_tokens": 1000,
+\    "temperature": 1,
+\    "request_timeout": 10,
+\  },
+\}
+
 let s:plugin_root = expand('<sfile>:p:h:h')
 let s:complete_py = s:plugin_root . "/py/complete.py"
 let s:chat_py = s:plugin_root . "/py/chat.py"
@@ -22,6 +47,7 @@ endfunction
 
 function! AIRun(...) range
   let prompt = MakePrompt(getline(a:firstline, a:lastline), a:0 ? a:1 : "")
+  let options = g:vim_ai_complete['options']
   set paste
   execute "normal! " . a:lastline . "Go"
   execute "py3file " . s:complete_py
@@ -31,6 +57,7 @@ endfunction
 
 function! AIEditRun(...) range
   let prompt = MakePrompt(getline(a:firstline, a:lastline), a:0 ? a:1 : "")
+  let options = g:vim_ai_edit['options']
   set paste
   execute "normal! " . a:firstline . "GV" . a:lastline . "Gc"
   execute "py3file " . s:complete_py
@@ -47,6 +74,7 @@ function! AIChatRun(...) range
     execute "normal i>>> user\n\n" . prompt
   endif
 
+  let options = g:vim_ai_chat['options']
   execute "py3file " . s:chat_py
   set nopaste
 endfunction

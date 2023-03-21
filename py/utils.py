@@ -1,8 +1,6 @@
 import sys
 import os
 
-request_timeout_seconds = 15
-
 def load_api_key():
     config_file_path = os.path.join(os.path.expanduser("~"), ".config/openai.token")
     api_key = os.getenv("OPENAI_API_KEY")

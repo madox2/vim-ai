@@ -6,6 +6,7 @@ vim.command(f"py3file {plugin_root}/py/utils.py")
 
 openai.api_key = load_api_key()
 
+options = vim.eval("options")
 file_content = vim.eval('trim(join(getline(1, "$"), "\n"))')
 
 lines = file_content.splitlines()
@@ -38,10 +39,12 @@ try:
         vim.command("redraw")
 
         response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
             messages=messages,
             stream=True,
-            request_timeout=request_timeout_seconds,
+            model=options['model'],
+            max_tokens=int(options['max_tokens']),
+            temperature=float(options['temperature']),
+            request_timeout=float(options['request_timeout']),
         )
 
         generating_text = False
