@@ -128,7 +128,7 @@ xnoremap <leader>c :AIChat <CR>
 nnoremap <leader>c :AIChat <CR>
 
 " command with custom context (vim-ai functions: AIRun, AIEditRun, AIChatRun)
-command! -range -nargs=? AICode <line1>,<line2>call AIRun("Programming syntax is " . &filetype . ", " . <f-args>)
+command! -range -nargs=? AICode <line1>,<line2>call AIRun(<range>, "Programming syntax is " . &filetype . ", " . <f-args>)
 ```
 
 

@@ -35,18 +35,17 @@ function! ScratchWindow()
   setlocal ft=aichat
 endfunction
 
-function! MakePrompt(lines, instruction)
+function! MakePrompt(is_selection, lines, instruction)
   let lines = trim(join(a:lines, "\n"))
-  let is_selection = lines != "" && lines == trim(@*)
   let instruction = trim(a:instruction)
-  let delimiter = instruction != "" && is_selection ? ":\n" : ""
-  let selection = is_selection ? lines : ""
+  let delimiter = instruction != "" && a:is_selection ? ":\n" : ""
+  let selection = a:is_selection || instruction == "" ? lines : ""
   let prompt = join([instruction, delimiter, selection], "")
   return prompt
 endfunction
 
-function! AIRun(...) range
-  let prompt = MakePrompt(getline(a:firstline, a:lastline), a:0 ? a:1 : "")
+function! AIRun(is_selection, ...) range
+  let prompt = MakePrompt(a:is_selection, getline(a:firstline, a:lastline), a:0 ? a:1 : "")
   let options = g:vim_ai_complete['options']
   set paste
   execute "normal! " . a:lastline . "Go"
@@ -55,8 +54,9 @@ function! AIRun(...) range
   set nopaste
 endfunction
 
-function! AIEditRun(...) range
-  let prompt = MakePrompt(getline(a:firstline, a:lastline), a:0 ? a:1 : "")
+function! AIEditRun(is_selection, ...) range
+  let prompt = MakePrompt(a:is_selection, getline(a:firstline, a:lastline), a:0 ? a:1 : "")
+  echo prompt
   let options = g:vim_ai_edit['options']
   set paste
   execute "normal! " . a:firstline . "GV" . a:lastline . "Gc"
@@ -64,13 +64,14 @@ function! AIEditRun(...) range
   set nopaste
 endfunction
 
-function! AIChatRun(...) range
+function! AIChatRun(is_selection, ...) range
   let lines = getline(a:firstline, a:lastline)
   set paste
   let is_outside_of_chat_window = search('^>>> user$', 'nw') == 0
   if is_outside_of_chat_window
     call ScratchWindow()
-    let prompt = MakePrompt(lines, a:0 ? a:1 : "")
+    " use prompt only in visual mode
+    let prompt = a:is_selection ? MakePrompt(a:is_selection, lines, a:0 ? a:1 : "") : ""
     execute "normal i>>> user\n\n" . prompt
   endif
 
@@ -79,6 +80,6 @@ function! AIChatRun(...) range
   set nopaste
 endfunction
 
-command! -range -nargs=? AI <line1>,<line2>call AIRun(<f-args>)
-command! -range -nargs=? AIEdit <line1>,<line2>call AIEditRun(<f-args>)
-command! -range -nargs=? AIChat <line1>,<line2>call AIChatRun(<f-args>)
+command! -range -nargs=? AI <line1>,<line2>call AIRun(<range>, <f-args>)
+command! -range -nargs=? AIEdit <line1>,<line2>call AIEditRun(<range>, <f-args>)
+command! -range -nargs=? AIChat <line1>,<line2>call AIChatRun(<range>, <f-args>)
