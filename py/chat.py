@@ -4,10 +4,10 @@ import openai
 plugin_root = vim.eval("s:plugin_root")
 vim.command(f"py3file {plugin_root}/py/utils.py")
 
-openai.api_key = load_api_key()
-
-options = vim.eval("options")
+options = make_options()
 file_content = vim.eval('trim(join(getline(1, "$"), "\n"))')
+
+openai.api_key = load_api_key()
 
 lines = file_content.splitlines()
 messages = []
@@ -38,14 +38,7 @@ try:
         print('Answering...')
         vim.command("redraw")
 
-        response = openai.ChatCompletion.create(
-            messages=messages,
-            stream=True,
-            model=options['model'],
-            max_tokens=int(options['max_tokens']),
-            temperature=float(options['temperature']),
-            request_timeout=float(options['request_timeout']),
-        )
+        response = openai.ChatCompletion.create(messages=messages, stream=True, **options)
 
         generating_text = False
         for resp in response:

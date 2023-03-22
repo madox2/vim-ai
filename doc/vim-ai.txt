@@ -20,6 +20,16 @@ https://github.com/madox2/vim-ai
 (selection) :AI                     complete the selection
 (selection) :AI {instruction}       complete the selection using the instruction
 
+Options: >
+  let g:vim_ai_complete = {
+  \  "options": {
+  \    "model": "text-davinci-003",
+  \    "max_tokens": 1000,
+  \    "temperature": 0.1,
+  \    "request_timeout": 10,
+  \  },
+  \}
+
 Check OpenAI docs for more infomration:
 https://platform.openai.com/docs/api-reference/completions
 
@@ -28,6 +38,16 @@ https://platform.openai.com/docs/api-reference/completions
 (selection)? :AIEdit                edit the current line or the selection
 (selection)? :AIEdit {instruction}  edit the current line or the selection using
                                     the instruction
+
+Options: >
+  let g:vim_ai_edit = {
+  \  "options": {
+  \    "model": "text-davinci-003",
+  \    "max_tokens": 1000,
+  \    "temperature": 0.1,
+  \    "request_timeout": 10,
+  \  },
+  \}
 
 Check OpenAI docs for more infomration:
 https://platform.openai.com/docs/api-reference/completions
@@ -39,8 +59,30 @@ https://platform.openai.com/docs/api-reference/completions
 (selection)? :AIChat {instruction}? start a new conversation given the selection,
                                     the instruction or both
 
+Options: >
+  let g:vim_ai_chat = {
+  \  "options": {
+  \    "model": "gpt-3.5-turbo",
+  \    "max_tokens": 1000,
+  \    "temperature": 1,
+  \    "request_timeout": 10,
+  \  },
+  \}
+
 Check OpenAI docs for more infomration:
 https://platform.openai.com/docs/api-reference/chat
+
+CONFIGURATION                                   *vim-ai-config*
+
+To customize the default configuration, initialize the config variable with
+a selection of options: >
+
+  let g:vim_ai_chat = {
+  \  "options": {
+  \    "model": "gpt-4",
+  \    "temperature": 0.2,
+  \  },
+  \}
 
 ABOUT                                           *vim-ai-about*
 

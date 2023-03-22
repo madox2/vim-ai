@@ -1,4 +1,4 @@
-let g:vim_ai_complete = {
+let g:vim_ai_complete_default = {
 \  "options": {
 \    "model": "text-davinci-003",
 \    "max_tokens": 1000,
@@ -6,7 +6,7 @@ let g:vim_ai_complete = {
 \    "request_timeout": 10,
 \  },
 \}
-let g:vim_ai_edit = {
+let g:vim_ai_edit_default = {
 \  "options": {
 \    "model": "text-davinci-003",
 \    "max_tokens": 1000,
@@ -14,7 +14,7 @@ let g:vim_ai_edit = {
 \    "request_timeout": 10,
 \  },
 \}
-let g:vim_ai_chat = {
+let g:vim_ai_chat_default = {
 \  "options": {
 \    "model": "gpt-3.5-turbo",
 \    "max_tokens": 1000,
@@ -22,6 +22,16 @@ let g:vim_ai_chat = {
 \    "request_timeout": 10,
 \  },
 \}
+if !exists('g:vim_ai_complete')
+  let g:vim_ai_complete = {"options":{}}
+endif
+if !exists('g:vim_ai_edit')
+  let g:vim_ai_edit = {"options":{}}
+endif
+if !exists('g:vim_ai_chat')
+  let g:vim_ai_chat = {"options":{}}
+endif
+
 
 let s:plugin_root = expand('<sfile>:p:h:h')
 let s:complete_py = s:plugin_root . "/py/complete.py"
@@ -46,6 +56,7 @@ endfunction
 
 function! AIRun(is_selection, ...) range
   let prompt = MakePrompt(a:is_selection, getline(a:firstline, a:lastline), a:0 ? a:1 : "")
+  let options_default = g:vim_ai_complete_default['options']
   let options = g:vim_ai_complete['options']
   set paste
   execute "normal! " . a:lastline . "Go"
@@ -56,7 +67,7 @@ endfunction
 
 function! AIEditRun(is_selection, ...) range
   let prompt = MakePrompt(a:is_selection, getline(a:firstline, a:lastline), a:0 ? a:1 : "")
-  echo prompt
+  let options_default = g:vim_ai_edit_default['options']
   let options = g:vim_ai_edit['options']
   set paste
   execute "normal! " . a:firstline . "GV" . a:lastline . "Gc"
@@ -77,6 +88,7 @@ function! AIChatRun(is_selection, ...) range
     execute "normal i>>> user\n\n" . prompt
   endif
 
+  let options_default = g:vim_ai_chat_default['options']
   let options = g:vim_ai_chat['options']
   execute "py3file " . s:chat_py
   set nopaste

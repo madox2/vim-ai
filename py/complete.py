@@ -5,7 +5,7 @@ plugin_root = vim.eval("s:plugin_root")
 vim.command(f"py3file {plugin_root}/py/utils.py")
 
 prompt = vim.eval("prompt")
-options = vim.eval("options")
+options = make_options()
 
 openai.api_key = load_api_key()
 
@@ -15,14 +15,7 @@ try:
         print('Completing...')
         vim.command("redraw")
 
-        response = openai.Completion.create(
-            stream=True,
-            prompt=prompt,
-            model=options['model'],
-            max_tokens=int(options['max_tokens']),
-            temperature=float(options['temperature']),
-            request_timeout=float(options['request_timeout']),
-        )
+        response = openai.Completion.create(stream=True, prompt=prompt, **options)
 
         generating_text = False
         for resp in response:

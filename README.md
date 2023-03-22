@@ -87,6 +87,57 @@ nnoremap <leader>a :AI<CR>
 xnoremap <leader>a :AI<CR>
 ```
 
+### Completion configuration
+
+Request to the OpenAI API can be configured for each command.
+To customize the default configuration, initialize the config variable with a selection of options.  For example:
+
+```vim
+let g:vim_ai_chat = {
+\  "options": {
+\    "model": "gpt-4",
+\    "temperature": 0.2,
+\  },
+\}
+```
+
+Below are listed available options along with default values:
+
+```vim
+" :AI
+" - https://platform.openai.com/docs/api-reference/completions
+let g:vim_ai_complete = {
+\  "options": {
+\    "model": "text-davinci-003",
+\    "max_tokens": 1000,
+\    "temperature": 0.1,
+\    "request_timeout": 10,
+\  },
+\}
+
+" :AIEdit
+" - https://platform.openai.com/docs/api-reference/completions
+let g:vim_ai_edit = {
+\  "options": {
+\    "model": "text-davinci-003",
+\    "max_tokens": 1000,
+\    "temperature": 0.1,
+\    "request_timeout": 10,
+\  },
+\}
+
+" :AIChat
+" - https://platform.openai.com/docs/api-reference/chat
+let g:vim_ai_chat = {
+\  "options": {
+\    "model": "gpt-3.5-turbo",
+\    "max_tokens": 1000,
+\    "temperature": 1,
+\    "request_timeout": 10,
+\  },
+\}
+```
+
 ### Custom commands
 
 To customize and re-use prompts it is useful to put some context to the language model. You can do it with prepending text to `:AI` command.
