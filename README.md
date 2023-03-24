@@ -83,6 +83,7 @@ Supported chat roles are **`>>> system`**, **`>>> user`** and **`<<< assistant`*
 Map keys in your `.vimrc` to trigger `:AI` command.
 
 ```vim
+" complete text on the current line or in visual selection
 nnoremap <leader>a :AI<CR>
 xnoremap <leader>a :AI<CR>
 ```
@@ -148,8 +149,8 @@ xnoremap <leader>s :AIEdit fix grammar and spelling and use formal language<CR>
 nnoremap <leader>s :AIEdit fix grammar and spelling and use formal language<CR>
 
 " key binding to trigger chat
-xnoremap <leader>c :AIChat <CR>
-nnoremap <leader>c :AIChat <CR>
+xnoremap <leader>c :AIChat<CR>
+nnoremap <leader>c :AIChat<CR>
 
 " command with custom context (vim-ai functions: AIRun, AIEditRun, AIChatRun)
 command! -range -nargs=? AICode <line1>,<line2>call AIRun(<range>, "Programming syntax is " . &filetype . ", " . <f-args>)

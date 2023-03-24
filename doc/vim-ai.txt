@@ -84,6 +84,25 @@ a selection of options: >
   \  },
   \}
 
+KEY BINDINGS
+
+Examples how configure key bindins and customize commands: >
+
+  " complete text on the current line or in visual selection
+  nnoremap <leader>a :AI<CR>
+  xnoremap <leader>a :AI<CR>
+
+  " edit text with custom context
+  xnoremap <leader>s :AIEdit fix grammar and spelling<CR>
+  nnoremap <leader>s :AIEdit fix grammar and spelling<CR>
+
+  " trigger chat
+  xnoremap <leader>c :AIChat<CR>
+  nnoremap <leader>c :AIChat<CR>
+
+  " command with custom context (vim-ai functions: AIRun, AIEditRun, AIChatRun)
+  command! -range -nargs=? AICode <line1>,<line2>call AIRun(<range>, "Programming syntax is " . &filetype . ", " . <f-args>)
+
 ABOUT                                           *vim-ai-about*
 
 Contributions are welcome on GitHub:
