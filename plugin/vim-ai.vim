@@ -3,7 +3,7 @@ let g:vim_ai_complete_default = {
 \    "model": "text-davinci-003",
 \    "max_tokens": 1000,
 \    "temperature": 0.1,
-\    "request_timeout": 10,
+\    "request_timeout": 20,
 \  },
 \}
 let g:vim_ai_edit_default = {
@@ -11,7 +11,7 @@ let g:vim_ai_edit_default = {
 \    "model": "text-davinci-003",
 \    "max_tokens": 1000,
 \    "temperature": 0.1,
-\    "request_timeout": 10,
+\    "request_timeout": 20,
 \  },
 \}
 let g:vim_ai_chat_default = {
@@ -19,7 +19,7 @@ let g:vim_ai_chat_default = {
 \    "model": "gpt-3.5-turbo",
 \    "max_tokens": 1000,
 \    "temperature": 1,
-\    "request_timeout": 10,
+\    "request_timeout": 20,
 \  },
 \}
 if !exists('g:vim_ai_complete')

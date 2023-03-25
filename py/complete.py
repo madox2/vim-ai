@@ -28,3 +28,5 @@ try:
             vim.command("redraw")
 except KeyboardInterrupt:
     vim.command("normal! a Ctrl-C...")
+except openai.error.Timeout:
+    vim.command("normal! a Connection timeout...")
