@@ -55,11 +55,17 @@ function! MakePrompt(is_selection, lines, instruction)
 endfunction
 
 function! AIRun(is_selection, ...) range
-  let prompt = MakePrompt(a:is_selection, getline(a:firstline, a:lastline), a:0 ? a:1 : "")
+  let lines = getline(a:firstline, a:lastline)
+  let prompt = MakePrompt(a:is_selection, lines, a:0 ? a:1 : "")
   let options_default = g:vim_ai_complete_default['options']
   let options = g:vim_ai_complete['options']
+  let cursor_on_empty_line = trim(join(lines, "\n")) == ""
   set paste
-  execute "normal! " . a:lastline . "Go"
+  if cursor_on_empty_line
+    execute "normal! " . a:lastline . "GA"
+  else
+    execute "normal! " . a:lastline . "Go"
+  endif
   execute "py3file " . s:complete_py
   execute "normal! " . a:lastline . "G"
   set nopaste
