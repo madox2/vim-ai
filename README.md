@@ -86,6 +86,14 @@ Map keys in your `.vimrc` to trigger `:AI` command.
 " complete text on the current line or in visual selection
 nnoremap <leader>a :AI<CR>
 xnoremap <leader>a :AI<CR>
+
+" edit text with a custom prompt
+xnoremap <leader>s :AIEdit fix grammar and spelling<CR>
+nnoremap <leader>s :AIEdit fix grammar and spelling<CR>
+
+" trigger chat
+xnoremap <leader>c :AIChat<CR>
+nnoremap <leader>c :AIChat<CR>
 ```
 
 ### Completion configuration
@@ -141,19 +149,14 @@ let g:vim_ai_chat = {
 
 ### Custom commands
 
-To customize and re-use prompts it is useful to put some context to the language model. You can do it with prepending text to `:AI` command.
+To customize and re-use prompts it is useful to put some context in it. You can do it by prepending text to AI commands.
 
 ```vim
-" key binding with custom context
-xnoremap <leader>s :AIEdit fix grammar and spelling and use formal language<CR>
-nnoremap <leader>s :AIEdit fix grammar and spelling and use formal language<CR>
+command! -range -nargs=? AITranslate <line1>,<line2>call AIEditRun(<range>, "Translate to English: " . <q-args>)
 
-" key binding to trigger chat
-xnoremap <leader>c :AIChat<CR>
-nnoremap <leader>c :AIChat<CR>
+command! -range -nargs=? AICode <line1>,<line2>call AIRun(<range>, "Programming syntax is " . &filetype . ", " . <q-args>)
 
-" command with custom context (vim-ai functions: AIRun, AIEditRun, AIChatRun)
-command! -range -nargs=? AICode <line1>,<line2>call AIRun(<range>, "Programming syntax is " . &filetype . ", " . <f-args>)
+" available functions are: AIRun, AIEditRun, AIChatRun
 ```
 
 
