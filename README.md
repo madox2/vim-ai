@@ -12,7 +12,7 @@ Complete text and chat with GPT in Vim/Neovim using OpenAI.
 
 ## Installation
 
-vim-ai requires Vim/Neovim compiled with python3 support and the [openai-python](https://github.com/openai/openai-python) library.
+vim-ai requires Vim/Neovim compiled with python3 support and the [openai-python](https://github.com/openai/openai-python) library (version 0.27+).
 
 ```sh
 # configure openai api key https://platform.openai.com/account/api-keys
