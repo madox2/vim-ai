@@ -29,4 +29,4 @@ try:
 except KeyboardInterrupt:
     vim.command("normal! a Ctrl-C...")
 except openai.error.Timeout:
-    vim.command("normal! a Connection timeout...")
+    vim.command("normal! aRequest timeout...")
