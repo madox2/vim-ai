@@ -5,12 +5,19 @@ plugin_root = vim.eval("s:plugin_root")
 vim.command(f"py3file {plugin_root}/py/utils.py")
 
 options = make_options()
-file_content = vim.eval('trim(join(getline(1, "$"), "\n"))')
+request_options = make_request_options()
 
 openai.api_key = load_api_key()
 
-lines = file_content.splitlines()
+file_content = vim.eval('trim(join(getline(1, "$"), "\n"))')
+initial_prompt = '\n'.join(options['initial_prompt'])
+prompt = f"{initial_prompt}\n{file_content}"
+
+lines = prompt.splitlines()
 messages = []
+
+with open('/tmp/prompt.aichat', 'w') as f:
+    f.write(prompt)
 
 for line in lines:
     if line.startswith(">>> system"):
@@ -38,7 +45,7 @@ try:
         print('Answering...')
         vim.command("redraw")
 
-        response = openai.ChatCompletion.create(messages=messages, stream=True, **options)
+        response = openai.ChatCompletion.create(messages=messages, stream=True, **request_options)
 
         generating_text = False
         for resp in response:

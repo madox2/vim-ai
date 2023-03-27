@@ -14,12 +14,27 @@ let g:vim_ai_edit_default = {
 \    "request_timeout": 20,
 \  },
 \}
+let s:vim_ai_chat_initial_prompt =<< trim END
+>>> user
+
+You are going to play a role of completion engine with following parameters:
+Task: Provide compact code/text completion, generation, transformation or explanation
+Topic: general programming and text editing
+Style: Plain result without any commentary, unless commentary is necessary
+Audience: Users of text editor and programmers that need to transform/generate text
+
+<<< assistant
+
+Okay
+
+END
 let g:vim_ai_chat_default = {
 \  "options": {
 \    "model": "gpt-3.5-turbo",
 \    "max_tokens": 1000,
 \    "temperature": 1,
 \    "request_timeout": 20,
+\    "initial_prompt": s:vim_ai_chat_initial_prompt,
 \  },
 \}
 if !exists('g:vim_ai_complete')

@@ -15,7 +15,14 @@ def make_options():
     options_default = vim.eval("options_default")
     options_user = vim.eval("options")
     options = {**options_default, **options_user}
-    options['request_timeout'] = float(options['request_timeout'])
-    options['temperature'] = float(options['temperature'])
-    options['max_tokens'] = int(options['max_tokens'])
     return options
+
+def make_request_options():
+    options = make_options()
+    request_options = {}
+    request_options['model'] = options['model']
+    request_options['max_tokens'] = int(options['max_tokens'])
+    request_options['temperature'] = float(options['temperature'])
+    request_options['request_timeout'] = float(options['request_timeout'])
+    return request_options
+
