@@ -49,7 +49,6 @@ Plug 'madox2/vim-ai', { 'do': './install.sh' }
 
 ### :AIChat
 
-
 `:AIChat` - continue or start a new conversation.
 
 `(visual selection)? :AIChat {instruction}?` - start a new conversation given the selection, the instruction or both
@@ -76,6 +75,13 @@ You are a Clean Code expert, I have the following code, please refactor it in a 
 
 Supported chat roles are **`>>> system`**, **`>>> user`** and **`<<< assistant`**
 
+### :AIRedo
+
+Use this immediately after `AI`/`AIEdit`/`AIChat` command in order to re-try or get an alternative completion.
+Note that the randomness of responses heavily depends on the [`temperature`](https://platform.openai.com/docs/api-reference/completions/create#completions/create-temperature) parameter.
+
+`:AIRedo` - repeat last AI command
+
 ## Configuration
 
 ### Key bindings
@@ -94,6 +100,9 @@ nnoremap <leader>s :AIEdit fix grammar and spelling<CR>
 " trigger chat
 xnoremap <leader>c :AIChat<CR>
 nnoremap <leader>c :AIChat<CR>
+
+" redo last AI command
+nnoremap <leader>r :AIRedo<CR>
 ```
 
 ### Completion configuration

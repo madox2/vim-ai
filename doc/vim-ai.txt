@@ -54,7 +54,6 @@ https://platform.openai.com/docs/api-reference/completions
 
                                                 *:AIChat*
 
-
 :AIChat                             continue or start a new conversation.
 (selection)? :AIChat {instruction}? start a new conversation given the selection,
                                     the instruction or both
@@ -71,6 +70,11 @@ Options: >
 
 Check OpenAI docs for more infomration:
 https://platform.openai.com/docs/api-reference/chat
+
+                                                *:AIRedo*
+
+:AIRedo                             repeat last AI command in order to re-try
+                                    or get an alternative completion.
 
 CONFIGURATION                                   *vim-ai-config*
 
@@ -99,6 +103,9 @@ Examples how configure key bindins and customize commands: >
   " trigger chat
   xnoremap <leader>c :AIChat<CR>
   nnoremap <leader>c :AIChat<CR>
+
+  " redo last AI command
+  nnoremap <leader>r :AIRedo<CR>
 
   " command with custom context (vim-ai functions: AIRun, AIEditRun, AIChatRun)
   command! -range -nargs=? AICode <line1>,<line2>call AIRun(<range>, "Programming syntax is " . &filetype . ", " . <f-args>)
