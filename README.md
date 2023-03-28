@@ -77,10 +77,10 @@ Supported chat roles are **`>>> system`**, **`>>> user`** and **`<<< assistant`*
 
 ### :AIRedo
 
+`:AIRedo` - repeat last AI command
+
 Use this immediately after `AI`/`AIEdit`/`AIChat` command in order to re-try or get an alternative completion.
 Note that the randomness of responses heavily depends on the [`temperature`](https://platform.openai.com/docs/api-reference/completions/create#completions/create-temperature) parameter.
-
-`:AIRedo` - repeat last AI command
 
 ## Configuration
 
