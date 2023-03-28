@@ -126,10 +126,18 @@ endfunction
 function! AIRedoRun()
   execute "normal! u"
   if s:last_command == "complete"
-    '<,'>call AIRun(s:last_is_selection, s:last_instruction)
+    if s:last_is_selection
+      '<,'>call AIRun(s:last_is_selection, s:last_instruction)
+    else
+      call AIRun(s:last_is_selection, s:last_instruction)
+    endif
   endif
   if s:last_command == "edit"
-    '<,'>call AIEditRun(s:last_is_selection, s:last_instruction)
+    if s:last_is_selection
+      '<,'>call AIEditRun(s:last_is_selection, s:last_instruction)
+    else
+      call AIEditRun(s:last_is_selection, s:last_instruction)
+    endif
   endif
   if s:last_command == "chat"
     call AIChatRun(s:last_is_selection, s:last_instruction)
