@@ -19,3 +19,8 @@ def make_options():
     options['temperature'] = float(options['temperature'])
     options['max_tokens'] = int(options['max_tokens'])
     return options
+
+def print_text(text):
+    vim.command("normal! a" + text)
+    vim.command("redraw")
+    return ""

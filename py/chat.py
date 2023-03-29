@@ -41,17 +41,24 @@ try:
         response = openai.ChatCompletion.create(messages=messages, stream=True, **options)
 
         generating_text = False
+        text = ""
         for resp in response:
-            text = resp['choices'][0]['delta'].get('content', '')
-            if not text.strip() and not generating_text:
+            new_text = resp['choices'][0]['delta'].get('content', '')
+            if not new_text.strip() and not generating_text:
                 continue # trim newlines from the beginning
+            text += new_text
+            if len(text) > 50:
+                text = print_text(text)
 
             generating_text = True
-            vim.command("normal! a" + text)
-            vim.command("redraw")
 
+        if len(text):
+            text = print_text(text)
         vim.command("normal! a\n\n>>> user\n\n")
         vim.command("redraw")
+
+        print('Done answering.')
+
 except KeyboardInterrupt:
     vim.command("normal! a Ctrl-C...")
 except openai.error.Timeout:
