@@ -62,6 +62,8 @@ mv vim-ai ~/.config/nvim/plugin/  # this is an example, use your own appropriate
 
 Press `Ctrl-c` to cancel completion.
 
+When the AI finished answering, you can continue the conversation by entering edit mode, adding your prompt then using the command `:AIChat` once again.
+
 #### Custom conversation prompts
 
 You can edit and save the conversation to an `.aichat` file and restore it later.
