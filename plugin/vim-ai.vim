@@ -1,25 +1,36 @@
+" complete using davinci:
+"let g:vim_ai_complete_default = {
+"\  "options": {
+"\    "model": "text-davinci-003",
+"\    "max_tokens": 1000,
+"\    "temperature": 0.1,
+"\    "request_timeout": 20,
+"\  },
+"\}
+" complete using chatgpt:
 let g:vim_ai_complete_default = {
 \  "options": {
-\    "model": "text-davinci-003",
+\    "model": "gpt-3.5-turbo",
 \    "max_tokens": 1000,
-\    "temperature": 0.1,
-\    "request_timeout": 20,
+\    "temperature": 0.0,
+\    "request_timeout": 50,
 \  },
 \}
+" reminder: as of march 2023 only davinci models support edition
 let g:vim_ai_edit_default = {
 \  "options": {
 \    "model": "text-davinci-003",
 \    "max_tokens": 1000,
-\    "temperature": 0.1,
-\    "request_timeout": 20,
+\    "temperature": 0.0,
+\    "request_timeout": 50,
 \  },
 \}
 let g:vim_ai_chat_default = {
 \  "options": {
 \    "model": "gpt-3.5-turbo",
 \    "max_tokens": 1000,
-\    "temperature": 1,
-\    "request_timeout": 20,
+\    "temperature": 0.0,
+\    "request_timeout": 50,
 \  },
 \}
 if !exists('g:vim_ai_complete')
