@@ -17,7 +17,8 @@ def make_options():
     options = {**options_default, **options_user}
     options['request_timeout'] = float(options['request_timeout'])
     options['temperature'] = float(options['temperature'])
-    options['max_tokens'] = int(options['max_tokens'])
+    if "max_tokens" in options:
+        options['max_tokens'] = int(options['max_tokens'])
     return options
 
 def print_text(text):
