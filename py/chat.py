@@ -61,5 +61,7 @@ try:
 
 except KeyboardInterrupt:
     vim.command("normal! a Ctrl-C...")
+    print("Completion stopped.")
 except openai.error.Timeout:
     vim.command("normal! aRequest timeout...")
+    print("Completion timed out.")
