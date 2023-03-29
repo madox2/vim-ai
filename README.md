@@ -29,6 +29,12 @@ Add plugin to your `.vimrc` using `vim-plug`:
 Plug 'madox2/vim-ai', { 'do': './install.sh' }
 ```
 
+Alternatively, you can install manually like so:
+```
+git clone https://github.com/madox2/vim-ai/
+mv vim-ai ~/.config/nvim/plugin/  # this is an example, use your own appropriate path
+```
+
 ## Usage
 
 ### :AI
