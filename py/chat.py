@@ -7,6 +7,19 @@ vim.command(f"py3file {plugin_root}/py/utils.py")
 options = make_options()
 file_content = vim.eval('trim(join(getline(1, "$"), "\n"))')
 
+# store file history in the plugin folder
+with open(f"{plugin_root}/chat_history.txt", "a") as f:
+    f.write("\n\n")
+    f.write(file_content)
+# keep the history length manageable
+with open(f"{plugin_root}/chat_history.txt", "r") as f:
+    history_content = f.read()
+if len(history_content.splitlines(True)) > 1000:
+    with open(f"{plugin_root}/chat_history.txt", "w") as f:
+        f.write(
+                "".join(history_content.splitlines()[-1000:])
+                )
+
 openai.api_key = load_api_key()
 
 lines = file_content.splitlines()
@@ -42,22 +55,29 @@ try:
 
         generating_text = False
         text = ""
+        full_new_text = ""
         for resp in response:
             new_text = resp['choices'][0]['delta'].get('content', '')
             if not new_text.strip() and not generating_text:
                 continue # trim newlines from the beginning
             text += new_text
             if len(text) > 50:
+                full_new_text += text
                 text = print_text(text)
 
             generating_text = True
 
         if len(text):
+            full_new_text += text
             text = print_text(text)
         vim.command("normal! a\n\n>>> user\n\n")
         vim.command("redraw")
 
         print('Done answering.')
+
+        # append the new completion
+        with open(f"{plugin_root}/chat_history.txt", "a") as f:
+            f.write(full_new_text)
 
 except KeyboardInterrupt:
     vim.command("normal! a Ctrl-C...")
