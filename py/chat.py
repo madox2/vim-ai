@@ -42,6 +42,11 @@ if not messages:
     file_content = ">>> user\n\n" + file_content
     messages.append({"role": "user", "content": file_content})
 
+# filter out empty messages (happens when no context is provided to the chat,
+# i.e. only a question was asked and no code from the original document was
+# supplied):
+messages = [m for m in messages if m["content"].strip() != ""]
+
 history.extend(messages)
 full_response = ""
 
