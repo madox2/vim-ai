@@ -73,13 +73,13 @@ try:
             text += new_text
             if len(text) > 50:
                 full_response += text
-                text = print_text(text)
+                text = partial_print_text(text)
 
             generating_text = True
 
         if len(text):
             full_response += text
-            text = print_text(text)
+            text = partial_print_text(text)
         vim.command("normal! a\n\n>>> user\n\n")
         vim.command("redraw")
 

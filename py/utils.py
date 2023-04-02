@@ -21,7 +21,8 @@ def make_options():
         options['max_tokens'] = int(options['max_tokens'])
     return options
 
-def print_text(text):
+def partial_print_text(text):
+    "add text to vim as it's received from the output stream"
     vim.command("normal! a" + text)
     vim.command("redraw")
     return ""

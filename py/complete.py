@@ -25,11 +25,11 @@ try:
                     continue # trim newlines from the beginning
                 text += new_text
                 if len(text) > 50:
-                    text = print_text(text)
+                    text = partial_print_text(text)
 
                 generating_text = True
             if len(text):
-                text = print_text(text)
+                text = partial_print_text(text)
 
         else:
             # using chatgpt
@@ -54,12 +54,12 @@ try:
                     continue # trim newlines from the beginning
                 text += new_text
                 if len(text) > 50:
-                    text = print_text(text)
+                    text = partial_print_text(text)
 
                 generating_text = True
 
             if len(text):
-                text = print_text(text)
+                text = partial_print_text(text)
 
 except KeyboardInterrupt:
     vim.command("normal! a Ctrl-C...")
