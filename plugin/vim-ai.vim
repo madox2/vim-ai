@@ -109,13 +109,21 @@ function! AIChatRun(is_selection, ...) range
   set paste
   let is_outside_of_chat_window = search('^>>> user$', 'nw') == 0
   if is_outside_of_chat_window
+    " open chat window
     execute g:vim_ai_chat['ui']['open_chat_command']
     let prompt = ""
     if a:0 || a:is_selection
       let instruction = a:0 ? a:1 : ""
       let prompt = MakePrompt(a:is_selection, lines, instruction)
     endif
-    execute "normal! i>>> user\n\n" . prompt
+    let is_outside_of_chat_window = search('^>>> user$', 'nw') == 0
+    if is_outside_of_chat_window
+      " write an user prompt
+      execute "normal! i>>> user\n\n" . prompt
+    else
+      " appending prompt into restored conversation
+      execute "normal! Gi" . prompt
+    endif
   endif
 
   let s:last_command = "chat"
