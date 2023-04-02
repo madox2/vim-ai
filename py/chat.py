@@ -30,6 +30,10 @@ if not messages:
     file_content = ">>> user\n\n" + file_content
     messages.append({"role": "user", "content": file_content })
 
+for message in messages:
+    # strip newlines from the content as it causes empty responses
+    message["content"] = message["content"].strip()
+
 try:
     if messages[-1]["content"].strip():
         vim.command("normal! Go\n<<< assistant\n\n")
