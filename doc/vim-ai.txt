@@ -66,6 +66,9 @@ Options: >
   \    "temperature": 1,
   \    "request_timeout": 10,
   \  },
+  \  "ui": {
+  \    "open_chat_command": "below new | call vim_ai#MakeScratchWindow()",
+  \  },
   \}
 
 Check OpenAI docs for more infomration:

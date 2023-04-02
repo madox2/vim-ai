@@ -105,6 +105,37 @@ nnoremap <leader>c :AIChat<CR>
 nnoremap <leader>r :AIRedo<CR>
 ```
 
+
+### Interface configuration
+
+Default interface configuration:
+
+```vim
+let g:vim_ai_chat = {
+\  "ui": {
+\    "open_chat_command": "below new | call vim_ai#MakeScratchWindow()",
+\  },
+\}
+```
+
+Tips:
+
+```vim
+" restore conversation from the file
+let g:vim_ai_chat = {
+\  "ui": {
+\    "open_chat_command": "below new /tmp/last_conversation.aichat",
+\  },
+\}
+
+" open chat in a new tab
+let g:vim_ai_chat = {
+\  "ui": {
+\    "open_chat_command": "tabnew | call vim_ai#MakeScratchWindow()",
+\  },
+\}
+```
+
 ### Completion configuration
 
 Request to the OpenAI API can be configured for each command.
