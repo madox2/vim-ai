@@ -132,6 +132,7 @@ function! AIChatRun(is_selection, ...) range
   let options = g:vim_ai_chat['options']
   execute "py3file " . s:chat_py
   set nopaste
+  setlocal wrap
 endfunction
 
 function! AIRedoRun()
