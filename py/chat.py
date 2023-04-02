@@ -47,6 +47,10 @@ if not messages:
 # supplied):
 messages = [m for m in messages if m["content"].strip() != ""]
 
+# remove extra linebreaks added at the start of the message
+for i, m in enumerate(messages):
+    messages[i]["content"] = messages[i]["content"].lstrip()
+
 history.extend(messages)
 full_response = ""
 
