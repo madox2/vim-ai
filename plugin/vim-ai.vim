@@ -25,15 +25,28 @@ let g:vim_ai_chat_default = {
 \    "open_chat_command": "below new | call vim_ai#MakeScratchWindow()"
 \  },
 \}
-if !exists('g:vim_ai_complete')
-  let g:vim_ai_complete = {"options":{}}
-endif
-if !exists('g:vim_ai_edit')
-  let g:vim_ai_edit = {"options":{}}
-endif
-if !exists('g:vim_ai_chat')
-  let g:vim_ai_chat = {"options":{}, "ui": {}}
-endif
+
+function! s:ExtendDeep(defaults, override) abort
+  let l:result = a:defaults
+  for [l:key, l:value] in items(a:override)
+    if type(get(l:result, l:key)) is v:t_dict && type(l:value) is v:t_dict
+      call s:ExtendDeep(l:result[l:key], l:value)
+    else
+      let l:result[l:key] = l:value
+    endif
+  endfor
+  return l:result
+endfun
+
+function! s:MakeConfig(config_name) abort
+  let l:defaults = copy(g:[a:config_name . "_default"])
+  let l:override = exists("g:" . a:config_name) ? g:[a:config_name] : {}
+  let g:[a:config_name] = s:ExtendDeep(l:defaults, l:override)
+endfun
+
+call s:MakeConfig("vim_ai_chat")
+call s:MakeConfig("vim_ai_complete")
+call s:MakeConfig("vim_ai_edit")
 
 let s:plugin_root = expand('<sfile>:p:h:h')
 let s:complete_py = s:plugin_root . "/py/complete.py"
@@ -62,7 +75,6 @@ function! AIRun(is_selection, ...) range
   let s:last_instruction = instruction
   let s:last_is_selection = a:is_selection
 
-  let options_default = g:vim_ai_complete_default['options']
   let options = g:vim_ai_complete['options']
   let cursor_on_empty_line = trim(join(lines, "\n")) == ""
   set paste
@@ -84,7 +96,6 @@ function! AIEditRun(is_selection, ...) range
   let s:last_instruction = instruction
   let s:last_is_selection = a:is_selection
 
-  let options_default = g:vim_ai_edit_default['options']
   let options = g:vim_ai_edit['options']
   set paste
   execute "normal! " . a:firstline . "GV" . a:lastline . "Gc"
@@ -98,8 +109,7 @@ function! AIChatRun(is_selection, ...) range
   set paste
   let is_outside_of_chat_window = search('^>>> user$', 'nw') == 0
   if is_outside_of_chat_window
-    let ui_options = extend(copy(g:vim_ai_chat_default['ui']), g:vim_ai_chat['ui'])
-    execute ui_options['open_chat_command']
+    execute g:vim_ai_chat['ui']['open_chat_command']
     let prompt = ""
     if a:0 || a:is_selection
       let instruction = a:0 ? a:1 : ""
@@ -112,7 +122,6 @@ function! AIChatRun(is_selection, ...) range
   let s:last_instruction = instruction
   let s:last_is_selection = a:is_selection
 
-  let options_default = g:vim_ai_chat_default['options']
   let options = g:vim_ai_chat['options']
   execute "py3file " . s:chat_py
   set nopaste
