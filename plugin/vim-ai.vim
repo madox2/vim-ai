@@ -21,6 +21,9 @@ let g:vim_ai_chat_default = {
 \    "temperature": 1,
 \    "request_timeout": 20,
 \  },
+\  "ui": {
+\    "open_chat_command": "below new | call vim_ai#MakeScratchWindow()"
+\  },
 \}
 if !exists('g:vim_ai_complete')
   let g:vim_ai_complete = {"options":{}}
@@ -29,9 +32,8 @@ if !exists('g:vim_ai_edit')
   let g:vim_ai_edit = {"options":{}}
 endif
 if !exists('g:vim_ai_chat')
-  let g:vim_ai_chat = {"options":{}}
+  let g:vim_ai_chat = {"options":{}, "ui": {}}
 endif
-
 
 let s:plugin_root = expand('<sfile>:p:h:h')
 let s:complete_py = s:plugin_root . "/py/complete.py"
@@ -41,14 +43,6 @@ let s:chat_py = s:plugin_root . "/py/chat.py"
 let s:last_is_selection = 0
 let s:last_instruction = ""
 let s:last_command = ""
-
-function! ScratchWindow()
-  below new
-  setlocal buftype=nofile
-  setlocal bufhidden=hide
-  setlocal noswapfile
-  setlocal ft=aichat
-endfunction
 
 function! MakePrompt(is_selection, lines, instruction)
   let lines = trim(join(a:lines, "\n"))
@@ -104,7 +98,8 @@ function! AIChatRun(is_selection, ...) range
   set paste
   let is_outside_of_chat_window = search('^>>> user$', 'nw') == 0
   if is_outside_of_chat_window
-    call ScratchWindow()
+    let ui_options = extend(copy(g:vim_ai_chat_default['ui']), g:vim_ai_chat['ui'])
+    execute ui_options['open_chat_command']
     let prompt = ""
     if a:0 || a:is_selection
       let instruction = a:0 ? a:1 : ""
