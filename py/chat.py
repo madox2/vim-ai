@@ -18,6 +18,8 @@ except Exception as err:
     time.sleep(2)
     history = []
 
+history.append({"type": "new chat invoked", "timestamp": int(time.time())})
+
 openai.api_key = load_api_key()
 
 lines = file_content.splitlines()
