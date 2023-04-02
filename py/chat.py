@@ -1,4 +1,6 @@
 import openai
+import json
+import time
 
 # import utils
 plugin_root = vim.eval("s:plugin_root")
@@ -7,18 +9,14 @@ vim.command(f"py3file {plugin_root}/py/utils.py")
 options = make_options()
 file_content = vim.eval('trim(join(getline(1, "$"), "\n"))')
 
-# store file history in the plugin folder
-with open(f"{plugin_root}/chat_history.txt", "a") as f:
-    f.write("\n\n")
-    f.write(file_content)
-# keep the history length manageable
-with open(f"{plugin_root}/chat_history.txt", "r") as f:
-    history_content = f.read()
-if len(history_content.splitlines(True)) > 1000:
-    with open(f"{plugin_root}/chat_history.txt", "w") as f:
-        f.write(
-                "".join(history_content.splitlines()[-1000:])
-                )
+# save history as json
+try:
+    with open(f"{plugin_root}/chat_history.json", "r") as f:
+        history = json.load(f)
+except Exception as err:
+    print(f"Error loading json: '{err}'")
+    time.sleep(2)
+    history = []
 
 openai.api_key = load_api_key()
 
@@ -39,9 +37,13 @@ for line in lines:
         continue
     messages[-1]["content"] += "\n" + line
 
+
 if not messages:
     file_content = ">>> user\n\n" + file_content
-    messages.append({"role": "user", "content": file_content })
+    messages.append({"role": "user", "content": file_content})
+
+history.extend(messages)
+full_response = ""
 
 try:
     if messages[-1]["content"].strip():
@@ -55,29 +57,24 @@ try:
 
         generating_text = False
         text = ""
-        full_new_text = ""
         for resp in response:
             new_text = resp['choices'][0]['delta'].get('content', '')
             if not new_text.strip() and not generating_text:
                 continue # trim newlines from the beginning
             text += new_text
             if len(text) > 50:
-                full_new_text += text
+                full_response += text
                 text = print_text(text)
 
             generating_text = True
 
         if len(text):
-            full_new_text += text
+            full_response += text
             text = print_text(text)
         vim.command("normal! a\n\n>>> user\n\n")
         vim.command("redraw")
 
         print('Done answering.')
-
-        # append the new completion
-        with open(f"{plugin_root}/chat_history.txt", "a") as f:
-            f.write(full_new_text)
 
 except KeyboardInterrupt:
     vim.command("normal! a Ctrl-C...")
@@ -85,3 +82,14 @@ except KeyboardInterrupt:
 except openai.error.Timeout:
     vim.command("normal! aRequest timeout...")
     print("Completion timed out.")
+
+
+# append the new completion to history
+history.append(
+        {
+            "type": "completion",
+            "content": full_response,
+            }
+        )
+with open(f"{plugin_root}/chat_history.json", "w") as f:
+    json.dump(history[-10_000:], f, indent=2)
