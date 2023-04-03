@@ -33,6 +33,7 @@ if not messages:
     # roles not found, put whole file content as an user prompt
     vim.command("normal! ggO>>> user\n")
     vim.command("normal! G")
+    vim.command("let &ul=&ul") # breaks undo sequence (https://vi.stackexchange.com/a/29087)
     vim.command("redraw")
     messages = parse_messages()
 
