@@ -116,14 +116,7 @@ function! AIChatRun(is_selection, ...) range
       let instruction = a:0 ? a:1 : ""
       let prompt = MakePrompt(a:is_selection, lines, instruction)
     endif
-    let is_outside_of_chat_window = search('^>>> user$', 'nw') == 0
-    if is_outside_of_chat_window
-      " write an user prompt
-      execute "normal! i>>> user\n\n" . prompt
-    else
-      " appending prompt into restored conversation
-      execute "normal! Gi" . prompt
-    endif
+    execute "normal! Gi" . prompt
   endif
 
   let s:last_command = "chat"

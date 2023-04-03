@@ -5,30 +5,36 @@ plugin_root = vim.eval("s:plugin_root")
 vim.command(f"py3file {plugin_root}/py/utils.py")
 
 options = make_options()
-file_content = vim.eval('trim(join(getline(1, "$"), "\n"))')
 
 openai.api_key = load_api_key()
 
-lines = file_content.splitlines()
-messages = []
+def parse_messages():
+    file_content = vim.eval('trim(join(getline(1, "$"), "\n"))')
+    lines = file_content.splitlines()
+    messages = []
+    for line in lines:
+        if line.startswith(">>> system"):
+            messages.append({"role": "system", "content": ""})
+            continue
+        if line.startswith(">>> user"):
+            messages.append({"role": "user", "content": ""})
+            continue
+        if line.startswith("<<< assistant"):
+            messages.append({"role": "assistant", "content": ""})
+            continue
+        if not messages:
+            continue
+        messages[-1]["content"] += "\n" + line
+    return messages
 
-for line in lines:
-    if line.startswith(">>> system"):
-        messages.append({"role": "system", "content": ""})
-        continue
-    if line.startswith(">>> user"):
-        messages.append({"role": "user", "content": ""})
-        continue
-    if line.startswith("<<< assistant"):
-        messages.append({"role": "assistant", "content": ""})
-        continue
-    if not messages:
-        continue
-    messages[-1]["content"] += "\n" + line
+messages = parse_messages()
 
 if not messages:
-    file_content = ">>> user\n\n" + file_content
-    messages.append({"role": "user", "content": file_content })
+    # roles not found, put whole file content as an user prompt
+    vim.command("normal! ggO>>> user\n")
+    vim.command("normal! G")
+    vim.command("redraw")
+    messages = parse_messages()
 
 for message in messages:
     # strip newlines from the content as it causes empty responses
