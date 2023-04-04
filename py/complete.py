@@ -18,7 +18,8 @@ def complete_engine():
     return text_chunks
 
 def chat_engine():
-    initial_prompt = options.get('initial_prompt', '')
+    initial_prompt = options.get('initial_prompt', [])
+    initial_prompt = '\n'.join(initial_prompt)
     chat_content = f"{initial_prompt}\n\n>>> user\n\n{prompt}".strip()
     messages = parse_chat_messages(chat_content)
     response = openai.ChatCompletion.create(messages=messages, stream=True, **request_options)
