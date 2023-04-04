@@ -11,14 +11,8 @@ def load_api_key():
         pass
     return api_key.strip()
 
-def make_options():
-    options_default = vim.eval("options_default")
-    options_user = vim.eval("options")
-    options = {**options_default, **options_user}
-    return options
-
 def make_request_options():
-    options = make_options()
+    options = vim.eval("options")
     request_options = {}
     request_options['model'] = options['model']
     request_options['max_tokens'] = int(options['max_tokens'])

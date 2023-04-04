@@ -36,29 +36,41 @@ let g:vim_ai_chat_default = {
 \    "request_timeout": 20,
 \    "initial_prompt": s:vim_ai_chat_initial_prompt,
 \  },
+\  "ui": {
+\    "open_chat_command": "below new | call vim_ai#MakeScratchWindow()"
+\  },
 \}
-if !exists('g:vim_ai_complete')
-  let g:vim_ai_complete = {"options":{}}
-endif
-if !exists('g:vim_ai_edit')
-  let g:vim_ai_edit = {"options":{}}
-endif
-if !exists('g:vim_ai_chat')
-  let g:vim_ai_chat = {"options":{}}
-endif
 
+function! s:ExtendDeep(defaults, override) abort
+  let l:result = a:defaults
+  for [l:key, l:value] in items(a:override)
+    if type(get(l:result, l:key)) is v:t_dict && type(l:value) is v:t_dict
+      call s:ExtendDeep(l:result[l:key], l:value)
+    else
+      let l:result[l:key] = l:value
+    endif
+  endfor
+  return l:result
+endfun
+
+function! s:MakeConfig(config_name) abort
+  let l:defaults = copy(g:[a:config_name . "_default"])
+  let l:override = exists("g:" . a:config_name) ? g:[a:config_name] : {}
+  let g:[a:config_name] = s:ExtendDeep(l:defaults, l:override)
+endfun
+
+call s:MakeConfig("vim_ai_chat")
+call s:MakeConfig("vim_ai_complete")
+call s:MakeConfig("vim_ai_edit")
 
 let s:plugin_root = expand('<sfile>:p:h:h')
 let s:complete_py = s:plugin_root . "/py/complete.py"
 let s:chat_py = s:plugin_root . "/py/chat.py"
 
-function! ScratchWindow()
-  below new
-  setlocal buftype=nofile
-  setlocal bufhidden=hide
-  setlocal noswapfile
-  setlocal ft=aichat
-endfunction
+" remembers last command parameters to be used in AIRedoRun
+let s:last_is_selection = 0
+let s:last_instruction = ""
+let s:last_command = ""
 
 function! MakePrompt(is_selection, lines, instruction)
   let lines = trim(join(a:lines, "\n"))
@@ -70,9 +82,14 @@ function! MakePrompt(is_selection, lines, instruction)
 endfunction
 
 function! AIRun(is_selection, ...) range
+  let instruction = a:0 ? a:1 : ""
   let lines = getline(a:firstline, a:lastline)
-  let prompt = MakePrompt(a:is_selection, lines, a:0 ? a:1 : "")
-  let options_default = g:vim_ai_complete_default['options']
+  let prompt = MakePrompt(a:is_selection, lines, instruction)
+
+  let s:last_command = "complete"
+  let s:last_instruction = instruction
+  let s:last_is_selection = a:is_selection
+
   let options = g:vim_ai_complete['options']
   let cursor_on_empty_line = trim(join(lines, "\n")) == ""
   set paste
@@ -87,8 +104,13 @@ function! AIRun(is_selection, ...) range
 endfunction
 
 function! AIEditRun(is_selection, ...) range
-  let prompt = MakePrompt(a:is_selection, getline(a:firstline, a:lastline), a:0 ? a:1 : "")
-  let options_default = g:vim_ai_edit_default['options']
+  let instruction = a:0 ? a:1 : ""
+  let prompt = MakePrompt(a:is_selection, getline(a:firstline, a:lastline), instruction)
+
+  let s:last_command = "edit"
+  let s:last_instruction = instruction
+  let s:last_is_selection = a:is_selection
+
   let options = g:vim_ai_edit['options']
   set paste
   execute "normal! " . a:firstline . "GV" . a:lastline . "Gc"
@@ -97,24 +119,52 @@ function! AIEditRun(is_selection, ...) range
 endfunction
 
 function! AIChatRun(is_selection, ...) range
+  let instruction = ""
   let lines = getline(a:firstline, a:lastline)
   set paste
   let is_outside_of_chat_window = search('^>>> user$', 'nw') == 0
   if is_outside_of_chat_window
-    call ScratchWindow()
+    " open chat window
+    execute g:vim_ai_chat['ui']['open_chat_command']
     let prompt = ""
     if a:0 || a:is_selection
-      let prompt = MakePrompt(a:is_selection, lines, a:0 ? a:1 : "")
+      let instruction = a:0 ? a:1 : ""
+      let prompt = MakePrompt(a:is_selection, lines, instruction)
     endif
-    execute "normal i>>> user\n\n" . prompt
+    execute "normal! Gi" . prompt
   endif
 
-  let options_default = g:vim_ai_chat_default['options']
+  let s:last_command = "chat"
+  let s:last_instruction = instruction
+  let s:last_is_selection = a:is_selection
+
   let options = g:vim_ai_chat['options']
   execute "py3file " . s:chat_py
   set nopaste
 endfunction
 
+function! AIRedoRun()
+  execute "normal! u"
+  if s:last_command == "complete"
+    if s:last_is_selection
+      '<,'>call AIRun(s:last_is_selection, s:last_instruction)
+    else
+      call AIRun(s:last_is_selection, s:last_instruction)
+    endif
+  endif
+  if s:last_command == "edit"
+    if s:last_is_selection
+      '<,'>call AIEditRun(s:last_is_selection, s:last_instruction)
+    else
+      call AIEditRun(s:last_is_selection, s:last_instruction)
+    endif
+  endif
+  if s:last_command == "chat"
+    call AIChatRun(s:last_is_selection, s:last_instruction)
+  endif
+endfunction
+
 command! -range -nargs=? AI <line1>,<line2>call AIRun(<range>, <f-args>)
 command! -range -nargs=? AIEdit <line1>,<line2>call AIEditRun(<range>, <f-args>)
 command! -range -nargs=? AIChat <line1>,<line2>call AIChatRun(<range>, <f-args>)
+command! AIRedo call AIRedoRun()

@@ -4,13 +4,13 @@ import openai
 plugin_root = vim.eval("s:plugin_root")
 vim.command(f"py3file {plugin_root}/py/utils.py")
 
-prompt = vim.eval("prompt")
+prompt = vim.eval("prompt").strip()
 request_options = make_request_options()
 
 openai.api_key = load_api_key()
 
 try:
-    if prompt.strip():
+    if prompt:
 
         print('Completing...')
         vim.command("redraw")

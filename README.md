@@ -49,7 +49,6 @@ Plug 'madox2/vim-ai', { 'do': './install.sh' }
 
 ### :AIChat
 
-
 `:AIChat` - continue or start a new conversation.
 
 `(visual selection)? :AIChat {instruction}?` - start a new conversation given the selection, the instruction or both
@@ -76,6 +75,13 @@ You are a Clean Code expert, I have the following code, please refactor it in a 
 
 Supported chat roles are **`>>> system`**, **`>>> user`** and **`<<< assistant`**
 
+### :AIRedo
+
+`:AIRedo` - repeat last AI command
+
+Use this immediately after `AI`/`AIEdit`/`AIChat` command in order to re-try or get an alternative completion.
+Note that the randomness of responses heavily depends on the [`temperature`](https://platform.openai.com/docs/api-reference/completions/create#completions/create-temperature) parameter.
+
 ## Configuration
 
 ### Key bindings
@@ -94,6 +100,40 @@ nnoremap <leader>s :AIEdit fix grammar and spelling<CR>
 " trigger chat
 xnoremap <leader>c :AIChat<CR>
 nnoremap <leader>c :AIChat<CR>
+
+" redo last AI command
+nnoremap <leader>r :AIRedo<CR>
+```
+
+
+### Interface configuration
+
+Default interface configuration:
+
+```vim
+let g:vim_ai_chat = {
+\  "ui": {
+\    "open_chat_command": "below new | call vim_ai#MakeScratchWindow()",
+\  },
+\}
+```
+
+Tips:
+
+```vim
+" restore conversation from the file
+let g:vim_ai_chat = {
+\  "ui": {
+\    "open_chat_command": "below new /tmp/last_conversation.aichat",
+\  },
+\}
+
+" open chat in a new tab
+let g:vim_ai_chat = {
+\  "ui": {
+\    "open_chat_command": "tabnew | call vim_ai#MakeScratchWindow()",
+\  },
+\}
 ```
 
 ### Completion configuration

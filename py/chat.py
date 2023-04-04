@@ -4,7 +4,7 @@ import openai
 plugin_root = vim.eval("s:plugin_root")
 vim.command(f"py3file {plugin_root}/py/utils.py")
 
-options = make_options()
+options = vim.eval("options")
 request_options = make_request_options()
 
 openai.api_key = load_api_key()
@@ -16,26 +16,38 @@ prompt = f"{initial_prompt}\n{file_content}"
 lines = prompt.splitlines()
 messages = []
 
-with open('/tmp/prompt.aichat', 'w') as f:
-    f.write(prompt)
+def parse_messages():
+    file_content = vim.eval('trim(join(getline(1, "$"), "\n"))')
+    lines = file_content.splitlines()
+    messages = []
+    for line in lines:
+        if line.startswith(">>> system"):
+            messages.append({"role": "system", "content": ""})
+            continue
+        if line.startswith(">>> user"):
+            messages.append({"role": "user", "content": ""})
+            continue
+        if line.startswith("<<< assistant"):
+            messages.append({"role": "assistant", "content": ""})
+            continue
+        if not messages:
+            continue
+        messages[-1]["content"] += "\n" + line
+    return messages
 
-for line in lines:
-    if line.startswith(">>> system"):
-        messages.append({"role": "system", "content": ""})
-        continue
-    if line.startswith(">>> user"):
-        messages.append({"role": "user", "content": ""})
-        continue
-    if line.startswith("<<< assistant"):
-        messages.append({"role": "assistant", "content": ""})
-        continue
-    if not messages:
-        continue
-    messages[-1]["content"] += "\n" + line
+messages = parse_messages()
 
 if not messages:
-    file_content = ">>> user\n\n" + file_content
-    messages.append({"role": "user", "content": file_content })
+    # roles not found, put whole file content as an user prompt
+    vim.command("normal! ggO>>> user\n")
+    vim.command("normal! G")
+    vim.command("let &ul=&ul") # breaks undo sequence (https://vi.stackexchange.com/a/29087)
+    vim.command("redraw")
+    messages = parse_messages()
+
+for message in messages:
+    # strip newlines from the content as it causes empty responses
+    message["content"] = message["content"].strip()
 
 try:
     if messages[-1]["content"].strip():
