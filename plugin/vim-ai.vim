@@ -1,4 +1,5 @@
 let g:vim_ai_complete_default = {
+\  "engine": "complete",
 \  "options": {
 \    "model": "text-davinci-003",
 \    "max_tokens": 1000,
@@ -7,6 +8,7 @@ let g:vim_ai_complete_default = {
 \  },
 \}
 let g:vim_ai_edit_default = {
+\  "engine": "complete",
 \  "options": {
 \    "model": "text-davinci-003",
 \    "max_tokens": 1000,
@@ -26,9 +28,9 @@ Audience: Users of text editor and programmers that need to transform/generate t
 <<< assistant
 
 Okay
-
 END
 let g:vim_ai_chat_default = {
+\  "engine": "chat",
 \  "options": {
 \    "model": "gpt-3.5-turbo",
 \    "max_tokens": 1000,
@@ -90,6 +92,7 @@ function! AIRun(is_selection, ...) range
   let s:last_instruction = instruction
   let s:last_is_selection = a:is_selection
 
+  let engine = g:vim_ai_complete['engine']
   let options = g:vim_ai_complete['options']
   let cursor_on_empty_line = trim(join(lines, "\n")) == ""
   set paste
@@ -111,6 +114,7 @@ function! AIEditRun(is_selection, ...) range
   let s:last_instruction = instruction
   let s:last_is_selection = a:is_selection
 
+  let engine = g:vim_ai_edit['engine']
   let options = g:vim_ai_edit['options']
   set paste
   execute "normal! " . a:firstline . "GV" . a:lastline . "Gc"
@@ -138,6 +142,7 @@ function! AIChatRun(is_selection, ...) range
   let s:last_instruction = instruction
   let s:last_is_selection = a:is_selection
 
+  let engine = g:vim_ai_chat['engine']
   let options = g:vim_ai_chat['options']
   execute "py3file " . s:chat_py
   set nopaste

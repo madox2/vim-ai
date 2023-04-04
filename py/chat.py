@@ -16,26 +16,8 @@ prompt = f"{initial_prompt}\n{file_content}"
 lines = prompt.splitlines()
 messages = []
 
-def parse_messages():
-    file_content = vim.eval('trim(join(getline(1, "$"), "\n"))')
-    lines = file_content.splitlines()
-    messages = []
-    for line in lines:
-        if line.startswith(">>> system"):
-            messages.append({"role": "system", "content": ""})
-            continue
-        if line.startswith(">>> user"):
-            messages.append({"role": "user", "content": ""})
-            continue
-        if line.startswith("<<< assistant"):
-            messages.append({"role": "assistant", "content": ""})
-            continue
-        if not messages:
-            continue
-        messages[-1]["content"] += "\n" + line
-    return messages
-
-messages = parse_messages()
+chat_content = vim.eval('trim(join(getline(1, "$"), "\n"))')
+messages = parse_chat_messages(chat_content)
 
 if not messages:
     # roles not found, put whole file content as an user prompt
@@ -43,11 +25,8 @@ if not messages:
     vim.command("normal! G")
     vim.command("let &ul=&ul") # breaks undo sequence (https://vi.stackexchange.com/a/29087)
     vim.command("redraw")
-    messages = parse_messages()
-
-for message in messages:
-    # strip newlines from the content as it causes empty responses
-    message["content"] = message["content"].strip()
+    chat_content = vim.eval('trim(join(getline(1, "$"), "\n"))')
+    messages = parse_chat_messages(chat_content)
 
 try:
     if messages[-1]["content"].strip():
@@ -58,16 +37,8 @@ try:
         vim.command("redraw")
 
         response = openai.ChatCompletion.create(messages=messages, stream=True, **request_options)
-
-        generating_text = False
-        for resp in response:
-            text = resp['choices'][0]['delta'].get('content', '')
-            if not text.strip() and not generating_text:
-                continue # trim newlines from the beginning
-
-            generating_text = True
-            vim.command("normal! a" + text)
-            vim.command("redraw")
+        text_chunks = map(lambda resp: resp['choices'][0]['delta'].get('content', ''), response)
+        render_text_chunks(text_chunks)
 
         vim.command("normal! a\n\n>>> user\n\n")
         vim.command("redraw")
