@@ -105,7 +105,6 @@ nnoremap <leader>c :AIChat<CR>
 nnoremap <leader>r :AIRedo<CR>
 ```
 
-
 ### Interface configuration
 
 Default interface configuration:
@@ -155,7 +154,9 @@ Below are listed available options along with default values:
 ```vim
 " :AI
 " - https://platform.openai.com/docs/api-reference/completions
+" - see how to configure chat engine for completion in the section below
 let g:vim_ai_complete = {
+\  "engine": "complete",
 \  "options": {
 \    "model": "text-davinci-003",
 \    "max_tokens": 1000,
@@ -166,7 +167,9 @@ let g:vim_ai_complete = {
 
 " :AIEdit
 " - https://platform.openai.com/docs/api-reference/completions
+" - see how to configure chat engine for edits in the section below
 let g:vim_ai_edit = {
+\  "engine": "complete",
 \  "options": {
 \    "model": "text-davinci-003",
 \    "max_tokens": 1000,
@@ -183,8 +186,42 @@ let g:vim_ai_chat = {
 \    "max_tokens": 1000,
 \    "temperature": 1,
 \    "request_timeout": 10,
+\    "initial_prompt": "",
 \  },
 \}
+```
+
+### Using chat engine for completion and edits
+
+It is possible to configure chat models, such as `gpt-3.5-turbo`, to be used in `:AI` and `:AIEdit` commands.
+These models are cheaper, but currently less suitable for code editing/completion, as they respond with human-like text and commentary.
+
+Depending on the use case, a good initial prompt can help to instruct the chat model to respond in the desired way:
+
+```vim
+let initial_prompt =<< trim END
+>>> system
+
+You are going to play a role of a completion engine with following parameters:
+Task: Provide compact code/text completion, generation, transformation or explanation
+Topic: general programming and text editing
+Style: Plain result without any commentary, unless commentary is necessary
+Audience: Users of text editor and programmers that need to transform/generate text
+END
+
+let chat_engine_config = {
+\  "engine": "chat",
+\  "options": {
+\    "model": "gpt-3.5-turbo",
+\    "max_tokens": 1000,
+\    "temperature": 0.1,
+\    "request_timeout": 20,
+\    "initial_prompt": initial_prompt,
+\  },
+\}
+
+let g:vim_ai_complete = chat_engine_config
+let g:vim_ai_complete = chat_engine_config
 ```
 
 ### Custom commands

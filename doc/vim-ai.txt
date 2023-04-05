@@ -22,6 +22,7 @@ https://github.com/madox2/vim-ai
 
 Options: >
   let g:vim_ai_complete = {
+  \  "engine": "complete",
   \  "options": {
   \    "model": "text-davinci-003",
   \    "max_tokens": 1000,
@@ -41,6 +42,7 @@ https://platform.openai.com/docs/api-reference/completions
 
 Options: >
   let g:vim_ai_edit = {
+  \  "engine": "complete",
   \  "options": {
   \    "model": "text-davinci-003",
   \    "max_tokens": 1000,
@@ -65,6 +67,7 @@ Options: >
   \    "max_tokens": 1000,
   \    "temperature": 1,
   \    "request_timeout": 10,
+  \    "initial_prompt": "",
   \  },
   \  "ui": {
   \    "open_chat_command": "below new | call vim_ai#MakeScratchWindow()",

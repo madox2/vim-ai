@@ -16,27 +16,13 @@ let g:vim_ai_edit_default = {
 \    "request_timeout": 20,
 \  },
 \}
-let s:vim_ai_chat_initial_prompt =<< trim END
->>> user
-
-You are going to play a role of completion engine with following parameters:
-Task: Provide compact code/text completion, generation, transformation or explanation
-Topic: general programming and text editing
-Style: Plain result without any commentary, unless commentary is necessary
-Audience: Users of text editor and programmers that need to transform/generate text
-
-<<< assistant
-
-Okay
-END
 let g:vim_ai_chat_default = {
-\  "engine": "chat",
 \  "options": {
 \    "model": "gpt-3.5-turbo",
 \    "max_tokens": 1000,
 \    "temperature": 1,
 \    "request_timeout": 20,
-\    "initial_prompt": s:vim_ai_chat_initial_prompt,
+\    "initial_prompt": "",
 \  },
 \  "ui": {
 \    "open_chat_command": "below new | call vim_ai#MakeScratchWindow()"
@@ -142,7 +128,6 @@ function! AIChatRun(is_selection, ...) range
   let s:last_instruction = instruction
   let s:last_is_selection = a:is_selection
 
-  let engine = g:vim_ai_chat['engine']
   let options = g:vim_ai_chat['options']
   execute "py3file " . s:chat_py
   set nopaste
