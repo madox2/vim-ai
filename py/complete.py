@@ -12,12 +12,12 @@ prompt = vim.eval("prompt").strip()
 
 openai.api_key = load_api_key()
 
-def complete_engine():
+def complete_engine(prompt):
     response = openai.Completion.create(stream=True, prompt=prompt, **request_options)
     text_chunks = map(lambda resp: resp['choices'][0].get('text', ''), response)
     return text_chunks
 
-def chat_engine():
+def chat_engine(prompt):
     initial_prompt = options.get('initial_prompt', [])
     initial_prompt = '\n'.join(initial_prompt)
     chat_content = f"{initial_prompt}\n\n>>> user\n\n{prompt}".strip()
@@ -32,7 +32,7 @@ try:
     if prompt:
         print('Completing...')
         vim.command("redraw")
-        text_chunks = engines[engine]()
+        text_chunks = engines[engine](prompt)
         render_text_chunks(text_chunks)
 except KeyboardInterrupt:
     vim.command("normal! a Ctrl-C...")
