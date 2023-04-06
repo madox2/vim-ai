@@ -1,11 +1,12 @@
 # vim-ai
 
-Complete text and chat with GPT in Vim/Neovim using OpenAI.
+This plugin adds Artificial Intelligence (AI) capabilities to your Vim and Neovim.
+You can generate code, edit text, or have an interactive conversation with GPT models, all powered by OpenAI's API.
 
 ## Features
 
-- Generate text or code, answer questions
-- Edit selected text in-place
+- Generate text or code, answer questions with AI
+- Edit selected text in-place with AI
 - Interactive conversation with ChatGPT
 
 ![vim-ai demo](./demo.gif)
