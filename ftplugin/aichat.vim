@@ -99,7 +99,7 @@ function! s:IsHighlightSourcesEnabledForBuffer()
 endfunction
 
 function! s:MarkdownRefreshSyntax(force)
-  if g:vim_ai_chat_default['ui']['code_syntax_enabled']
+  if g:vim_ai_chat_default['ui']['code_syntax_enabled'] && &filetype =~# 'aichat'
     call s:MarkdownHighlightSources(a:force)
   endif
 endfunction
@@ -111,9 +111,10 @@ function! s:MarkdownClearSyntaxVariables()
 endfunction
 
 augroup Aichat
-  autocmd BufWinEnter *.aichat call s:MarkdownRefreshSyntax(1)
-  autocmd BufUnload *.aichat call s:MarkdownClearSyntaxVariables()
-  autocmd BufWritePost *.aichat call s:MarkdownRefreshSyntax(0)
-  autocmd InsertEnter,InsertLeave *.aichat call s:MarkdownRefreshSyntax(0)
-  autocmd CursorHold,CursorHoldI *.aichat call s:MarkdownRefreshSyntax(0)
+  autocmd! * <buffer>
+  autocmd BufWinEnter <buffer> call s:MarkdownRefreshSyntax(1)
+  autocmd BufUnload <buffer> call s:MarkdownClearSyntaxVariables()
+  autocmd BufWritePost <buffer> call s:MarkdownRefreshSyntax(0)
+  autocmd InsertEnter,InsertLeave <buffer> call s:MarkdownRefreshSyntax(0)
+  autocmd CursorHold,CursorHoldI <buffer> call s:MarkdownRefreshSyntax(0)
 augroup END
