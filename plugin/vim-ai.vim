@@ -16,13 +16,20 @@ let g:vim_ai_edit_default = {
 \    "request_timeout": 20,
 \  },
 \}
+
+let s:initial_chat_prompt =<< trim END
+>>> system
+
+You are a general assistant.
+If you attach a code block add syntax type annotation to it, for example ```python.
+END
 let g:vim_ai_chat_default = {
 \  "options": {
 \    "model": "gpt-3.5-turbo",
 \    "max_tokens": 1000,
 \    "temperature": 1,
 \    "request_timeout": 20,
-\    "initial_prompt": "",
+\    "initial_prompt": s:initial_chat_prompt,
 \  },
 \  "ui": {
 \    "open_chat_command": "below new | call vim_ai#MakeScratchWindow()",
