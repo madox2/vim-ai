@@ -25,7 +25,8 @@ let g:vim_ai_chat_default = {
 \    "initial_prompt": "",
 \  },
 \  "ui": {
-\    "open_chat_command": "below new | call vim_ai#MakeScratchWindow()"
+\    "open_chat_command": "below new | call vim_ai#MakeScratchWindow()",
+\    "code_syntax_enabled": 1,
 \  },
 \}
 
