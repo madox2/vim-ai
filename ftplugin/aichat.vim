@@ -57,8 +57,8 @@ function! s:MarkdownHighlightSources(force)
       else
         let include = '@' . toupper(filetype)
       endif
-      let command_backtick = 'syntax region %s matchgroup=%s start="^\s*`\{3,}\s*%s.*$" matchgroup=%s end="\s*`\{3,}$" keepend contains=%s'
-      let command_tilde    = 'syntax region %s matchgroup=%s start="^\s*\~\{3,}\s*%s.*$" matchgroup=%s end="\s*\~\{3,}$" keepend contains=%s'
+      let command_backtick = 'syntax region %s matchgroup=%s start="^\s*`\{3,}\s*%s.*$" matchgroup=%s end="\s*`\{3,}\s*$" keepend contains=%s'
+      let command_tilde    = 'syntax region %s matchgroup=%s start="^\s*\~\{3,}\s*%s.*$" matchgroup=%s end="\s*\~\{3,}\s*$" keepend contains=%s'
       execute printf(command_backtick, group, startgroup, ft, endgroup, include)
       execute printf(command_tilde,    group, startgroup, ft, endgroup, include)
       execute printf('syntax cluster aichatNonListItem add=%s', group)
