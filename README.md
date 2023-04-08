@@ -31,9 +31,10 @@ Plug 'madox2/vim-ai', { 'do': './install.sh' }
 ```
 
 Alternatively, you can install manually like so:
-```
+
+```sh
 git clone https://github.com/madox2/vim-ai/
-mv vim-ai ~/.config/nvim/plugin/  # this is an example, use your own appropriate path
+mv vim-ai ~/.config/nvim/plugin/  # copy to the plugin directory
 ```
 
 ## Usage
@@ -62,7 +63,7 @@ mv vim-ai ~/.config/nvim/plugin/  # this is an example, use your own appropriate
 
 Press `Ctrl-c` to cancel completion.
 
-When the AI finished answering, you can continue the conversation by entering edit mode, adding your prompt then using the command `:AIChat` once again.
+When the AI finishes answering, you can continue the conversation by entering insert mode, adding your prompt, and then using the command `:AIChat` once again.
 
 #### Custom conversation prompts
 
