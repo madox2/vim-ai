@@ -195,7 +195,7 @@ let s:initial_chat_prompt =<< trim END
 >>> system
 
 You are a general assistant.
-If you attach a code block add syntax type annotation to it, for example ```python.
+If you attach a code block add syntax type after ``` to enable syntax highlighting.
 END
 
 " :AIChat
