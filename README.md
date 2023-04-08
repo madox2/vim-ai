@@ -189,6 +189,15 @@ let g:vim_ai_edit = {
 \  },
 \}
 
+
+" This prompt instructs model to work with syntax highlighting
+let s:initial_chat_prompt =<< trim END
+>>> system
+
+You are a general assistant.
+If you attach a code block add syntax type annotation to it, for example ```python.
+END
+
 " :AIChat
 " - https://platform.openai.com/docs/api-reference/chat
 let g:vim_ai_chat = {
@@ -197,7 +206,7 @@ let g:vim_ai_chat = {
 \    "max_tokens": 1000,
 \    "temperature": 1,
 \    "request_timeout": 10,
-\    "initial_prompt": "",
+\    "initial_prompt": s:initial_chat_prompt,
 \  },
 \}
 ```
