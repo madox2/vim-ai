@@ -6,7 +6,7 @@ vim.command(f"py3file {plugin_root}/py/utils.py")
 
 engine = vim.eval("engine")
 options = make_options()
-request_options = make_request_options()
+request_options = make_request_options(options)
 
 prompt = vim.eval("prompt").strip()
 
