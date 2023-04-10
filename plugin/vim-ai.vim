@@ -33,8 +33,8 @@ let g:vim_ai_chat_default = {
 \  },
 \  "ui": {
 \    "open_chat_command": "below new | call vim_ai#MakeScratchWindow()",
-\    "code_syntax_enabled": 1,
 \    "populate_options": 0,
+\    "code_syntax_enabled": 1,
 \  },
 \}
 

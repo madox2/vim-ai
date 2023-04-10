@@ -122,8 +122,9 @@ Default interface configuration:
 ```vim
 let g:vim_ai_chat = {
 \  "ui": {
-\    "open_chat_command": "below new | call vim_ai#MakeScratchWindow()",
 \    "code_syntax_enabled": 1,
+\    "populate_options": 0,
+\    "open_chat_command": "below new | call vim_ai#MakeScratchWindow()",
 \  },
 \}
 ```
@@ -158,6 +159,25 @@ let g:vim_ai_chat = {
 \    "temperature": 0.2,
 \  },
 \}
+```
+
+Or modify options directly during the vim session:
+
+```vim
+let g:vim_ai_chat['options']['model'] = 'gpt-4'
+let g:vim_ai_chat['options']['temperature'] = 0.2
+```
+
+You can also customize the options in the chat header:
+
+```properties
+[chat-options]
+model=gpt-4
+temperature=0.2
+
+>>> user
+
+generate a paragraph of lorem ipsum
 ```
 
 Below are listed available options along with default values:

@@ -79,6 +79,7 @@ Options: >
   \  },
   \  "ui": {
   \    "code_syntax_enabled": 1,
+  \    "populate_options": 0,
   \    "open_chat_command": "below new | call vim_ai#MakeScratchWindow()",
   \  },
   \}
@@ -102,6 +103,22 @@ a selection of options: >
   \    "temperature": 0.2,
   \  },
   \}
+
+Or modify options directly during the vim session: >
+
+  let g:vim_ai_chat['options']['model'] = 'gpt-4'
+  let g:vim_ai_chat['options']['temperature'] = 0.2
+
+You can also customize the options in the chat header: >
+
+  [chat-options]
+  model=gpt-4
+  temperature=0.2
+
+  >>> user
+
+  generate a paragraph of lorem ipsum
+  ...
 
 KEY BINDINGS
 
