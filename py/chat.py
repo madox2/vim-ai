@@ -30,24 +30,27 @@ def initialize_chat_window():
         vim.command("redraw")
 
 def parse_chat_header_options():
-    options = {}
-    lines = vim.eval('getline(1, "$")')
-    contains_chat_options = '[chat-options]' in lines
-    if contains_chat_options:
-        # parse options that are defined in the chat header
-        options_index = lines.index('[chat-options]')
-        for line in lines[options_index + 1:]:
-            if line.startswith('#'):
-                # ignore comments
-                continue
-            if line == '':
-                # stop at the end of the region
-                break
-            (key, value) = line.strip().split('=')
-            if key == 'initial_prompt':
-                value = value.split('\\n')
-            options[key] = value
-    return options
+    try:
+        options = {}
+        lines = vim.eval('getline(1, "$")')
+        contains_chat_options = '[chat-options]' in lines
+        if contains_chat_options:
+            # parse options that are defined in the chat header
+            options_index = lines.index('[chat-options]')
+            for line in lines[options_index + 1:]:
+                if line.startswith('#'):
+                    # ignore comments
+                    continue
+                if line == '':
+                    # stop at the end of the region
+                    break
+                (key, value) = line.strip().split('=')
+                if key == 'initial_prompt':
+                    value = value.split('\\n')
+                options[key] = value
+        return options
+    except:
+        raise Exception("Invalid [chat-options]")
 
 initialize_chat_window()
 

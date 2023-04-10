@@ -9,6 +9,8 @@ def load_api_key():
             api_key = file.read()
     except Exception:
         pass
+    if not api_key:
+        raise Exception("Missing OpenAI API key")
     return api_key.strip()
 
 def make_request_options(options):
