@@ -3,43 +3,59 @@
 This plugin adds Artificial Intelligence (AI) capabilities to your Vim and Neovim.
 You can generate code, edit text, or have an interactive conversation with GPT models, all powered by OpenAI's API.
 
+![vim-ai demo](./demo.gif)
+
 ## Features
 
 - Generate text or code, answer questions with AI
 - Edit selected text in-place with AI
 - Interactive conversation with ChatGPT
 
-![vim-ai demo](./demo.gif)
-
 ## Installation
 
-vim-ai requires Vim/Neovim compiled with python3 support and the [openai-python](https://github.com/openai/openai-python) library (version 0.27+).
+### Prerequisites
+
+- Vim or Neovim compiled with python3 support
+- Setup [OpenAI API key](https://platform.openai.com/account/api-keys)
+- [openai-python](https://github.com/openai/openai-python) library (version 0.27+)
 
 ```sh
-# configure openai api key https://platform.openai.com/account/api-keys
+# save api key to `~/.config/openai.token` file
 echo "YOUR_OPENAI_API_KEY" > ~/.config/openai.token
 
-# alternatively using environment variable
+# alternatively set it as an environment variable
 export OPENAI_API_KEY="YOUR_OPENAI_API_KEY"
 ```
 
-Add plugin to your `.vimrc` using `vim-plug`:
+### Using `vim-plug`
 
 ```vim
-" ./install.sh script will automatically install openai-python
 Plug 'madox2/vim-ai', { 'do': './install.sh' }
 ```
 
-Alternatively, you can install manually like so:
+### Manual installation
 
 ```sh
+pip install "openai>=0.27"
 git clone https://github.com/madox2/vim-ai/
 mv vim-ai ~/.config/nvim/plugin/  # copy to the plugin directory
 ```
 
 ## Usage
 
-### :AI
+Commands:
+
+```
+:AI         complete text
+:AIEdit     edit text
+:AIChat     open/continue chat
+:AIRedo     repeat last AI command
+```
+**Tip:** Press `Ctrl-c` anytime to cancel completion
+
+**Tip:** setup your own [key bindings](#key-bindings) or use command shortcuts - `:AIE`, `:AIC`, `:AIR`
+
+### `:AI`
 
 `:AI` - complete the text on the current line
 
@@ -49,26 +65,31 @@ mv vim-ai ~/.config/nvim/plugin/  # copy to the plugin directory
 
 `(visual selection) :AI {instruction}` - complete the selection using the instruction
 
-### :AIEdit
+### `:AIEdit`
 
 `(visual selection)? :AIEdit` - edit the current line or the selection
 
 `(visual selection)? :AIEdit {instruction}` - edit the current line or the selection using the instruction
 
-### :AIChat
+### `:AIChat`
 
 `:AIChat` - continue or start a new conversation.
 
 `(visual selection)? :AIChat {instruction}?` - start a new conversation given the selection, the instruction or both
 
-Press `Ctrl-c` to cancel completion.
-
 When the AI finishes answering, you can continue the conversation by entering insert mode, adding your prompt, and then using the command `:AIChat` once again.
 
-#### Custom conversation prompts
+### `:AIRedo`
 
-You can edit and save the conversation to an `.aichat` file and restore it later.
-This allows you to create re-usable custom prompts. For example:
+`:AIRedo` - repeat last AI command
+
+Use this immediately after `AI`/`AIEdit`/`AIChat` command in order to re-try or get an alternative completion.
+Note that the randomness of responses heavily depends on the [`temperature`](https://platform.openai.com/docs/api-reference/completions/create#completions/create-temperature) parameter.
+
+### `.aichat` files
+
+You can edit and save the chat conversation to an `.aichat` file and restore it later.
+This allows you to create re-usable custom prompts, for example:
 
 ```
 # ./refactoring-prompt.aichat
@@ -85,18 +106,9 @@ You are a Clean Code expert, I have the following code, please refactor it in a 
 
 Supported chat roles are **`>>> system`**, **`>>> user`** and **`<<< assistant`**
 
-### :AIRedo
+## Key bindings
 
-`:AIRedo` - repeat last AI command
-
-Use this immediately after `AI`/`AIEdit`/`AIChat` command in order to re-try or get an alternative completion.
-Note that the randomness of responses heavily depends on the [`temperature`](https://platform.openai.com/docs/api-reference/completions/create#completions/create-temperature) parameter.
-
-## Configuration
-
-### Key bindings
-
-Map keys in your `.vimrc` to trigger `:AI` command.
+This plugin does not set any key binding. Create your own bindings in the `.vimrc` to trigger AI commands, for example:
 
 ```vim
 " complete text on the current line or in visual selection
@@ -115,42 +127,10 @@ nnoremap <leader>c :AIChat<CR>
 nnoremap <leader>r :AIRedo<CR>
 ```
 
-### Interface configuration
+## Configuration
 
-Default interface configuration:
-
-```vim
-let g:vim_ai_chat = {
-\  "ui": {
-\    "code_syntax_enabled": 1,
-\    "populate_options": 0,
-\    "open_chat_command": "below new | call vim_ai#MakeScratchWindow()",
-\  },
-\}
-```
-
-Tips:
-
-```vim
-" restore conversation from the file
-let g:vim_ai_chat = {
-\  "ui": {
-\    "open_chat_command": "below new /tmp/last_conversation.aichat",
-\  },
-\}
-
-" open chat in a new tab
-let g:vim_ai_chat = {
-\  "ui": {
-\    "open_chat_command": "tabnew | call vim_ai#MakeScratchWindow()",
-\  },
-\}
-```
-
-### Completion configuration
-
-Request to the OpenAI API can be configured for each command.
-To customize the default configuration, initialize the config variable with a selection of options.  For example:
+Each command is configured with a corresponding configuration variable.
+To customize the default configuration, initialize the config variable with a selection of options, for example:
 
 ```vim
 let g:vim_ai_chat = {
@@ -180,12 +160,12 @@ temperature=0.2
 generate a paragraph of lorem ipsum
 ```
 
-Below are listed available options along with default values:
+Below are listed all available configuration options, along with their default values:
 
 ```vim
 " :AI
-" - https://platform.openai.com/docs/api-reference/completions
-" - see how to configure chat engine for completion in the section below
+" - options: openai config (see https://platform.openai.com/docs/api-reference/completions)
+" - engine: complete | chat - see how to configure chat engine in the section below
 let g:vim_ai_complete = {
 \  "engine": "complete",
 \  "options": {
@@ -197,8 +177,8 @@ let g:vim_ai_complete = {
 \}
 
 " :AIEdit
-" - https://platform.openai.com/docs/api-reference/completions
-" - see how to configure chat engine for edits in the section below
+" - options: openai config (see https://platform.openai.com/docs/api-reference/completions)
+" - engine: complete | chat - see how to configure chat engine in the section below
 let g:vim_ai_edit = {
 \  "engine": "complete",
 \  "options": {
@@ -209,7 +189,6 @@ let g:vim_ai_edit = {
 \  },
 \}
 
-
 " This prompt instructs model to work with syntax highlighting
 let s:initial_chat_prompt =<< trim END
 >>> system
@@ -219,7 +198,10 @@ If you attach a code block add syntax type after ``` to enable syntax highlighti
 END
 
 " :AIChat
-" - https://platform.openai.com/docs/api-reference/chat
+" - options: openai config (see https://platform.openai.com/docs/api-reference/chat)
+" - options.initial_prompt: prompt prepended to every chat request
+" - ui.populate_options: put [chat-options] to the chat header
+" - ui.open_chat_command: customize how to open chat window
 let g:vim_ai_chat = {
 \  "options": {
 \    "model": "gpt-3.5-turbo",
@@ -228,7 +210,16 @@ let g:vim_ai_chat = {
 \    "request_timeout": 10,
 \    "initial_prompt": s:initial_chat_prompt,
 \  },
+\  "ui": {
+\    "code_syntax_enabled": 1,
+\    "populate_options": 0,
+\    "open_chat_command": "below new | call vim_ai#MakeScratchWindow()",
 \}
+
+" Tips:
+" "open_chat_command":
+" - "below new /tmp/last_conversation.aichat" - restore converstaion from a file
+" - "open_chat_command": "tabnew | call vim_ai#MakeScratchWindow()" - open chat in a new tab
 ```
 
 ### Using chat engine for completion and edits
@@ -263,19 +254,6 @@ let chat_engine_config = {
 let g:vim_ai_complete = chat_engine_config
 let g:vim_ai_complete = chat_engine_config
 ```
-
-### Custom commands
-
-To customize and re-use prompts it is useful to put some context in it. You can do it by prepending text to AI commands.
-
-```vim
-command! -range -nargs=? AITranslate <line1>,<line2>call AIEditRun(<range>, "Translate to English: " . <q-args>)
-
-command! -range -nargs=? AICode <line1>,<line2>call AIRun(<range>, "Programming syntax is " . &filetype . ", " . <q-args>)
-
-" available functions are: AIRun, AIEditRun, AIChatRun
-```
-
 
 ## Important Disclaimer
 
