@@ -68,6 +68,21 @@ function! s:MarkdownHighlightSources(force)
   endfor
 endfunction
 
+function! s:MarkdownHighlightChatOptions(force)
+  " use jproperties syntax to highlight chat options
+  let filetype = 'jproperties'
+  if a:force || !has_key(b:aichat_known_filetypes, filetype)
+    if !has_key(b:aichat_included_filetypes, filetype)
+      let include = s:SyntaxInclude(filetype)
+      let b:aichat_included_filetypes[filetype] = 1
+    else
+      let include = '@' . toupper(filetype)
+    endif
+    syntax region aichatOptions start="\[chat-options\]" end="^$" contains=@JPROPERTIES
+    let b:aichat_known_filetypes[filetype] = 1
+  endif
+endfunction
+
 function! s:SyntaxInclude(filetype)
   " Include the syntax highlighting of another {filetype}.
   let grouplistname = '@' . toupper(a:filetype)
@@ -92,7 +107,6 @@ function! s:SyntaxInclude(filetype)
   return grouplistname
 endfunction
 
-
 function! s:IsHighlightSourcesEnabledForBuffer()
   " Enable for markdown buffers, and for liquid buffers with markdown format
   return &filetype =~# 'aichat' || get(b:, 'liquid_subtype', '') =~# 'aichat'
@@ -101,7 +115,9 @@ endfunction
 function! s:MarkdownRefreshSyntax(force)
   if g:vim_ai_chat_default['ui']['code_syntax_enabled'] && &filetype =~# 'aichat'
     call s:MarkdownHighlightSources(a:force)
+    call s:MarkdownHighlightChatOptions(a:force)
   endif
+
 endfunction
 
 function! s:MarkdownClearSyntaxVariables()
