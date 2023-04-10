@@ -5,8 +5,8 @@ plugin_root = vim.eval("s:plugin_root")
 vim.command(f"py3file {plugin_root}/py/utils.py")
 
 engine = vim.eval("engine")
-options = make_options()
-request_options = make_request_options(options)
+config_options = vim.eval("options")
+request_options = make_request_options(config_options)
 
 prompt = vim.eval("prompt").strip()
 
@@ -18,7 +18,7 @@ def complete_engine(prompt):
     return text_chunks
 
 def chat_engine(prompt):
-    initial_prompt = options.get('initial_prompt', [])
+    initial_prompt = config_options.get('initial_prompt', [])
     initial_prompt = '\n'.join(initial_prompt)
     chat_content = f"{initial_prompt}\n\n>>> user\n\n{prompt}".strip()
     messages = parse_chat_messages(chat_content)

@@ -34,6 +34,7 @@ let g:vim_ai_chat_default = {
 \  "ui": {
 \    "open_chat_command": "below new | call vim_ai#MakeScratchWindow()",
 \    "code_syntax_enabled": 1,
+\    "populate_options": 0,
 \  },
 \}
 
@@ -137,6 +138,7 @@ function! AIChatRun(is_selection, ...) range
   let s:last_is_selection = a:is_selection
 
   let options = g:vim_ai_chat['options']
+  let ui = g:vim_ai_chat['ui']
   execute "py3file " . s:chat_py
   set nopaste
 endfunction

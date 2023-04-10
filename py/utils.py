@@ -11,10 +11,6 @@ def load_api_key():
         pass
     return api_key.strip()
 
-def make_options(options_custom = {}):
-    options_config = vim.eval("options")
-    return {**options_config, **options_custom}
-
 def make_request_options(options):
     request_options = {}
     request_options['model'] = options['model']
@@ -55,3 +51,6 @@ def parse_chat_messages(chat_content):
 
     return messages
 
+def vim_break_undo_sequence():
+    # breaks undo sequence (https://vi.stackexchange.com/a/29087)
+    vim.command("let &ul=&ul")
