@@ -1,5 +1,9 @@
+import datetime
 import sys
 import os
+
+is_debugging = vim.bindeval("g:vim_ai_debug") == 1
+debug_log_file = vim.bindeval("g:vim_ai_debug_log_file")
 
 def load_api_key():
     config_file_path = os.path.join(os.path.expanduser("~"), ".config/openai.token")
@@ -56,3 +60,9 @@ def parse_chat_messages(chat_content):
 def vim_break_undo_sequence():
     # breaks undo sequence (https://vi.stackexchange.com/a/29087)
     vim.command("let &ul=&ul")
+
+def printDebug(text, *args):
+    if not is_debugging:
+        return
+    with open(debug_log_file, "a") as file:
+        file.write(f"[{datetime.datetime.now()}] " + text.format(*args) + "\n")

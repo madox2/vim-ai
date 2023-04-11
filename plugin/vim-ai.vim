@@ -38,6 +38,14 @@ let g:vim_ai_chat_default = {
 \  },
 \}
 
+if !exists("g:vim_ai_debug")
+  let g:vim_ai_debug = 0
+endif
+
+if !exists("g:vim_ai_debug_log_file")
+  let g:vim_ai_debug_log_file = "/tmp/vim_ai_debug.log"
+endif
+
 function! s:ExtendDeep(defaults, override) abort
   let l:result = a:defaults
   for [l:key, l:value] in items(a:override)

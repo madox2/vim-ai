@@ -13,8 +13,17 @@ prompt = vim.eval("prompt").strip()
 openai.api_key = load_api_key()
 
 def complete_engine(prompt):
-    response = openai.Completion.create(stream=True, prompt=prompt, **request_options)
-    text_chunks = map(lambda resp: resp['choices'][0].get('text', ''), response)
+    request = {
+        'stream': True,
+        'prompt': prompt,
+        **request_options
+    }
+    printDebug("[engine-complete] request: {}", request)
+    response = openai.Completion.create(**request)
+    def map_chunk(resp):
+        printDebug("[engine-complete] response: {}", resp)
+        return resp['choices'][0].get('text', '')
+    text_chunks = map(map_chunk, response)
     return text_chunks
 
 def chat_engine(prompt):
@@ -22,8 +31,17 @@ def chat_engine(prompt):
     initial_prompt = '\n'.join(initial_prompt)
     chat_content = f"{initial_prompt}\n\n>>> user\n\n{prompt}".strip()
     messages = parse_chat_messages(chat_content)
-    response = openai.ChatCompletion.create(messages=messages, stream=True, **request_options)
-    text_chunks = map(lambda resp: resp['choices'][0]['delta'].get('content', ''), response)
+    request = {
+        'stream': True,
+        'messages': messages,
+        **request_options
+    }
+    printDebug("[engine-chat] request: {}", request)
+    response = openai.ChatCompletion.create(**request)
+    def map_chunk(resp):
+        printDebug("[engine-chat] response: {}", resp)
+        return resp['choices'][0]['delta'].get('content', '')
+    text_chunks = map(map_chunk, response)
     return text_chunks
 
 engines = {"chat": chat_engine, "complete": complete_engine}

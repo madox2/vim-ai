@@ -74,8 +74,17 @@ try:
         print('Answering...')
         vim.command("redraw")
 
-        response = openai.ChatCompletion.create(messages=messages, stream=True, **request_options)
-        text_chunks = map(lambda resp: resp['choices'][0]['delta'].get('content', ''), response)
+        request = {
+            'stream': True,
+            'messages': messages,
+            **request_options
+        }
+        printDebug("[chat] request: {}", request)
+        response = openai.ChatCompletion.create(**request)
+        def map_chunk(resp):
+            printDebug("[chat] response: {}", resp)
+            return resp['choices'][0]['delta'].get('content', '')
+        text_chunks = map(map_chunk, response)
         render_text_chunks(text_chunks)
 
         vim.command("normal! a\n\n>>> user\n\n")
