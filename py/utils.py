@@ -2,7 +2,7 @@ import datetime
 import sys
 import os
 
-is_debugging = vim.eval("g:vim_ai_debug") == 1
+is_debugging = vim.eval("g:vim_ai_debug") == "1"
 debug_log_file = vim.eval("g:vim_ai_debug_log_file")
 
 def load_api_key():
