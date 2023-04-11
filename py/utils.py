@@ -2,8 +2,8 @@ import datetime
 import sys
 import os
 
-is_debugging = vim.bindeval("g:vim_ai_debug") == 1
-debug_log_file = vim.bindeval("g:vim_ai_debug_log_file")
+is_debugging = vim.eval("g:vim_ai_debug") == 1
+debug_log_file = vim.eval("g:vim_ai_debug_log_file")
 
 def load_api_key():
     config_file_path = os.path.join(os.path.expanduser("~"), ".config/openai.token")
