@@ -43,14 +43,20 @@ mv vim-ai ~/.config/nvim/plugin/  # copy to the plugin directory
 
 ## Usage
 
-Commands:
+### Getting started
+
+To use an AI command, type the command followed by an instruction prompt `{instruction}`. You can also combine it with a visual selection `<selection>`. Here is a brief overview of available commands:
 
 ```
 :AI         complete text
 :AIEdit     edit text
 :AIChat     open/continue chat
 :AIRedo     repeat last AI command
+
+:help vim-ai
 ```
+In the documentation below, the `?` symbol denotes an optional parameter.
+
 **Tip:** Press `Ctrl-c` anytime to cancel completion
 
 **Tip:** setup your own [key bindings](#key-bindings) or use command shortcuts - `:AIE`, `:AIC`, `:AIR`
@@ -61,21 +67,21 @@ Commands:
 
 `:AI {prompt}` - complete the prompt
 
-`(visual selection) :AI` - complete the selection
+`<selection> :AI` - complete the selection
 
-`(visual selection) :AI {instruction}` - complete the selection using the instruction
+`<selection> :AI {instruction}` - complete the selection using the instruction
 
 ### `:AIEdit`
 
-`(visual selection)? :AIEdit` - edit the current line or the selection
+`<selection>? :AIEdit` - edit the current line or the selection
 
-`(visual selection)? :AIEdit {instruction}` - edit the current line or the selection using the instruction
+`<selection>? :AIEdit {instruction}` - edit the current line or the selection using the instruction
 
 ### `:AIChat`
 
 `:AIChat` - continue or start a new conversation.
 
-`(visual selection)? :AIChat {instruction}?` - start a new conversation given the selection, the instruction or both
+`<selection>? :AIChat {instruction}?` - start a new conversation given the selection, the instruction or both
 
 When the AI finishes answering, you can continue the conversation by entering insert mode, adding your prompt, and then using the command `:AIChat` once again.
 
@@ -214,6 +220,7 @@ let g:vim_ai_chat = {
 \    "code_syntax_enabled": 1,
 \    "populate_options": 0,
 \    "open_chat_command": "below new | call vim_ai#MakeScratchWindow()",
+\  },
 \}
 
 " Tips:
