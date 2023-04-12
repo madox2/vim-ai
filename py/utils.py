@@ -2,6 +2,11 @@ import datetime
 import sys
 import os
 
+try:
+    import openai
+except ImportError:
+    raise Exception("OpenAI module not found. Please install it with pip.")
+
 is_debugging = vim.eval("g:vim_ai_debug") == "1"
 debug_log_file = vim.eval("g:vim_ai_debug_log_file")
 
