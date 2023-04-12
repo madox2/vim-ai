@@ -1,3 +1,22 @@
+" Ensure Python3 and OpenAI is available
+if !has('python3')
+  echoerr "Python 3 support is required for Vim-AI plugin"
+  finish
+endif
+
+" Add ChatGPT dependencies
+python3 << EOF
+import sys
+try:
+    import openai
+except ImportError:
+    print("Error: OpenAI module not found. Please install with Pip.")
+    raise
+import vim
+import os
+
+EOF
+
 let g:vim_ai_complete_default = {
 \  "engine": "complete",
 \  "options": {
