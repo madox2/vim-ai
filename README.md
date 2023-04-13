@@ -17,7 +17,6 @@ You can generate code, edit text, or have an interactive conversation with GPT m
 
 - Vim or Neovim compiled with python3 support
 - Setup [OpenAI API key](https://platform.openai.com/account/api-keys)
-- [openai-python](https://github.com/openai/openai-python) library (version 0.27+)
 
 ```sh
 # save api key to `~/.config/openai.token` file
@@ -30,13 +29,12 @@ export OPENAI_API_KEY="YOUR_OPENAI_API_KEY"
 ### Using `vim-plug`
 
 ```vim
-Plug 'madox2/vim-ai', { 'do': './install.sh' }
+Plug 'madox2/vim-ai'
 ```
 
 ### Manual installation
 
 ```sh
-pip install "openai>=0.27"
 git clone https://github.com/madox2/vim-ai/
 mv vim-ai ~/.config/nvim/plugin/  # copy to the plugin directory
 ```

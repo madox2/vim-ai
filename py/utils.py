@@ -81,8 +81,8 @@ def openai_request(url, data):
         "Content-Type": "application/json",
         "Authorization": f"Bearer {OPENAI_API_KEY}"
     }
-    # request_timeout is a leftover from the time when openai-python was used,
-    # it needs to be handled in a special way now
+    # request_timeout is a leftover from the time when openai-python was used
+    # moving it somewhere else would mean a breaking change, for now handling this way
     request_timeout=data['request_timeout']
     del data['request_timeout']
     req = urllib.request.Request(
