@@ -8,8 +8,6 @@ request_options = make_request_options(config_options)
 
 prompt = vim.eval("prompt").strip()
 
-openai.api_key = load_api_key()
-
 def complete_engine(prompt):
     request = {
         'stream': True,
@@ -17,7 +15,7 @@ def complete_engine(prompt):
         **request_options
     }
     printDebug("[engine-complete] request: {}", request)
-    response = openai.Completion.create(**request)
+    response = openai_request('https://api.openai.com/v1/completions', request)
     def map_chunk(resp):
         printDebug("[engine-complete] response: {}", resp)
         return resp['choices'][0].get('text', '')
@@ -35,7 +33,7 @@ def chat_engine(prompt):
         **request_options
     }
     printDebug("[engine-chat] request: {}", request)
-    response = openai.ChatCompletion.create(**request)
+    response = openai_request('https://api.openai.com/v1/chat/completions', request)
     def map_chunk(resp):
         printDebug("[engine-chat] response: {}", resp)
         return resp['choices'][0]['delta'].get('content', '')
@@ -52,5 +50,3 @@ try:
         render_text_chunks(text_chunks)
 except KeyboardInterrupt:
     vim.command("normal! a Ctrl-C...")
-except openai.error.Timeout:
-    vim.command("normal! aRequest timeout...")

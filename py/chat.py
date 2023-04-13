@@ -5,8 +5,6 @@ vim.command(f"py3file {plugin_root}/py/utils.py")
 config_options = vim.eval("options")
 config_ui = vim.eval("ui")
 
-openai.api_key = load_api_key()
-
 def initialize_chat_window():
     lines = vim.eval('getline(1, "$")')
     contains_user_prompt = '>>> user' in lines
@@ -78,7 +76,7 @@ try:
             **request_options
         }
         printDebug("[chat] request: {}", request)
-        response = openai.ChatCompletion.create(**request)
+        response = openai_request('https://api.openai.com/v1/chat/completions', request)
         def map_chunk(resp):
             printDebug("[chat] response: {}", resp)
             return resp['choices'][0]['delta'].get('content', '')
@@ -89,5 +87,3 @@ try:
         vim.command("redraw")
 except KeyboardInterrupt:
     vim.command("normal! a Ctrl-C...")
-except openai.error.Timeout:
-    vim.command("normal! aRequest timeout...")
