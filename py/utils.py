@@ -4,6 +4,8 @@ import os
 import json
 import urllib.error
 import urllib.request
+import socket
+from urllib.error import URLError
 
 def load_api_key():
     config_file_path = os.path.join(os.path.expanduser("~"), ".config/openai.token")
@@ -25,6 +27,7 @@ def make_request_options(options):
     request_options['model'] = options['model']
     request_options['max_tokens'] = int(options['max_tokens'])
     request_options['temperature'] = float(options['temperature'])
+    request_options['request_timeout'] = float(options['request_timeout'])
     return request_options
 
 def render_text_chunks(chunks):
@@ -78,13 +81,17 @@ def openai_request(url, data):
         "Content-Type": "application/json",
         "Authorization": f"Bearer {OPENAI_API_KEY}"
     }
+    # request_timeout is a leftover from the time when openai-python was used,
+    # it needs to be handled in a special way now
+    request_timeout=data['request_timeout']
+    del data['request_timeout']
     req = urllib.request.Request(
         url,
-        data=json.dumps(data).encode("utf-8"),
+        data=json.dumps({ **data }).encode("utf-8"),
         headers=headers,
         method="POST",
     )
-    with urllib.request.urlopen(req) as response:
+    with urllib.request.urlopen(req, timeout=request_timeout) as response:
         for line_bytes in response:
             line = line_bytes.decode("utf-8", errors="replace")
             if line.startswith(OPENAI_RESP_DATA_PREFIX):
