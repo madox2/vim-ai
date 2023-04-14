@@ -11,12 +11,20 @@ You can generate code, edit text, or have an interactive conversation with GPT m
 - Edit selected text in-place with AI
 - Interactive conversation with ChatGPT
 
+## How it works
+
+This plugin uses OpenAI's API to generate responses.
+You will need to [setup](https://platform.openai.com/signup) an account and obtain an [API key](https://platform.openai.com/account/api-keys).
+Usage of the API is not free, but the cost is reasonable and depends on how many tokens you use, in simple terms, how much text you send and receive (see [pricing](https://openai.com/pricing)).
+Note that the plugin does not send any of your code behind the scenes.
+You only share and pay for what you specifically select, for prompts and chat content.
+
 ## Installation
 
 ### Prerequisites
 
 - Vim or Neovim compiled with python3 support
-- Setup [OpenAI API key](https://platform.openai.com/account/api-keys)
+- [API key](https://platform.openai.com/account/api-keys)
 
 ```sh
 # save api key to `~/.config/openai.token` file
