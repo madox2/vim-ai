@@ -41,9 +41,7 @@ mv vim-ai ~/.config/nvim/plugin/  # copy to the plugin directory
 
 ## Usage
 
-### Getting started
-
-To use an AI command, type the command followed by an instruction prompt `{instruction}`. You can also combine it with a visual selection `<selection>`. Here is a brief overview of available commands:
+To use an AI command, type the command followed by an instruction prompt. You can also combine it with a visual selection. Here is a brief overview of available commands:
 
 ```
 :AI         complete text
@@ -53,11 +51,14 @@ To use an AI command, type the command followed by an instruction prompt `{instr
 
 :help vim-ai
 ```
-In the documentation below, the `?` symbol denotes an optional parameter.
 
 **Tip:** Press `Ctrl-c` anytime to cancel completion
 
 **Tip:** setup your own [key bindings](#key-bindings) or use command shortcuts - `:AIE`, `:AIC`, `:AIR`
+
+## Reference
+
+In the documentation below,  `<selection>` denotes a visual selection, `{instruction}` an instruction prompt and `?` symbol an optional parameter.
 
 ### `:AI`
 
@@ -83,14 +84,7 @@ In the documentation below, the `?` symbol denotes an optional parameter.
 
 When the AI finishes answering, you can continue the conversation by entering insert mode, adding your prompt, and then using the command `:AIChat` once again.
 
-### `:AIRedo`
-
-`:AIRedo` - repeat last AI command
-
-Use this immediately after `AI`/`AIEdit`/`AIChat` command in order to re-try or get an alternative completion.
-Note that the randomness of responses heavily depends on the [`temperature`](https://platform.openai.com/docs/api-reference/completions/create#completions/create-temperature) parameter.
-
-### `.aichat` files
+#### `.aichat` files
 
 You can edit and save the chat conversation to an `.aichat` file and restore it later.
 This allows you to create re-usable custom prompts, for example:
@@ -109,6 +103,14 @@ You are a Clean Code expert, I have the following code, please refactor it in a 
 ```
 
 Supported chat roles are **`>>> system`**, **`>>> user`** and **`<<< assistant`**
+
+### `:AIRedo`
+
+`:AIRedo` - repeat last AI command
+
+Use this immediately after `AI`/`AIEdit`/`AIChat` command in order to re-try or get an alternative completion.
+Note that the randomness of responses heavily depends on the [`temperature`](https://platform.openai.com/docs/api-reference/completions/create#completions/create-temperature) parameter.
+
 
 ## Key bindings
 
@@ -134,7 +136,7 @@ nnoremap <leader>r :AIRedo<CR>
 ## Configuration
 
 Each command is configured with a corresponding configuration variable.
-To customize the default configuration, initialize the config variable with a selection of options, for example:
+To customize the default configuration, initialize the config variable with a selection of options, for example put this to your`.vimrc` file:
 
 ```vim
 let g:vim_ai_chat = {
@@ -152,7 +154,7 @@ let g:vim_ai_chat['options']['model'] = 'gpt-4'
 let g:vim_ai_chat['options']['temperature'] = 0.2
 ```
 
-You can also customize the options in the chat header:
+Or customize the options directly in the chat buffer:
 
 ```properties
 [chat-options]
