@@ -10,7 +10,7 @@ translate, etc.
 
 COMMANDS                                        *vim-ai-commands*
 
-To set-up key bindings and expamples see:
+To set-up key bindings and examples see:
 https://github.com/madox2/vim-ai
 
                                                 *:AI*
@@ -31,7 +31,7 @@ Options: >
   \  },
   \}
 
-Check OpenAI docs for more infomration:
+Check OpenAI docs for more information:
 https://platform.openai.com/docs/api-reference/completions
 
                                                 *:AIEdit*
@@ -51,7 +51,7 @@ Options: >
   \  },
   \}
 
-Check OpenAI docs for more infomration:
+Check OpenAI docs for more information:
 https://platform.openai.com/docs/api-reference/completions
 
                                                 *:AIChat*
@@ -84,7 +84,7 @@ Options: >
   \  },
   \}
 
-Check OpenAI docs for more infomration:
+Check OpenAI docs for more information:
 https://platform.openai.com/docs/api-reference/chat
 
                                                 *:AIRedo*
@@ -122,7 +122,7 @@ You can also customize the options in the chat header: >
 
 KEY BINDINGS
 
-Examples how configure key bindins and customize commands: >
+Examples how configure key bindings and customize commands: >
 
   " complete text on the current line or in visual selection
   nnoremap <leader>a :AI<CR>
