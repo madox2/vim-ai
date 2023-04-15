@@ -125,3 +125,12 @@ def openai_request(url, data, options):
                 else:
                     openai_obj = json.loads(line_data)
                     yield openai_obj
+
+def handle_completion_error(error):
+    if isinstance(error, KeyboardInterrupt):
+        vim.command("normal! a Ctrl-C...")
+    if isinstance(error, URLError):
+        if isinstance(error.reason, socket.timeout):
+            vim.command("normal! aRequest timeout...")
+        else:
+            raise error

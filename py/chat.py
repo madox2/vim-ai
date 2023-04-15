@@ -63,10 +63,5 @@ try:
 
         vim.command("normal! a\n\n>>> user\n\n")
         vim.command("redraw")
-except KeyboardInterrupt:
-    vim.command("normal! a Ctrl-C...")
-except URLError as error:
-    if isinstance(error.reason, socket.timeout):
-        vim.command("normal! aRequest timeout...")
-    else:
-        raise error
+except BaseException as error:
+    handle_completion_error(error)
