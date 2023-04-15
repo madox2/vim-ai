@@ -25,34 +25,12 @@ def initialize_chat_window():
         vim_break_undo_sequence()
         vim.command("redraw")
 
-def parse_chat_header_options():
-    try:
-        options = {}
-        lines = vim.eval('getline(1, "$")')
-        contains_chat_options = '[chat-options]' in lines
-        if contains_chat_options:
-            # parse options that are defined in the chat header
-            options_index = lines.index('[chat-options]')
-            for line in lines[options_index + 1:]:
-                if line.startswith('#'):
-                    # ignore comments
-                    continue
-                if line == '':
-                    # stop at the end of the region
-                    break
-                (key, value) = line.strip().split('=')
-                if key == 'initial_prompt':
-                    value = value.split('\\n')
-                options[key] = value
-        return options
-    except:
-        raise Exception("Invalid [chat-options]")
-
 initialize_chat_window()
 
 chat_options = parse_chat_header_options()
 options = {**config_options, **chat_options}
-request_options = make_request_options(options)
+openai_options = make_openai_options(options)
+http_options = make_http_options(options)
 
 initial_prompt = '\n'.join(options.get('initial_prompt', []))
 initial_messages = parse_chat_messages(initial_prompt)
@@ -73,10 +51,10 @@ try:
         request = {
             'stream': True,
             'messages': messages,
-            **request_options
+            **openai_options
         }
         printDebug("[chat] request: {}", request)
-        response = openai_request('https://api.openai.com/v1/chat/completions', request)
+        response = openai_request('https://api.openai.com/v1/chat/completions', request, http_options)
         def map_chunk(resp):
             printDebug("[chat] response: {}", resp)
             return resp['choices'][0]['delta'].get('content', '')

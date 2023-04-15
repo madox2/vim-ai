@@ -4,7 +4,8 @@ vim.command(f"py3file {plugin_root}/py/utils.py")
 
 engine = vim.eval("l:engine")
 config_options = vim.eval("l:options")
-request_options = make_request_options(config_options)
+openai_options = make_openai_options(config_options)
+http_options = make_http_options(config_options)
 
 prompt = vim.eval("l:prompt").strip()
 
@@ -12,10 +13,10 @@ def complete_engine(prompt):
     request = {
         'stream': True,
         'prompt': prompt,
-        **request_options
+        **openai_options
     }
     printDebug("[engine-complete] request: {}", request)
-    response = openai_request('https://api.openai.com/v1/completions', request)
+    response = openai_request('https://api.openai.com/v1/completions', request, http_options)
     def map_chunk(resp):
         printDebug("[engine-complete] response: {}", resp)
         return resp['choices'][0].get('text', '')
@@ -30,10 +31,10 @@ def chat_engine(prompt):
     request = {
         'stream': True,
         'messages': messages,
-        **request_options
+        **openai_options
     }
     printDebug("[engine-chat] request: {}", request)
-    response = openai_request('https://api.openai.com/v1/chat/completions', request)
+    response = openai_request('https://api.openai.com/v1/chat/completions', request, http_options)
     def map_chunk(resp):
         printDebug("[engine-chat] response: {}", resp)
         return resp['choices'][0]['delta'].get('content', '')

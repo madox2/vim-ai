@@ -7,6 +7,9 @@ import urllib.request
 import socket
 from urllib.error import URLError
 
+is_debugging = vim.eval("g:vim_ai_debug") == "1"
+debug_log_file = vim.eval("g:vim_ai_debug_log_file")
+
 def load_api_key():
     config_file_path = os.path.join(os.path.expanduser("~"), ".config/openai.token")
     api_key = os.getenv("OPENAI_API_KEY")
@@ -19,16 +22,17 @@ def load_api_key():
         raise Exception("Missing OpenAI API key")
     return api_key.strip()
 
-is_debugging = vim.eval("g:vim_ai_debug") == "1"
-debug_log_file = vim.eval("g:vim_ai_debug_log_file")
+def make_openai_options(options):
+    return {
+        'model': options['model'],
+        'max_tokens': int(options['max_tokens']),
+        'temperature': float(options['temperature']),
+    }
 
-def make_request_options(options):
-    request_options = {}
-    request_options['model'] = options['model']
-    request_options['max_tokens'] = int(options['max_tokens'])
-    request_options['temperature'] = float(options['temperature'])
-    request_options['request_timeout'] = float(options['request_timeout'])
-    return request_options
+def make_http_options(options):
+    return {
+        'request_timeout': float(options['request_timeout']),
+    }
 
 def render_text_chunks(chunks):
     generating_text = False
@@ -62,6 +66,29 @@ def parse_chat_messages(chat_content):
 
     return messages
 
+def parse_chat_header_options():
+    try:
+        options = {}
+        lines = vim.eval('getline(1, "$")')
+        contains_chat_options = '[chat-options]' in lines
+        if contains_chat_options:
+            # parse options that are defined in the chat header
+            options_index = lines.index('[chat-options]')
+            for line in lines[options_index + 1:]:
+                if line.startswith('#'):
+                    # ignore comments
+                    continue
+                if line == '':
+                    # stop at the end of the region
+                    break
+                (key, value) = line.strip().split('=')
+                if key == 'initial_prompt':
+                    value = value.split('\\n')
+                options[key] = value
+        return options
+    except:
+        raise Exception("Invalid [chat-options]")
+
 def vim_break_undo_sequence():
     # breaks undo sequence (https://vi.stackexchange.com/a/29087)
     vim.command("let &ul=&ul")
@@ -76,15 +103,12 @@ OPENAI_RESP_DATA_PREFIX = 'data: '
 OPENAI_RESP_DONE = '[DONE]'
 OPENAI_API_KEY = load_api_key()
 
-def openai_request(url, data):
+def openai_request(url, data, options):
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {OPENAI_API_KEY}"
     }
-    # request_timeout is a leftover from the time when openai-python was used
-    # moving it somewhere else would mean a breaking change, for now handling this way
-    request_timeout=data['request_timeout']
-    del data['request_timeout']
+    request_timeout=options['request_timeout']
     req = urllib.request.Request(
         url,
         data=json.dumps({ **data }).encode("utf-8"),
