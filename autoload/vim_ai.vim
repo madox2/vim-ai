@@ -9,6 +9,8 @@ let s:last_is_selection = 0
 let s:last_instruction = ""
 let s:last_command = ""
 
+let s:scratch_buffer_name = ">>> AI chat"
+
 " Configures ai-chat scratch window.
 " - scratch_buffer_keep_open = 0
 "   - opens new ai-chat every time
@@ -17,9 +19,9 @@ let s:last_command = ""
 "   - keeps the buffer in the buffer list
 function! vim_ai#MakeScratchWindow()
   let l:keep_open = g:vim_ai_chat['ui']['scratch_buffer_keep_open']
-  if l:keep_open && bufexists("[AI chat]")
+  if l:keep_open && bufexists(s:scratch_buffer_name)
     " reuse chat buffer
-    buffer \[AI chat\]
+    execute "buffer " . s:scratch_buffer_name
     return
   endif
   setlocal buftype=nofile
@@ -30,15 +32,15 @@ function! vim_ai#MakeScratchWindow()
   else
     setlocal bufhidden=wipe
   endif
-  if bufexists("[AI chat]")
+  if bufexists(s:scratch_buffer_name)
     " spawn another window if chat already exist
     let l:index = 2
-    while bufexists("[AI chat " . l:index . "]")
+    while bufexists(s:scratch_buffer_name . " " . l:index)
       let l:index += 1
     endwhile
-    execute "file [AI chat ". l:index . "]"
+    execute "file " . s:scratch_buffer_name . " " . l:index
   else
-    file [AI chat]
+    execute "file " . s:scratch_buffer_name
   endif
 endfunction
 
