@@ -24,6 +24,8 @@ def initialize_chat_window():
         vim.command("normal! G")
         vim_break_undo_sequence()
         vim.command("redraw")
+    else:
+        vim_break_undo_sequence()
 
 initialize_chat_window()
 
