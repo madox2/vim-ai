@@ -93,8 +93,7 @@ function! vim_ai#AIChatRun(is_selection, ...) range
   let l:instruction = ""
   let l:lines = getline(a:firstline, a:lastline)
   set paste
-  let l:is_outside_of_chat_window = search('^>>> user$', 'nw') == 0
-  if l:is_outside_of_chat_window
+  if &filetype != 'aichat'
     " open chat window
     execute g:vim_ai_chat['ui']['open_chat_command']
     let l:prompt = ""
