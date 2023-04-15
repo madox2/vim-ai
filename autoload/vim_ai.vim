@@ -42,7 +42,7 @@ function! vim_ai#MakeScratchWindow()
   endif
 endfunction
 
-function! MakePrompt(is_selection, lines, instruction)
+function! s:MakePrompt(is_selection, lines, instruction)
   let l:lines = trim(join(a:lines, "\n"))
   let l:instruction = trim(a:instruction)
   let l:delimiter = l:instruction != "" && a:is_selection ? ":\n" : ""
@@ -53,7 +53,7 @@ endfunction
 function! vim_ai#AIRun(is_selection, ...) range
   let l:instruction = a:0 ? a:1 : ""
   let l:lines = getline(a:firstline, a:lastline)
-  let l:prompt = MakePrompt(a:is_selection, l:lines, l:instruction)
+  let l:prompt = s:MakePrompt(a:is_selection, l:lines, l:instruction)
 
   let s:last_command = "complete"
   let s:last_instruction = l:instruction
@@ -75,7 +75,7 @@ endfunction
 
 function! vim_ai#AIEditRun(is_selection, ...) range
   let l:instruction = a:0 ? a:1 : ""
-  let l:prompt = MakePrompt(a:is_selection, getline(a:firstline, a:lastline), l:instruction)
+  let l:prompt = s:MakePrompt(a:is_selection, getline(a:firstline, a:lastline), l:instruction)
 
   let s:last_command = "edit"
   let s:last_instruction = l:instruction
@@ -100,7 +100,7 @@ function! vim_ai#AIChatRun(is_selection, ...) range
     let l:prompt = ""
     if a:0 || a:is_selection
       let l:instruction = a:0 ? a:1 : ""
-      let l:prompt = MakePrompt(a:is_selection, l:lines, l:instruction)
+      let l:prompt = s:MakePrompt(a:is_selection, l:lines, l:instruction)
     endif
     execute "normal! Gi" . l:prompt
   endif

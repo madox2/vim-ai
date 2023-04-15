@@ -126,11 +126,18 @@ def openai_request(url, data, options):
                     openai_obj = json.loads(line_data)
                     yield openai_obj
 
+def print_info_message(msg):
+    vim.command("redraw")
+    vim.command(f"normal \<Esc>")
+    vim.command("echohl ErrorMsg")
+    vim.command(f"echomsg '{msg}'")
+    vim.command("echohl None")
+
 def handle_completion_error(error):
     if isinstance(error, KeyboardInterrupt):
-        vim.command("normal! a Ctrl-C...")
+        print_info_message("Completion cancelled...")
     if isinstance(error, URLError):
         if isinstance(error.reason, socket.timeout):
-            vim.command("normal! aRequest timeout...")
+            print_info_message("Request timeout...")
         else:
             raise error
