@@ -1,4 +1,3 @@
-echom "loading vim_ai_config"
 let g:vim_ai_complete_default = {
 \  "engine": "complete",
 \  "options": {
@@ -71,5 +70,5 @@ call s:MakeConfig("vim_ai_complete")
 call s:MakeConfig("vim_ai_edit")
 
 function! vim_ai_config#load()
-  echom "[vim-ai] config loaded"
+  " nothing to do - triggers autoloading of this file
 endfunction
