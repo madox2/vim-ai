@@ -136,8 +136,10 @@ def print_info_message(msg):
 def handle_completion_error(error):
     if isinstance(error, KeyboardInterrupt):
         print_info_message("Completion cancelled...")
-    if isinstance(error, URLError):
+    elif isinstance(error, URLError):
         if isinstance(error.reason, socket.timeout):
             print_info_message("Request timeout...")
         else:
             raise error
+    else:
+        raise error
