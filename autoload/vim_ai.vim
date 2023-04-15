@@ -43,28 +43,27 @@ function! vim_ai#MakeScratchWindow()
 endfunction
 
 function! MakePrompt(is_selection, lines, instruction)
-  let lines = trim(join(a:lines, "\n"))
-  let instruction = trim(a:instruction)
-  let delimiter = instruction != "" && a:is_selection ? ":\n" : ""
-  let selection = a:is_selection || instruction == "" ? lines : ""
-  let prompt = join([instruction, delimiter, selection], "")
-  return prompt
+  let l:lines = trim(join(a:lines, "\n"))
+  let l:instruction = trim(a:instruction)
+  let l:delimiter = l:instruction != "" && a:is_selection ? ":\n" : ""
+  let l:selection = a:is_selection || l:instruction == "" ? l:lines : ""
+  return join([l:instruction, l:delimiter, l:selection], "")
 endfunction
 
 function! vim_ai#AIRun(is_selection, ...) range
-  let instruction = a:0 ? a:1 : ""
-  let lines = getline(a:firstline, a:lastline)
-  let prompt = MakePrompt(a:is_selection, lines, instruction)
+  let l:instruction = a:0 ? a:1 : ""
+  let l:lines = getline(a:firstline, a:lastline)
+  let l:prompt = MakePrompt(a:is_selection, l:lines, l:instruction)
 
   let s:last_command = "complete"
-  let s:last_instruction = instruction
+  let s:last_instruction = l:instruction
   let s:last_is_selection = a:is_selection
 
-  let engine = g:vim_ai_complete['engine']
-  let options = g:vim_ai_complete['options']
-  let cursor_on_empty_line = trim(join(lines, "\n")) == ""
+  let l:engine = g:vim_ai_complete['engine']
+  let l:options = g:vim_ai_complete['options']
+  let l:cursor_on_empty_line = trim(join(l:lines, "\n")) == ""
   set paste
-  if cursor_on_empty_line
+  if l:cursor_on_empty_line
     execute "normal! " . a:lastline . "GA"
   else
     execute "normal! " . a:lastline . "Go"
@@ -75,15 +74,15 @@ function! vim_ai#AIRun(is_selection, ...) range
 endfunction
 
 function! vim_ai#AIEditRun(is_selection, ...) range
-  let instruction = a:0 ? a:1 : ""
-  let prompt = MakePrompt(a:is_selection, getline(a:firstline, a:lastline), instruction)
+  let l:instruction = a:0 ? a:1 : ""
+  let l:prompt = MakePrompt(a:is_selection, getline(a:firstline, a:lastline), l:instruction)
 
   let s:last_command = "edit"
-  let s:last_instruction = instruction
+  let s:last_instruction = l:instruction
   let s:last_is_selection = a:is_selection
 
-  let engine = g:vim_ai_edit['engine']
-  let options = g:vim_ai_edit['options']
+  let l:engine = g:vim_ai_edit['engine']
+  let l:options = g:vim_ai_edit['options']
   set paste
   execute "normal! " . a:firstline . "GV" . a:lastline . "Gc"
   execute "py3file " . s:complete_py
@@ -91,27 +90,27 @@ function! vim_ai#AIEditRun(is_selection, ...) range
 endfunction
 
 function! vim_ai#AIChatRun(is_selection, ...) range
-  let instruction = ""
-  let lines = getline(a:firstline, a:lastline)
+  let l:instruction = ""
+  let l:lines = getline(a:firstline, a:lastline)
   set paste
-  let is_outside_of_chat_window = search('^>>> user$', 'nw') == 0
-  if is_outside_of_chat_window
+  let l:is_outside_of_chat_window = search('^>>> user$', 'nw') == 0
+  if l:is_outside_of_chat_window
     " open chat window
     execute g:vim_ai_chat['ui']['open_chat_command']
-    let prompt = ""
+    let l:prompt = ""
     if a:0 || a:is_selection
-      let instruction = a:0 ? a:1 : ""
-      let prompt = MakePrompt(a:is_selection, lines, instruction)
+      let l:instruction = a:0 ? a:1 : ""
+      let l:prompt = MakePrompt(a:is_selection, l:lines, l:instruction)
     endif
-    execute "normal! Gi" . prompt
+    execute "normal! Gi" . l:prompt
   endif
 
   let s:last_command = "chat"
-  let s:last_instruction = instruction
+  let s:last_instruction = l:instruction
   let s:last_is_selection = a:is_selection
 
-  let options = g:vim_ai_chat['options']
-  let ui = g:vim_ai_chat['ui']
+  let l:options = g:vim_ai_chat['options']
+  let l:ui = g:vim_ai_chat['ui']
   execute "py3file " . s:chat_py
   set nopaste
 endfunction

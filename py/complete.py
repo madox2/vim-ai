@@ -2,11 +2,11 @@
 plugin_root = vim.eval("s:plugin_root")
 vim.command(f"py3file {plugin_root}/py/utils.py")
 
-engine = vim.eval("engine")
-config_options = vim.eval("options")
+engine = vim.eval("l:engine")
+config_options = vim.eval("l:options")
 request_options = make_request_options(config_options)
 
-prompt = vim.eval("prompt").strip()
+prompt = vim.eval("l:prompt").strip()
 
 def complete_engine(prompt):
     request = {
