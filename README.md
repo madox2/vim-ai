@@ -216,6 +216,7 @@ END
 " - options.initial_prompt: prompt prepended to every chat request
 " - ui.populate_options: put [chat-options] to the chat header
 " - ui.open_chat_command: customize how to open chat window
+" - ui.scratch_buffer_keep_open: re-use scratch buffer within the vim session
 let g:vim_ai_chat = {
 \  "options": {
 \    "model": "gpt-3.5-turbo",
@@ -228,6 +229,7 @@ let g:vim_ai_chat = {
 \    "code_syntax_enabled": 1,
 \    "populate_options": 0,
 \    "open_chat_command": "below new | call vim_ai#MakeScratchWindow()",
+\    "scratch_buffer_keep_open": 0,
 \  },
 \}
 
