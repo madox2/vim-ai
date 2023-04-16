@@ -42,9 +42,16 @@ Plug 'madox2/vim-ai'
 
 ### Manual installation
 
+Using built-in Vim packages `:help packages`
+
 ```sh
-git clone https://github.com/madox2/vim-ai/
-mv vim-ai ~/.config/nvim/plugin/  # copy to the plugin directory
+# vim
+mkdir -p ~/.vim/pack/plugins/start
+git clone https://github.com/madox2/vim-ai.git ~/.vim/pack/plugins/start/vim-ai
+
+# neovim
+mkdir -p ~/.config/nvim/pack/plugins/start
+git clone https://github.com/madox2/vim-ai.git ~/.config/nvim/pack/plugins/start/vim-ai
 ```
 
 ## Usage
