@@ -50,8 +50,8 @@ mkdir -p ~/.vim/pack/plugins/start
 git clone https://github.com/madox2/vim-ai.git ~/.vim/pack/plugins/start/vim-ai
 
 # neovim
-mkdir -p ~/.config/nvim/pack/plugins/start
-git clone https://github.com/madox2/vim-ai.git ~/.config/nvim/pack/plugins/start/vim-ai
+mkdir -p ~/.local/share/nvim/site/pack/plugins/start
+git clone https://github.com/madox2/vim-ai.git ~/.local/share/nvim/site/pack/plugins/start/vim-ai
 ```
 
 ## Usage
