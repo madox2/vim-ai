@@ -134,12 +134,11 @@ def print_info_message(msg):
     vim.command("echohl None")
 
 def handle_completion_error(error):
-    if isinstance(error, KeyboardInterrupt):
+    # nvim throws - pynvim.api.common.NvimError: Keyboard interrupt
+    is_nvim_keyboard_interrupt = "Keyboard interrupt" in str(error)
+    if isinstance(error, KeyboardInterrupt) or is_nvim_keyboard_interrupt:
         print_info_message("Completion cancelled...")
-    elif isinstance(error, URLError):
-        if isinstance(error.reason, socket.timeout):
-            print_info_message("Request timeout...")
-        else:
-            raise error
+    elif isinstance(error, URLError) and isinstance(error.reason, socket.timeout):
+        print_info_message("Request timeout...")
     else:
         raise error
