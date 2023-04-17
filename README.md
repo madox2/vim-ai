@@ -243,7 +243,7 @@ let g:vim_ai_chat = {
 " Tips:
 " "open_chat_command":
 " - "below new /tmp/last_conversation.aichat" - restore converstaion from a file
-" - "open_chat_command": "tabnew | call vim_ai#MakeScratchWindow()" - open chat in a new tab
+" - "tabnew | call vim_ai#MakeScratchWindow()" - open chat in a new tab
 ```
 
 ### Using chat engine for completion and edits
