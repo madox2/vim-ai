@@ -48,7 +48,14 @@ function! s:MakePrompt(is_selection, lines, instruction)
   let l:lines = trim(join(a:lines, "\n"))
   let l:instruction = trim(a:instruction)
   let l:delimiter = l:instruction != "" && a:is_selection ? ":\n" : ""
-  let l:selection = a:is_selection || l:instruction == "" ? l:lines : ""
+  let l:selection = ""
+  if l:instruction == ""
+    let l:selection = l:lines
+  elseif a:is_selection
+    " TODO: check if lines already contain #####
+    " NOTE: surround selection with ##### in order to eliminate empty responses
+    let l:selection = "#####\n" . l:lines . "\n#####"
+  endif
   return join([l:instruction, l:delimiter, l:selection], "")
 endfunction
 
