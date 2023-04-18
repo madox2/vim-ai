@@ -36,12 +36,16 @@ def make_http_options(options):
 
 def render_text_chunks(chunks):
     generating_text = False
+    full_text = ''
     for text in chunks:
         if not text.strip() and not generating_text:
             continue # trim newlines from the beginning
         generating_text = True
         vim.command("normal! a" + text)
         vim.command("redraw")
+        full_text += text
+    if not full_text.strip():
+        print_info_message('Empty response received. Tip: You can try modifying the prompt and retry.')
 
 def parse_chat_messages(chat_content):
     lines = chat_content.splitlines()
