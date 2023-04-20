@@ -28,6 +28,7 @@ Options: >
   \    "max_tokens": 1000,
   \    "temperature": 0.1,
   \    "request_timeout": 20,
+  \    "selection_boundary": "#####",
   \  },
   \}
 
@@ -48,6 +49,7 @@ Options: >
   \    "max_tokens": 1000,
   \    "temperature": 0.1,
   \    "request_timeout": 20,
+  \    "selection_boundary": "#####",
   \  },
   \}
 
@@ -75,6 +77,7 @@ Options: >
   \    "max_tokens": 1000,
   \    "temperature": 1,
   \    "request_timeout": 20,
+  \    "selection_boundary": "#####",
   \    "initial_prompt": s:initial_chat_prompt,
   \  },
   \  "ui": {
