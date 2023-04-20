@@ -186,6 +186,7 @@ Below are listed all available configuration options, along with their default v
 ```vim
 " :AI
 " - options: openai config (see https://platform.openai.com/docs/api-reference/completions)
+" - options.request_timout: request timeout in seconds
 " - options.selection_boundary: seleciton prompt wrapper (eliminates empty responses, see #20)
 " - engine: complete | chat - see how to configure chat engine in the section below
 let g:vim_ai_complete = {
@@ -201,6 +202,7 @@ let g:vim_ai_complete = {
 
 " :AIEdit
 " - options: openai config (see https://platform.openai.com/docs/api-reference/completions)
+" - options.request_timout: request timeout in seconds
 " - options.selection_boundary: seleciton prompt wrapper
 " - engine: complete | chat - see how to configure chat engine in the section below
 let g:vim_ai_edit = {
@@ -225,6 +227,7 @@ END
 " :AIChat
 " - options: openai config (see https://platform.openai.com/docs/api-reference/chat)
 " - options.initial_prompt: prompt prepended to every chat request
+" - options.request_timout: request timeout in seconds
 " - options.selection_boundary: seleciton prompt wrapper
 " - ui.populate_options: put [chat-options] to the chat header
 " - ui.open_chat_command: customize how to open chat window
