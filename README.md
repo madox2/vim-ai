@@ -186,6 +186,7 @@ Below are listed all available configuration options, along with their default v
 ```vim
 " :AI
 " - options: openai config (see https://platform.openai.com/docs/api-reference/completions)
+" - options.selection_boundary: seleciton prompt wrapper (eliminates empty responses, see #20)
 " - engine: complete | chat - see how to configure chat engine in the section below
 let g:vim_ai_complete = {
 \  "engine": "complete",
@@ -194,11 +195,13 @@ let g:vim_ai_complete = {
 \    "max_tokens": 1000,
 \    "temperature": 0.1,
 \    "request_timeout": 20,
+\    "selection_boundary": "#####",
 \  },
 \}
 
 " :AIEdit
 " - options: openai config (see https://platform.openai.com/docs/api-reference/completions)
+" - options.selection_boundary: seleciton prompt wrapper
 " - engine: complete | chat - see how to configure chat engine in the section below
 let g:vim_ai_edit = {
 \  "engine": "complete",
@@ -207,6 +210,7 @@ let g:vim_ai_edit = {
 \    "max_tokens": 1000,
 \    "temperature": 0.1,
 \    "request_timeout": 20,
+\    "selection_boundary": "#####",
 \  },
 \}
 
@@ -221,6 +225,7 @@ END
 " :AIChat
 " - options: openai config (see https://platform.openai.com/docs/api-reference/chat)
 " - options.initial_prompt: prompt prepended to every chat request
+" - options.selection_boundary: seleciton prompt wrapper
 " - ui.populate_options: put [chat-options] to the chat header
 " - ui.open_chat_command: customize how to open chat window
 " - ui.scratch_buffer_keep_open: re-use scratch buffer within the vim session
@@ -230,6 +235,7 @@ let g:vim_ai_chat = {
 \    "max_tokens": 1000,
 \    "temperature": 1,
 \    "request_timeout": 20,
+\    "selection_boundary": "",
 \    "initial_prompt": s:initial_chat_prompt,
 \  },
 \  "ui": {
@@ -271,6 +277,7 @@ let chat_engine_config = {
 \    "max_tokens": 1000,
 \    "temperature": 0.1,
 \    "request_timeout": 20,
+\    "selection_boundary": "",
 \    "initial_prompt": initial_prompt,
 \  },
 \}
