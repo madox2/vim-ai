@@ -117,8 +117,14 @@ function! vim_ai#AIChatRun(is_selection, ...) range
   let l:lines = getline(a:firstline, a:lastline)
   set paste
   if &filetype != 'aichat'
-    " open chat window
-    execute g:vim_ai_chat['ui']['open_chat_command']
+    let l:chat_win_id = bufwinid(s:scratch_buffer_name)
+    if l:chat_win_id != -1
+      " reuse chat in active window
+      call win_gotoid(l:chat_win_id)
+    else
+      " open new chat window
+      execute g:vim_ai_chat['ui']['open_chat_command']
+    endif
     let l:prompt = ""
     if a:0 || a:is_selection
       let l:instruction = a:0 ? a:1 : ""
