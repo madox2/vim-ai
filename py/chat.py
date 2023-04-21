@@ -4,6 +4,7 @@ vim.command(f"py3file {plugin_root}/py/utils.py")
 
 config_options = vim.eval("l:options")
 config_ui = vim.eval("l:ui")
+prompt = vim.eval("l:prompt").strip()
 
 def initialize_chat_window():
     lines = vim.eval('getline(1, "$")')
@@ -21,11 +22,15 @@ def initialize_chat_window():
                 vim.command("normal! i" + key + "=" + value + "\n")
         vim.command("normal! " + ("o" if populates_options else "O"))
         vim.command("normal! i>>> user\n")
-        vim.command("normal! G")
+
+    vim.command("normal! G")
+    vim_break_undo_sequence()
+    vim.command("redraw")
+
+    if prompt:
+        vim.command("normal! a" + prompt)
         vim_break_undo_sequence()
         vim.command("redraw")
-    else:
-        vim_break_undo_sequence()
 
 initialize_chat_window()
 

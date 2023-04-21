@@ -119,18 +119,19 @@ function! vim_ai#AIChatRun(is_selection, ...) range
   if &filetype != 'aichat'
     let l:chat_win_id = bufwinid(s:scratch_buffer_name)
     if l:chat_win_id != -1
+      " TODO: look for first active chat buffer, in case .aichat file is used
       " reuse chat in active window
       call win_gotoid(l:chat_win_id)
     else
       " open new chat window
       execute g:vim_ai_chat['ui']['open_chat_command']
     endif
-    let l:prompt = ""
-    if a:0 || a:is_selection
-      let l:instruction = a:0 ? a:1 : ""
-      let l:prompt = s:MakePrompt(a:is_selection, l:lines, l:instruction, l:options)
-    endif
-    execute "normal! Gi" . l:prompt
+  endif
+
+  let l:prompt = ""
+  if a:0 || a:is_selection
+    let l:instruction = a:0 ? a:1 : ""
+    let l:prompt = s:MakePrompt(a:is_selection, l:lines, l:instruction, l:options)
   endif
 
   let s:last_command = "chat"
