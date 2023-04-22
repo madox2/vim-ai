@@ -230,7 +230,7 @@ END
 " - options.request_timeout: request timeout in seconds
 " - options.selection_boundary: seleciton prompt wrapper
 " - ui.populate_options: put [chat-options] to the chat header
-" - ui.open_chat_command: customize how to open chat window
+" - ui.open_chat_command: preset (preset_below, preset_tab, preset_right) or a custom command
 " - ui.scratch_buffer_keep_open: re-use scratch buffer within the vim session
 let g:vim_ai_chat = {
 \  "options": {
@@ -244,7 +244,7 @@ let g:vim_ai_chat = {
 \  "ui": {
 \    "code_syntax_enabled": 1,
 \    "populate_options": 0,
-\    "open_chat_command": "below new | call vim_ai#MakeScratchWindow()",
+\    "open_chat_command": "preset_below",
 \    "scratch_buffer_keep_open": 0,
 \  },
 \}
@@ -252,7 +252,6 @@ let g:vim_ai_chat = {
 " Tips:
 " "open_chat_command":
 " - "below new /tmp/last_conversation.aichat" - restore converstaion from a file
-" - "tabnew | call vim_ai#MakeScratchWindow()" - open chat in a new tab
 ```
 
 ### Using chat engine for completion and edits

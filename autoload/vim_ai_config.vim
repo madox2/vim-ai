@@ -35,11 +35,17 @@ let g:vim_ai_chat_default = {
 \    "initial_prompt": s:initial_chat_prompt,
 \  },
 \  "ui": {
-\    "open_chat_command": "below new | call vim_ai#MakeScratchWindow()",
+\    "open_chat_command": "preset_below",
 \    "scratch_buffer_keep_open": 0,
 \    "populate_options": 0,
 \    "code_syntax_enabled": 1,
 \  },
+\}
+
+let g:vim_ai_open_chat_presets = {
+\  "preset_below": "below new | call vim_ai#MakeScratchWindow()",
+\  "preset_tab": "tabnew | call vim_ai#MakeScratchWindow()",
+\  "preset_right": "rightbelow 55vnew | setlocal noequalalways | setlocal winfixwidth | call vim_ai#MakeScratchWindow()",
 \}
 
 if !exists("g:vim_ai_debug")

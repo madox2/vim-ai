@@ -83,7 +83,7 @@ Options: >
   \  "ui": {
   \    "code_syntax_enabled": 1,
   \    "populate_options": 0,
-  \    "open_chat_command": "below new | call vim_ai#MakeScratchWindow()",
+  \    "open_chat_command": "preset_below",
   \    "scratch_buffer_keep_open": 0,
   \  },
   \}
