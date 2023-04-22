@@ -91,6 +91,11 @@ Options: >
 Check OpenAI docs for more information:
 https://platform.openai.com/docs/api-reference/chat
 
+                                                *:AINewChat*
+
+:AINewChat {preset shortname}?      spawn a new conversation with a given open
+                                    chat preset - below, tab or right.
+
                                                 *:AIRedo*
 
 :AIRedo                             repeat last AI command in order to re-try

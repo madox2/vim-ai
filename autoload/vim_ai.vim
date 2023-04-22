@@ -69,6 +69,13 @@ function! s:MakePrompt(is_selection, lines, instruction, config)
   return join([l:instruction, l:delimiter, l:selection], "")
 endfunction
 
+function! s:OpenChatWindow(open_conf)
+  let l:open_cmd = has_key(g:vim_ai_open_chat_presets, a:open_conf)
+        \ ? g:vim_ai_open_chat_presets[a:open_conf]
+        \ : a:open_conf
+  execute l:open_cmd
+endfunction
+
 " Complete prompt
 " - is_selection - <range> parameter
 " - config       - function scoped vim_ai_complete config
@@ -137,10 +144,7 @@ function! vim_ai#AIChatRun(is_selection, config, ...) range
     else
       " open new chat window
       let l:open_conf = g:vim_ai_chat['ui']['open_chat_command']
-      let l:open_cmd = has_key(g:vim_ai_open_chat_presets, l:open_conf)
-            \ ? g:vim_ai_open_chat_presets[l:open_conf]
-            \ : l:open_conf
-      execute l:open_cmd
+      call s:OpenChatWindow(l:open_conf)
     endif
   endif
 
@@ -159,6 +163,15 @@ function! vim_ai#AIChatRun(is_selection, config, ...) range
   set nopaste
 endfunction
 
+" Start a new chat
+" a:1 - optional preset shorcut (below, right, tab)
+function! vim_ai#AINewChatRun(...)
+  let l:open_conf = a:0 ? "preset_" . a:1 : g:vim_ai_chat['ui']['open_chat_command']
+  call s:OpenChatWindow(l:open_conf)
+  call vim_ai#AIChatRun(0, {})
+endfunction
+
+" Repeat last AI command
 function! vim_ai#AIRedoRun()
   execute "normal! u"
   if s:last_command == "complete"
