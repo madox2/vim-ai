@@ -159,6 +159,7 @@ function! vim_ai#AIRedoRun()
     endif
   endif
   if s:last_command == "chat"
-    call vim_ai#AIChatRun(0, s:last_instruction)
+    " chat does not need prompt, all information are in the buffer already
+    call vim_ai#AIChatRun(0)
   endif
 endfunction
