@@ -159,6 +159,6 @@ function! vim_ai#AIRedoRun()
     endif
   endif
   if s:last_command == "chat"
-    call vim_ai#AIChatRun(s:last_is_selection, s:last_instruction)
+    call vim_ai#AIChatRun(0, s:last_instruction)
   endif
 endfunction
