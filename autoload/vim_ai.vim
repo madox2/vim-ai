@@ -69,6 +69,10 @@ function! s:MakePrompt(is_selection, lines, instruction, config)
   return join([l:instruction, l:delimiter, l:selection], "")
 endfunction
 
+" Complete prompt
+" - is_selection - <range> parameter
+" - config       - function scoped vim_ai_complete config
+" - a:1          - optional instruction prompt
 function! vim_ai#AIRun(is_selection, config, ...) range
   let l:config = vim_ai_config#ExtendDeep(g:vim_ai_complete, a:config)
 
@@ -93,6 +97,10 @@ function! vim_ai#AIRun(is_selection, config, ...) range
   set nopaste
 endfunction
 
+" Edit prompt
+" - is_selection - <range> parameter
+" - config       - function scoped vim_ai_edit config
+" - a:1          - optional instruction prompt
 function! vim_ai#AIEditRun(is_selection, config, ...) range
   let l:config = vim_ai_config#ExtendDeep(g:vim_ai_edit, a:config)
 
@@ -110,6 +118,10 @@ function! vim_ai#AIEditRun(is_selection, config, ...) range
   set nopaste
 endfunction
 
+" Start and answer the chat
+" - is_selection - <range> parameter
+" - config       - function scoped vim_ai_chat config
+" - a:1          - optional instruction prompt
 function! vim_ai#AIChatRun(is_selection, config, ...) range
   let l:config = vim_ai_config#ExtendDeep(g:vim_ai_chat, a:config)
 
