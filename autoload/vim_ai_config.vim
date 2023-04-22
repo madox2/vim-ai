@@ -50,11 +50,11 @@ if !exists("g:vim_ai_debug_log_file")
   let g:vim_ai_debug_log_file = "/tmp/vim_ai_debug.log"
 endif
 
-function! s:ExtendDeep(defaults, override) abort
+function! vim_ai_config#ExtendDeep(defaults, override) abort
   let l:result = a:defaults
   for [l:key, l:value] in items(a:override)
     if type(get(l:result, l:key)) is v:t_dict && type(l:value) is v:t_dict
-      call s:ExtendDeep(l:result[l:key], l:value)
+      call vim_ai_config#ExtendDeep(l:result[l:key], l:value)
     else
       let l:result[l:key] = l:value
     endif
@@ -65,7 +65,7 @@ endfunction
 function! s:MakeConfig(config_name) abort
   let l:defaults = copy(g:[a:config_name . "_default"])
   let l:override = exists("g:" . a:config_name) ? g:[a:config_name] : {}
-  let g:[a:config_name] = s:ExtendDeep(l:defaults, l:override)
+  let g:[a:config_name] = vim_ai_config#ExtendDeep(l:defaults, l:override)
 endfunction
 
 call s:MakeConfig("vim_ai_chat")

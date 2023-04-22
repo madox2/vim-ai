@@ -8,6 +8,7 @@ let s:chat_py = s:plugin_root . "/py/chat.py"
 let s:last_is_selection = 0
 let s:last_instruction = ""
 let s:last_command = ""
+let s:last_config = {}
 
 let s:scratch_buffer_name = ">>> AI chat"
 
@@ -44,12 +45,12 @@ function! vim_ai#MakeScratchWindow()
   endif
 endfunction
 
-function! s:MakeSelectionPrompt(is_selection, lines, instruction, options)
+function! s:MakeSelectionPrompt(is_selection, lines, instruction, config)
   let l:selection = ""
   if a:instruction == ""
     let l:selection = a:lines
   elseif a:is_selection
-    let l:boundary = a:options['selection_boundary']
+    let l:boundary = a:config['options']['selection_boundary']
     if l:boundary != "" && match(a:lines, l:boundary) == -1
       " NOTE: surround selection with boundary (e.g. #####) in order to eliminate empty responses
       let l:selection = l:boundary . "\n" . a:lines . "\n" . l:boundary
@@ -60,23 +61,23 @@ function! s:MakeSelectionPrompt(is_selection, lines, instruction, options)
   return l:selection
 endfunction
 
-function! s:MakePrompt(is_selection, lines, instruction, options)
+function! s:MakePrompt(is_selection, lines, instruction, config)
   let l:lines = trim(join(a:lines, "\n"))
   let l:instruction = trim(a:instruction)
   let l:delimiter = l:instruction != "" && a:is_selection ? ":\n" : ""
-  let l:selection = s:MakeSelectionPrompt(a:is_selection, l:lines, l:instruction, a:options)
+  let l:selection = s:MakeSelectionPrompt(a:is_selection, l:lines, l:instruction, a:config)
   return join([l:instruction, l:delimiter, l:selection], "")
 endfunction
 
-function! vim_ai#AIRun(is_selection, ...) range
-  let l:engine = g:vim_ai_complete['engine']
-  let l:options = g:vim_ai_complete['options']
+function! vim_ai#AIRun(is_selection, config, ...) range
+  let l:config = vim_ai_config#ExtendDeep(g:vim_ai_complete, a:config)
 
   let l:instruction = a:0 ? a:1 : ""
   let l:lines = getline(a:firstline, a:lastline)
-  let l:prompt = s:MakePrompt(a:is_selection, l:lines, l:instruction, l:options)
+  let l:prompt = s:MakePrompt(a:is_selection, l:lines, l:instruction, l:config)
 
   let s:last_command = "complete"
+  let s:last_config = a:config
   let s:last_instruction = l:instruction
   let s:last_is_selection = a:is_selection
 
@@ -92,14 +93,14 @@ function! vim_ai#AIRun(is_selection, ...) range
   set nopaste
 endfunction
 
-function! vim_ai#AIEditRun(is_selection, ...) range
-  let l:engine = g:vim_ai_edit['engine']
-  let l:options = g:vim_ai_edit['options']
+function! vim_ai#AIEditRun(is_selection, config, ...) range
+  let l:config = vim_ai_config#ExtendDeep(g:vim_ai_edit, a:config)
 
   let l:instruction = a:0 ? a:1 : ""
-  let l:prompt = s:MakePrompt(a:is_selection, getline(a:firstline, a:lastline), l:instruction, l:options)
+  let l:prompt = s:MakePrompt(a:is_selection, getline(a:firstline, a:lastline), l:instruction, l:config)
 
   let s:last_command = "edit"
+  let s:last_config = a:config
   let s:last_instruction = l:instruction
   let s:last_is_selection = a:is_selection
 
@@ -109,9 +110,8 @@ function! vim_ai#AIEditRun(is_selection, ...) range
   set nopaste
 endfunction
 
-function! vim_ai#AIChatRun(is_selection, ...) range
-  let l:options = g:vim_ai_chat['options']
-  let l:ui = g:vim_ai_chat['ui']
+function! vim_ai#AIChatRun(is_selection, config, ...) range
+  let l:config = vim_ai_config#ExtendDeep(g:vim_ai_chat, a:config)
 
   let l:instruction = ""
   let l:lines = getline(a:firstline, a:lastline)
@@ -131,10 +131,11 @@ function! vim_ai#AIChatRun(is_selection, ...) range
   let l:prompt = ""
   if a:0 || a:is_selection
     let l:instruction = a:0 ? a:1 : ""
-    let l:prompt = s:MakePrompt(a:is_selection, l:lines, l:instruction, l:options)
+    let l:prompt = s:MakePrompt(a:is_selection, l:lines, l:instruction, l:config)
   endif
 
   let s:last_command = "chat"
+  let s:last_config = a:config
   let s:last_instruction = l:instruction
   let s:last_is_selection = a:is_selection
 
@@ -146,20 +147,20 @@ function! vim_ai#AIRedoRun()
   execute "normal! u"
   if s:last_command == "complete"
     if s:last_is_selection
-      '<,'>call vim_ai#AIRun(s:last_is_selection, s:last_instruction)
+      '<,'>call vim_ai#AIRun(s:last_is_selection, s:last_config, s:last_instruction)
     else
-      call vim_ai#AIRun(s:last_is_selection, s:last_instruction)
+      call vim_ai#AIRun(s:last_is_selection, s:last_config, s:last_instruction)
     endif
   endif
   if s:last_command == "edit"
     if s:last_is_selection
-      '<,'>call vim_ai#AIEditRun(s:last_is_selection, s:last_instruction)
+      '<,'>call vim_ai#AIEditRun(s:last_is_selection, s:last_config, s:last_instruction)
     else
-      call vim_ai#AIEditRun(s:last_is_selection, s:last_instruction)
+      call vim_ai#AIEditRun(s:last_is_selection, s:last_config, s:last_instruction)
     endif
   endif
   if s:last_command == "chat"
     " chat does not need prompt, all information are in the buffer already
-    call vim_ai#AIChatRun(0)
+    call vim_ai#AIChatRun(0, s:last_config)
   endif
 endfunction

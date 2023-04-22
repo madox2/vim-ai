@@ -2,8 +2,9 @@
 plugin_root = vim.eval("s:plugin_root")
 vim.command(f"py3file {plugin_root}/py/utils.py")
 
-config_options = vim.eval("l:options")
-config_ui = vim.eval("l:ui")
+config = vim.eval("l:config")
+config_options = config['options']
+config_ui = config['ui']
 prompt = vim.eval("l:prompt").strip()
 
 def initialize_chat_window():

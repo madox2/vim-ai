@@ -2,8 +2,9 @@
 plugin_root = vim.eval("s:plugin_root")
 vim.command(f"py3file {plugin_root}/py/utils.py")
 
-engine = vim.eval("l:engine")
-config_options = vim.eval("l:options")
+config = vim.eval("l:config")
+engine = config['engine']
+config_options = config['options']
 openai_options = make_openai_options(config_options)
 http_options = make_http_options(config_options)
 
