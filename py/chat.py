@@ -27,6 +27,13 @@ def initialize_chat_window():
     vim_break_undo_sequence()
     vim.command("redraw")
 
+    file_content = vim.eval('trim(join(getline(1, "$"), "\n"))')
+    role_lines = re.findall(r'(^>>> user|^>>> system|^<<< assistant).*', file_content, flags=re.MULTILINE)
+    if not role_lines[-1].startswith(">>> user"):
+        # last role is not user, most likely completion was cancelled before
+        vim.command("normal! o")
+        vim.command("normal! i\n>>> user\n\n")
+
     if prompt:
         vim.command("normal! a" + prompt)
         vim_break_undo_sequence()

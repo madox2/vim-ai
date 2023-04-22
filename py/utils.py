@@ -5,6 +5,7 @@ import json
 import urllib.error
 import urllib.request
 import socket
+import re
 from urllib.error import URLError
 
 is_debugging = vim.eval("g:vim_ai_debug") == "1"
