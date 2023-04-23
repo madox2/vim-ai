@@ -303,8 +303,8 @@ To create a custom command, you can call `AIRun`, `AIEditRun` and `AIChatRun` fu
 
 ```vim
 " custom command suggesting git commit message, takes no arguments
-function! AIPromptCommitMessageFn()
-  let l:diff = system('git diff --staged')
+function! GitCommitMessageFn()
+  let l:diff = system('git --no-pager diff --staged')
   let l:prompt = "generate a short commit message from the diff below:\n" . l:diff
   let l:range = 0
   let l:config = {
@@ -317,10 +317,10 @@ function! AIPromptCommitMessageFn()
   \}
   call vim_ai#AIRun(l:range, l:config, l:prompt)
 endfunction
-command! AIPromptCommitMessage call AIPromptCommitMessageFn()
+command! GitCommitMessage call GitCommitMessageFn()
 
 " custom command that provides a code review for selected code block
-function! AIPromptCodeReviewFn(range) range
+function! CodeReviewFn(range) range
   let l:prompt = "programming syntax is " . &filetype . ", review the code below"
   let l:config = {
   \  "options": {
@@ -329,7 +329,7 @@ function! AIPromptCodeReviewFn(range) range
   \}
   '<,'>call vim_ai#AIChatRun(a:range, l:config, l:prompt)
 endfunction
-command! -range AIPromptCodeReview <line1>,<line2>call AIPromptCodeReviewFn(<range>)
+command! -range CodeReview <line1>,<line2>call CodeReviewFn(<range>)
 ```
 
 ## Important Disclaimer
