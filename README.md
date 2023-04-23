@@ -59,11 +59,16 @@ git clone https://github.com/madox2/vim-ai.git ~/.local/share/nvim/site/pack/plu
 To use an AI command, type the command followed by an instruction prompt. You can also combine it with a visual selection. Here is a brief overview of available commands:
 
 ```
+========= Basic AI commands =========
+
 :AI         complete text
 :AIEdit     edit text
 :AIChat     continue or open new chat
-:AINewChat  open new chat
+
+============= Utilities =============
+
 :AIRedo     repeat last AI command
+:AINewChat  open new chat
 
 :help vim-ai
 ```
