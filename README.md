@@ -5,6 +5,8 @@ You can generate code, edit text, or have an interactive conversation with GPT m
 
 ![vim-ai demo](./demo.gif)
 
+To get an idea what is possible to do with AI commands see the [prompts](https://github.com/madox2/vim-ai/wiki/AI-prompts#prompts) on the [Community Wiki](https://github.com/madox2/vim-ai/wiki)
+
 ## Features
 
 - Generate text or code, answer questions with AI
@@ -76,6 +78,8 @@ To use an AI command, type the command followed by an instruction prompt. You ca
 **Tip:** Press `Ctrl-c` anytime to cancel completion
 
 **Tip:** setup your own [key bindings](#key-bindings) or use command shortcuts - `:AIE`, `:AIC`, `:AIR`
+
+If you are interested in more tips or would like to level up your Vim with more commands like [`:GitCommitMessage`](https://github.com/madox2/vim-ai/wiki/Custom-commands#suggest-a-git-commit-message) - suggesting a git commit message, visit the [Community Wiki](https://github.com/madox2/vim-ai/wiki).
 
 ## Reference
 
@@ -262,10 +266,6 @@ let g:vim_ai_chat = {
 \    "scratch_buffer_keep_open": 0,
 \  },
 \}
-
-" Tips:
-" "open_chat_command":
-" - "below new /tmp/last_conversation.aichat" - restore converstaion from a file
 ```
 
 ### Using chat engine for completion and edits
@@ -304,7 +304,9 @@ let g:vim_ai_edit = chat_engine_config
 
 ## Custom commands
 
-To create a custom command, you can call `AIRun`, `AIEditRun` and `AIChatRun` functions. See examples below:
+You might find useful a [collection](https://github.com/madox2/vim-ai/wiki/Custom-commands) of custom commands on the [Community Wiki](https://github.com/madox2/vim-ai/wiki).
+
+To create a custom command, you can call `AIRun`, `AIEditRun` and `AIChatRun` functions. For example:
 
 ```vim
 " custom command suggesting git commit message, takes no arguments
@@ -336,6 +338,10 @@ function! CodeReviewFn(range) range
 endfunction
 command! -range CodeReview <line1>,<line2>call CodeReviewFn(<range>)
 ```
+
+## Contributing
+
+Contributions are welcome! Please feel free to open a pull request, report an issue, or contribute to the [Community Wiki](https://github.com/madox2/vim-ai/wiki).
 
 ## Important Disclaimer
 
