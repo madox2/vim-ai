@@ -7,6 +7,7 @@ import urllib.request
 import socket
 import re
 from urllib.error import URLError
+from urllib.error import HTTPError
 
 is_debugging = vim.eval("g:vim_ai_debug") == "1"
 debug_log_file = vim.eval("g:vim_ai_debug_log_file")
@@ -145,5 +146,15 @@ def handle_completion_error(error):
         print_info_message("Completion cancelled...")
     elif isinstance(error, URLError) and isinstance(error.reason, socket.timeout):
         print_info_message("Request timeout...")
+    elif isinstance(error, HTTPError):
+        status_code = error.getcode()
+        msg = f"OpenAI: HTTPError {status_code}"
+        if status_code == 401:
+            msg += ' (Hint: verify that your API key is valid)'
+        if status_code == 404:
+            msg += ' (Hint: verify that you have access to the OpenAI API and to the model)'
+        elif status_code == 429:
+            msg += ' (Hint: verify that your billing plan is "Pay as you go")'
+        print_info_message(msg)
     else:
         raise error
