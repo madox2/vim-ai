@@ -7,6 +7,9 @@ let g:vim_ai_complete_default = {
 \    "request_timeout": 20,
 \    "selection_boundary": "#####",
 \  },
+\  "ui": {
+\    "paste_mode": 1,
+\  },
 \}
 let g:vim_ai_edit_default = {
 \  "engine": "complete",
@@ -16,6 +19,9 @@ let g:vim_ai_edit_default = {
 \    "temperature": 0.1,
 \    "request_timeout": 20,
 \    "selection_boundary": "#####",
+\  },
+\  "ui": {
+\    "paste_mode": 1,
 \  },
 \}
 
@@ -39,6 +45,7 @@ let g:vim_ai_chat_default = {
 \    "scratch_buffer_keep_open": 0,
 \    "populate_options": 0,
 \    "code_syntax_enabled": 1,
+\    "paste_mode": 1,
 \  },
 \}
 

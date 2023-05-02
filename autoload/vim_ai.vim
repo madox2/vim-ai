@@ -76,6 +76,18 @@ function! s:OpenChatWindow(open_conf)
   execute l:open_cmd
 endfunction
 
+function! s:set_paste(config)
+  if a:config['ui']['paste_mode']
+    setlocal paste
+  endif
+endfunction
+
+function! s:set_nopaste(config)
+  if a:config['ui']['paste_mode']
+    setlocal nopaste
+  endif
+endfunction
+
 " Complete prompt
 " - is_selection - <range> parameter
 " - config       - function scoped vim_ai_complete config
@@ -93,7 +105,7 @@ function! vim_ai#AIRun(is_selection, config, ...) range
   let s:last_is_selection = a:is_selection
 
   let l:cursor_on_empty_line = trim(join(l:lines, "\n")) == ""
-  set paste
+  call s:set_paste(l:config)
   if l:cursor_on_empty_line
     execute "normal! " . a:lastline . "GA"
   else
@@ -101,7 +113,7 @@ function! vim_ai#AIRun(is_selection, config, ...) range
   endif
   execute "py3file " . s:complete_py
   execute "normal! " . a:lastline . "G"
-  set nopaste
+  call s:set_nopaste(l:config)
 endfunction
 
 " Edit prompt
@@ -119,10 +131,10 @@ function! vim_ai#AIEditRun(is_selection, config, ...) range
   let s:last_instruction = l:instruction
   let s:last_is_selection = a:is_selection
 
-  set paste
+  call s:set_paste(l:config)
   execute "normal! " . a:firstline . "GV" . a:lastline . "Gc"
   execute "py3file " . s:complete_py
-  set nopaste
+  call s:set_nopaste(l:config)
 endfunction
 
 " Start and answer the chat
@@ -134,7 +146,7 @@ function! vim_ai#AIChatRun(is_selection, config, ...) range
 
   let l:instruction = ""
   let l:lines = getline(a:firstline, a:lastline)
-  set paste
+  call s:set_paste(l:config)
   if &filetype != 'aichat'
     let l:chat_win_id = bufwinid(s:scratch_buffer_name)
     if l:chat_win_id != -1
@@ -160,7 +172,7 @@ function! vim_ai#AIChatRun(is_selection, config, ...) range
   let s:last_is_selection = a:is_selection
 
   execute "py3file " . s:chat_py
-  set nopaste
+  call s:set_nopaste(l:config)
 endfunction
 
 " Start a new chat

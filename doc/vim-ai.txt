@@ -30,6 +30,9 @@ Options: >
   \    "request_timeout": 20,
   \    "selection_boundary": "#####",
   \  },
+  \  "ui": {
+  \    "paste_mode": 1,
+  \  },
   \}
 
 Check OpenAI docs for more information:
@@ -50,6 +53,9 @@ Options: >
   \    "temperature": 0.1,
   \    "request_timeout": 20,
   \    "selection_boundary": "#####",
+  \  },
+  \  "ui": {
+  \    "paste_mode": 1,
   \  },
   \}
 
@@ -85,6 +91,7 @@ Options: >
   \    "populate_options": 0,
   \    "open_chat_command": "preset_below",
   \    "scratch_buffer_keep_open": 0,
+  \    "paste_mode": 1,
   \  },
   \}
 

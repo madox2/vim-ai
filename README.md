@@ -203,10 +203,11 @@ Below are listed all available configuration options, along with their default v
 
 ```vim
 " :AI
+" - engine: complete | chat - see how to configure chat engine in the section below
 " - options: openai config (see https://platform.openai.com/docs/api-reference/completions)
 " - options.request_timeout: request timeout in seconds
 " - options.selection_boundary: seleciton prompt wrapper (eliminates empty responses, see #20)
-" - engine: complete | chat - see how to configure chat engine in the section below
+" - ui.paste_mode: use paste mode (see more info in the Notes below)
 let g:vim_ai_complete = {
 \  "engine": "complete",
 \  "options": {
@@ -216,13 +217,17 @@ let g:vim_ai_complete = {
 \    "request_timeout": 20,
 \    "selection_boundary": "#####",
 \  },
+\  "ui": {
+\    "paste_mode": 1,
+\  },
 \}
 
 " :AIEdit
+" - engine: complete | chat - see how to configure chat engine in the section below
 " - options: openai config (see https://platform.openai.com/docs/api-reference/completions)
 " - options.request_timeout: request timeout in seconds
 " - options.selection_boundary: seleciton prompt wrapper
-" - engine: complete | chat - see how to configure chat engine in the section below
+" - ui.paste_mode: use paste mode (see more info in the Notes below)
 let g:vim_ai_edit = {
 \  "engine": "complete",
 \  "options": {
@@ -231,6 +236,9 @@ let g:vim_ai_edit = {
 \    "temperature": 0.1,
 \    "request_timeout": 20,
 \    "selection_boundary": "#####",
+\  },
+\  "ui": {
+\    "paste_mode": 1,
 \  },
 \}
 
@@ -250,6 +258,7 @@ END
 " - ui.populate_options: put [chat-options] to the chat header
 " - ui.open_chat_command: preset (preset_below, preset_tab, preset_right) or a custom command
 " - ui.scratch_buffer_keep_open: re-use scratch buffer within the vim session
+" - ui.paste_mode: use paste mode (see more info in the Notes below)
 let g:vim_ai_chat = {
 \  "options": {
 \    "model": "gpt-3.5-turbo",
@@ -264,8 +273,15 @@ let g:vim_ai_chat = {
 \    "populate_options": 0,
 \    "open_chat_command": "preset_below",
 \    "scratch_buffer_keep_open": 0,
+\    "paste_mode": 1,
 \  },
 \}
+
+" Notes:
+" ui.paste_mode
+" - if disabled code indentation will work but AI doesn't always respond with a code block
+"   therefore it could be messed up
+" - find out more in vim's help `:help paste`
 ```
 
 ### Using chat engine for completion and edits
