@@ -143,7 +143,7 @@ function! vim_ai#AIChatRun(is_selection, config, ...) range
       call win_gotoid(l:chat_win_id)
     else
       " open new chat window
-      let l:open_conf = g:vim_ai_chat['ui']['open_chat_command']
+      let l:open_conf = l:config['ui']['open_chat_command']
       call s:OpenChatWindow(l:open_conf)
     endif
   endif
