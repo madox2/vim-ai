@@ -44,6 +44,7 @@ def render_text_chunks(chunks):
             continue # trim newlines from the beginning
         generating_text = True
         vim.command("normal! a" + text)
+        vim.command("undojoin")
         vim.command("redraw")
         full_text += text
     if not full_text.strip():
