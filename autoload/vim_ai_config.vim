@@ -49,11 +49,13 @@ let g:vim_ai_chat_default = {
 \  },
 \}
 
-let g:vim_ai_open_chat_presets = {
-\  "preset_below": "below new | call vim_ai#MakeScratchWindow()",
-\  "preset_tab": "tabnew | call vim_ai#MakeScratchWindow()",
-\  "preset_right": "rightbelow 55vnew | setlocal noequalalways | setlocal winfixwidth | call vim_ai#MakeScratchWindow()",
-\}
+if !exists("g:vim_ai_open_chat_presets")
+  let g:vim_ai_open_chat_presets = {
+  \  "preset_below": "below new | call vim_ai#MakeScratchWindow()",
+  \  "preset_tab": "tabnew | call vim_ai#MakeScratchWindow()",
+  \  "preset_right": "rightbelow 55vnew | setlocal noequalalways | setlocal winfixwidth | call vim_ai#MakeScratchWindow()",
+  \}
+endif
 
 if !exists("g:vim_ai_debug")
   let g:vim_ai_debug = 0
