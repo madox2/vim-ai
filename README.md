@@ -135,7 +135,7 @@ Supported chat roles are **`>>> system`**, **`>>> user`** and **`<<< assistant`*
 
 This command is used when you need to spawn a new chat in a specific way or in situation when `:AIChat` would normally continue conversation instead.
 
-As a parameter you put an open chat command preset shortcut - `below`, `tab` or `right`.
+As a parameter you put an open chat command preset shortcut - `below`, `tab` or `right`. For example: `:AINewChat right`.
 
 ### `:AIRedo`
 
