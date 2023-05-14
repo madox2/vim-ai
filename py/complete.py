@@ -50,5 +50,6 @@ try:
         vim.command("redraw")
         text_chunks = engines[engine](prompt)
         render_text_chunks(text_chunks)
+        clear_echo_message()
 except BaseException as error:
     handle_completion_error(error)
