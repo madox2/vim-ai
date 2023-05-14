@@ -78,5 +78,6 @@ try:
 
         vim.command("normal! a\n\n>>> user\n\n")
         vim.command("redraw")
+        clear_echo_message()
 except BaseException as error:
     handle_completion_error(error)

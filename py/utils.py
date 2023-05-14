@@ -159,3 +159,8 @@ def handle_completion_error(error):
         print_info_message(msg)
     else:
         raise error
+
+# clears "Completing..." message from the status line
+def clear_echo_message():
+    # https://neovim.discourse.group/t/how-to-clear-the-echo-message-in-the-command-line/268/3
+    vim.command("call feedkeys(':','nx')")
