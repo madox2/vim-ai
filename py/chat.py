@@ -81,3 +81,4 @@ try:
         clear_echo_message()
 except BaseException as error:
     handle_completion_error(error)
+    printDebug("[chat] error: {}", traceback.format_exc())

@@ -8,6 +8,7 @@ import socket
 import re
 from urllib.error import URLError
 from urllib.error import HTTPError
+import traceback
 
 is_debugging = vim.eval("g:vim_ai_debug") == "1"
 debug_log_file = vim.eval("g:vim_ai_debug_log_file")
