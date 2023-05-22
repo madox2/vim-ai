@@ -1,6 +1,7 @@
 :AI	vim-ai.txt	/*:AI*
 :AIChat	vim-ai.txt	/*:AIChat*
 :AIEdit	vim-ai.txt	/*:AIEdit*
+:AINewChat	vim-ai.txt	/*:AINewChat*
 :AIRedo	vim-ai.txt	/*:AIRedo*
 vim-ai	vim-ai.txt	/*vim-ai*
 vim-ai-about	vim-ai.txt	/*vim-ai-about*
