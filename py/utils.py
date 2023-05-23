@@ -1,3 +1,4 @@
+import vim
 import datetime
 import sys
 import os
