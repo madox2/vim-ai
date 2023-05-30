@@ -226,7 +226,7 @@ let g:vim_ai_complete = {
 " - engine: complete | chat - see how to configure chat engine in the section below
 " - options: openai config (see https://platform.openai.com/docs/api-reference/completions)
 " - options.request_timeout: request timeout in seconds
-" - options.selection_boundary: seleciton prompt wrapper
+" - options.selection_boundary: seleciton prompt wrapper (eliminates empty responses, see #20)
 " - ui.paste_mode: use paste mode (see more info in the Notes below)
 let g:vim_ai_edit = {
 \  "engine": "complete",
@@ -254,7 +254,7 @@ END
 " - options: openai config (see https://platform.openai.com/docs/api-reference/chat)
 " - options.initial_prompt: prompt prepended to every chat request
 " - options.request_timeout: request timeout in seconds
-" - options.selection_boundary: seleciton prompt wrapper
+" - options.selection_boundary: seleciton prompt wrapper (eliminates empty responses, see #20)
 " - ui.populate_options: put [chat-options] to the chat header
 " - ui.open_chat_command: preset (preset_below, preset_tab, preset_right) or a custom command
 " - ui.scratch_buffer_keep_open: re-use scratch buffer within the vim session
