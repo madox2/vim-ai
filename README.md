@@ -282,6 +282,11 @@ let g:vim_ai_chat = {
 " - if disabled code indentation will work but AI doesn't always respond with a code block
 "   therefore it could be messed up
 " - find out more in vim's help `:help paste`
+" options.max_tokens
+" - note that prompt + max_tokens must be less than model's token limit, see #42, #46
+" - setting max tokens to 0 will exclude it from the OpenAI API request parameters, it is
+"   unclear/undocumented what it exactly does, but it seems to resolve issues when the model
+"   hits token limit, which respond with `OpenAI: HTTPError 400`
 ```
 
 ### Using chat engine for completion and edits

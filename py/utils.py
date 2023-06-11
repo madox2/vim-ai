@@ -27,9 +27,10 @@ def load_api_key():
     return api_key.strip()
 
 def make_openai_options(options):
+    max_tokens = int(options['max_tokens'])
     return {
         'model': options['model'],
-        'max_tokens': int(options['max_tokens']),
+        'max_tokens': max_tokens if max_tokens > 0 else None,
         'temperature': float(options['temperature']),
     }
 
