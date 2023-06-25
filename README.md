@@ -252,7 +252,7 @@ END
 
 " :AIChat
 " - options: openai config (see https://platform.openai.com/docs/api-reference/chat)
-" - options.initial_prompt: prompt prepended to every chat request
+" - options.initial_prompt: prompt prepended to every chat request (list of lines or string)
 " - options.request_timeout: request timeout in seconds
 " - options.selection_boundary: seleciton prompt wrapper (eliminates empty responses, see #20)
 " - ui.populate_options: put [chat-options] to the chat header

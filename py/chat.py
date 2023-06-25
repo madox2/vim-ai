@@ -2,7 +2,7 @@
 plugin_root = vim.eval("s:plugin_root")
 vim.command(f"py3file {plugin_root}/py/utils.py")
 
-config = vim.eval("l:config")
+config = normalize_config(vim.eval("l:config"))
 config_options = config['options']
 config_ui = config['ui']
 prompt = vim.eval("l:prompt").strip()

@@ -26,6 +26,14 @@ def load_api_key():
         raise Exception("Missing OpenAI API key")
     return api_key.strip()
 
+def normalize_config(config):
+    normalized = { **config }
+    # initial prompt can be both a string and a list of strings, normalize it to list
+    if 'initial_prompt' in config['options'] and isinstance(config['options']['initial_prompt'], str):
+        normalized['options']['initial_prompt'] = normalized['options']['initial_prompt'].split('\n')
+    return normalized
+
+
 def make_openai_options(options):
     max_tokens = int(options['max_tokens'])
     return {
