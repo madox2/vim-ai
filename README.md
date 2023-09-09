@@ -32,8 +32,14 @@ You only share and pay for what you specifically select, for prompts and chat co
 # save api key to `~/.config/openai.token` file
 echo "YOUR_OPENAI_API_KEY" > ~/.config/openai.token
 
+# or save api key and org id to `~/.config/openai.token` file
+#echo "YOUR_OPENAI_API_KEY,YOUR_OPENAI_ORG_ID" > ~/.config/openai.token
+
 # alternatively set it as an environment variable
 export OPENAI_API_KEY="YOUR_OPENAI_API_KEY"
+
+# or set with org id
+#export OPENAI_API_KEY="YOUR_OPENAI_API_KEY,YOUR_OPENAI_ORG_ID"
 ```
 
 ### Using `vim-plug`
