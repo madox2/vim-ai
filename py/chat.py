@@ -1,3 +1,4 @@
+from urllib.parse import urljoin
 # import utils
 plugin_root = vim.eval("s:plugin_root")
 vim.command(f"py3file {plugin_root}/py/utils.py")
@@ -69,7 +70,9 @@ try:
             **openai_options
         }
         printDebug("[chat] request: {}", request)
-        response = openai_request('https://api.openai.com/v1/chat/completions', request, http_options)
+        base_url = options.get('base_url', 'https://api.openai.com')
+        url = urljoin(base_url, 'v1/chat/completions')
+        response = openai_request(url, request, http_options)
         def map_chunk(resp):
             printDebug("[chat] response: {}", resp)
             return resp['choices'][0]['delta'].get('content', '')

@@ -138,7 +138,7 @@ def openai_request(url, data, options):
             line = line_bytes.decode("utf-8", errors="replace")
             if line.startswith(OPENAI_RESP_DATA_PREFIX):
                 line_data = line[len(OPENAI_RESP_DATA_PREFIX):-1]
-                if line_data == OPENAI_RESP_DONE:
+                if line_data.strip() == OPENAI_RESP_DONE:
                     pass
                 else:
                     openai_obj = json.loads(line_data)
