@@ -1,7 +1,7 @@
 let g:vim_ai_complete_default = {
 \  "engine": "complete",
 \  "options": {
-\    "model": "text-davinci-003",
+\    "model": "gpt-3.5-turbo-instruct",
 \    "max_tokens": 1000,
 \    "temperature": 0.1,
 \    "request_timeout": 20,
@@ -14,7 +14,7 @@ let g:vim_ai_complete_default = {
 let g:vim_ai_edit_default = {
 \  "engine": "complete",
 \  "options": {
-\    "model": "text-davinci-003",
+\    "model": "gpt-3.5-turbo-instruct",
 \    "max_tokens": 1000,
 \    "temperature": 0.1,
 \    "request_timeout": 20,

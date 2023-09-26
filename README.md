@@ -215,7 +215,7 @@ Below are listed all available configuration options, along with their default v
 let g:vim_ai_complete = {
 \  "engine": "complete",
 \  "options": {
-\    "model": "text-davinci-003",
+\    "model": "gpt-3.5-turbo-instruct",
 \    "max_tokens": 1000,
 \    "temperature": 0.1,
 \    "request_timeout": 20,
@@ -235,7 +235,7 @@ let g:vim_ai_complete = {
 let g:vim_ai_edit = {
 \  "engine": "complete",
 \  "options": {
-\    "model": "text-davinci-003",
+\    "model": "gpt-3.5-turbo-instruct",
 \    "max_tokens": 1000,
 \    "temperature": 0.1,
 \    "request_timeout": 20,
