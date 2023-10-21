@@ -14,6 +14,9 @@ import traceback
 is_debugging = vim.eval("g:vim_ai_debug") == "1"
 debug_log_file = vim.eval("g:vim_ai_debug_log_file")
 
+class KnownError(Exception):
+    pass
+
 def load_api_key():
     config_file_path = os.path.join(os.path.expanduser("~"), ".config/openai.token")
     api_key = os.getenv("OPENAI_API_KEY")
@@ -23,7 +26,7 @@ def load_api_key():
     except Exception:
         pass
     if not api_key:
-        raise Exception("Missing OpenAI API key")
+        raise KnownError("Missing OpenAI API key")
     return api_key.strip()
 
 def normalize_config(config):
@@ -45,6 +48,7 @@ def make_openai_options(options):
 def make_http_options(options):
     return {
         'request_timeout': float(options['request_timeout']),
+        'enable_auth': bool(int(options['enable_auth'])),
     }
 
 def render_text_chunks(chunks):
@@ -119,13 +123,16 @@ def printDebug(text, *args):
 
 OPENAI_RESP_DATA_PREFIX = 'data: '
 OPENAI_RESP_DONE = '[DONE]'
-OPENAI_API_KEY = load_api_key()
 
 def openai_request(url, data, options):
+    enable_auth=options['enable_auth']
     headers = {
         "Content-Type": "application/json",
-        "Authorization": f"Bearer {OPENAI_API_KEY}"
     }
+    if enable_auth:
+        OPENAI_API_KEY = load_api_key()
+        headers['Authorization'] = f"Bearer {OPENAI_API_KEY}"
+
     request_timeout=options['request_timeout']
     req = urllib.request.Request(
         url,
@@ -168,6 +175,8 @@ def handle_completion_error(error):
         elif status_code == 429:
             msg += ' (Hint: verify that your billing plan is "Pay as you go")'
         print_info_message(msg)
+    elif isinstance(error, KnownError):
+        print_info_message(str(error))
     else:
         raise error
 
