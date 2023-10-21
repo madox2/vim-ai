@@ -18,8 +18,7 @@ def complete_engine(prompt):
         **openai_options
     }
     printDebug("[engine-complete] request: {}", request)
-    base_url = config_options.get('base_url', 'https://api.openai.com')
-    url = urljoin(base_url, 'v1/completions')
+    url = urljoin(config_options['base_url'], 'v1/completions')
     response = openai_request(url, request, http_options)
     def map_chunk(resp):
         printDebug("[engine-complete] response: {}", resp)
@@ -38,8 +37,7 @@ def chat_engine(prompt):
         **openai_options
     }
     printDebug("[engine-chat] request: {}", request)
-    base_url = config_options.get('base_url', 'https://api.openai.com')
-    url = urljoin(base_url, 'v1/chat/completions')
+    url = urljoin(config_options['base_url'], 'v1/chat/completions')
     response = openai_request(url, request, http_options)
     def map_chunk(resp):
         printDebug("[engine-chat] response: {}", resp)

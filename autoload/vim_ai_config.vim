@@ -5,6 +5,7 @@ let g:vim_ai_complete_default = {
 \    "max_tokens": 1000,
 \    "temperature": 0.1,
 \    "request_timeout": 20,
+\    "base_url": "https://api.openai.com",
 \    "selection_boundary": "#####",
 \  },
 \  "ui": {
@@ -18,6 +19,7 @@ let g:vim_ai_edit_default = {
 \    "max_tokens": 1000,
 \    "temperature": 0.1,
 \    "request_timeout": 20,
+\    "base_url": "https://api.openai.com",
 \    "selection_boundary": "#####",
 \  },
 \  "ui": {
@@ -37,6 +39,7 @@ let g:vim_ai_chat_default = {
 \    "max_tokens": 1000,
 \    "temperature": 1,
 \    "request_timeout": 20,
+\    "base_url": "https://api.openai.com",
 \    "selection_boundary": "",
 \    "initial_prompt": s:initial_chat_prompt,
 \  },
