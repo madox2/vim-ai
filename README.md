@@ -206,7 +206,6 @@ Below are listed all available configuration options, along with their default v
 " - engine: complete | chat - see how to configure chat engine in the section below
 " - options: openai config (see https://platform.openai.com/docs/api-reference/completions)
 " - options.request_timeout: request timeout in seconds
-" - options.base_url: openai endpoint url
 " - options.enable_auth: enable authorization using openai key
 " - options.selection_boundary: seleciton prompt wrapper (eliminates empty responses, see #20)
 " - ui.paste_mode: use paste mode (see more info in the Notes below)
@@ -214,10 +213,10 @@ let g:vim_ai_complete = {
 \  "engine": "complete",
 \  "options": {
 \    "model": "text-davinci-003",
+\    "endpoint_url": "https://api.openai.com/v1/completions",
 \    "max_tokens": 1000,
 \    "temperature": 0.1,
 \    "request_timeout": 20,
-\    "base_url": "https://api.openai.com",
 \    "enable_auth": 1,
 \    "selection_boundary": "#####",
 \  },
@@ -230,7 +229,6 @@ let g:vim_ai_complete = {
 " - engine: complete | chat - see how to configure chat engine in the section below
 " - options: openai config (see https://platform.openai.com/docs/api-reference/completions)
 " - options.request_timeout: request timeout in seconds
-" - options.base_url: openai endpoint url
 " - options.enable_auth: enable authorization using openai key
 " - options.selection_boundary: seleciton prompt wrapper (eliminates empty responses, see #20)
 " - ui.paste_mode: use paste mode (see more info in the Notes below)
@@ -238,10 +236,10 @@ let g:vim_ai_edit = {
 \  "engine": "complete",
 \  "options": {
 \    "model": "text-davinci-003",
+\    "endpoint_url": "https://api.openai.com/v1/completions",
 \    "max_tokens": 1000,
 \    "temperature": 0.1,
 \    "request_timeout": 20,
-\    "base_url": "https://api.openai.com",
 \    "enable_auth": 1,
 \    "selection_boundary": "#####",
 \  },
@@ -262,7 +260,6 @@ END
 " - options: openai config (see https://platform.openai.com/docs/api-reference/chat)
 " - options.initial_prompt: prompt prepended to every chat request (list of lines or string)
 " - options.request_timeout: request timeout in seconds
-" - options.base_url: openai endpoint url
 " - options.enable_auth: enable authorization using openai key
 " - options.selection_boundary: seleciton prompt wrapper (eliminates empty responses, see #20)
 " - ui.populate_options: put [chat-options] to the chat header
@@ -272,10 +269,10 @@ END
 let g:vim_ai_chat = {
 \  "options": {
 \    "model": "gpt-3.5-turbo",
+\    "endpoint_url": "https://api.openai.com/v1/chat/completions",
 \    "max_tokens": 1000,
 \    "temperature": 1,
 \    "request_timeout": 20,
-\    "base_url": "https://api.openai.com",
 \    "enable_auth": 1,
 \    "selection_boundary": "",
 \    "initial_prompt": s:initial_chat_prompt,
@@ -323,6 +320,7 @@ let chat_engine_config = {
 \  "engine": "chat",
 \  "options": {
 \    "model": "gpt-3.5-turbo",
+\    "endpoint_url": "https://api.openai.com/v1/chat/completions",
 \    "max_tokens": 1000,
 \    "temperature": 0.1,
 \    "request_timeout": 20,

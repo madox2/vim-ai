@@ -70,7 +70,7 @@ try:
             **openai_options
         }
         printDebug("[chat] request: {}", request)
-        url = urljoin(config_options['base_url'], 'v1/chat/completions')
+        url = config_options['endpoint_url']
         response = openai_request(url, request, http_options)
         def map_chunk(resp):
             printDebug("[chat] response: {}", resp)
