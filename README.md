@@ -298,6 +298,20 @@ let g:vim_ai_chat = {
 "   hits token limit, which respond with `OpenAI: HTTPError 400`
 ```
 
+### Using custom API
+
+It is possible to configure the plugin to use different OpenAI-compatible endpoints.
+See some cool projects listed in [Custom APIs](https://github.com/madox2/vim-ai/wiki/Custom-APIs) section on the [Community Wiki](https://github.com/madox2/vim-ai/wiki).
+
+```vim
+let g:vim_ai_chat = {
+\  "options": {
+\    "endpoint_url": "http://localhost:8000/v1/chat/completions",
+\    "enable_auth": 0,
+\  },
+\}
+```
+
 ### Using chat engine for completion and edits
 
 It is possible to configure chat models, such as `gpt-3.5-turbo`, to be used in `:AI` and `:AIEdit` commands.
