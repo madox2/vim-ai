@@ -19,15 +19,26 @@ class KnownError(Exception):
 
 def load_api_key():
     config_file_path = os.path.join(os.path.expanduser("~"), ".config/openai.token")
-    api_key = os.getenv("OPENAI_API_KEY")
+    api_key_param_value = os.getenv("OPENAI_API_KEY")
     try:
         with open(config_file_path, 'r') as file:
-            api_key = file.read()
+            api_key_param_value = file.read()
     except Exception:
         pass
-    if not api_key:
+
+    if not api_key_param_value:
         raise KnownError("Missing OpenAI API key")
-    return api_key.strip()
+
+    # The text is in format of "<api key>,<org id>" and the
+    # <org id> part is optional
+    elements = api_key_param_value.strip().split(",")
+    api_key = elements[0].strip()
+    org_id = None
+
+    if len(elements) > 1:
+        org_id = elements[1].strip()
+
+    return (api_key, org_id)
 
 def normalize_config(config):
     normalized = { **config }
@@ -130,8 +141,11 @@ def openai_request(url, data, options):
         "Content-Type": "application/json",
     }
     if enable_auth:
-        OPENAI_API_KEY = load_api_key()
+        (OPENAI_API_KEY, OPENAI_ORG_ID) = load_api_key()
         headers['Authorization'] = f"Bearer {OPENAI_API_KEY}"
+
+        if OPENAI_ORG_ID is not None:
+            headers["OpenAI-Organization"] =  f"{OPENAI_ORG_ID}"
 
     request_timeout=options['request_timeout']
     req = urllib.request.Request(
