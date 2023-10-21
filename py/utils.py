@@ -14,6 +14,9 @@ import traceback
 is_debugging = vim.eval("g:vim_ai_debug") == "1"
 debug_log_file = vim.eval("g:vim_ai_debug_log_file")
 
+class KnownError(Exception):
+    pass
+
 def load_api_key():
     config_file_path = os.path.join(os.path.expanduser("~"), ".config/openai.token")
     api_key_param_value = os.getenv("OPENAI_API_KEY")
@@ -24,7 +27,7 @@ def load_api_key():
         pass
 
     if not api_key_param_value:
-        raise Exception("Missing OpenAI API key")
+        raise KnownError("Missing OpenAI API key")
 
     # The text is in format of "<api key>,<org id>" and the
     # <org id> part is optional
@@ -56,6 +59,7 @@ def make_openai_options(options):
 def make_http_options(options):
     return {
         'request_timeout': float(options['request_timeout']),
+        'enable_auth': bool(int(options['enable_auth'])),
     }
 
 def render_text_chunks(chunks):
@@ -130,16 +134,18 @@ def printDebug(text, *args):
 
 OPENAI_RESP_DATA_PREFIX = 'data: '
 OPENAI_RESP_DONE = '[DONE]'
-(OPENAI_API_KEY, OPENAI_ORG_ID) = load_api_key()
 
 def openai_request(url, data, options):
+    enable_auth=options['enable_auth']
     headers = {
         "Content-Type": "application/json",
-        "Authorization": f"Bearer {OPENAI_API_KEY}"
     }
+    if enable_auth:
+        (OPENAI_API_KEY, OPENAI_ORG_ID) = load_api_key()
+        headers['Authorization'] = f"Bearer {OPENAI_API_KEY}"
 
-    if OPENAI_ORG_ID is not None:
-        headers["OpenAI-Organization"] =  f"{OPENAI_ORG_ID}"
+        if OPENAI_ORG_ID is not None:
+            headers["OpenAI-Organization"] =  f"{OPENAI_ORG_ID}"
 
     request_timeout=options['request_timeout']
     req = urllib.request.Request(
@@ -153,7 +159,7 @@ def openai_request(url, data, options):
             line = line_bytes.decode("utf-8", errors="replace")
             if line.startswith(OPENAI_RESP_DATA_PREFIX):
                 line_data = line[len(OPENAI_RESP_DATA_PREFIX):-1]
-                if line_data == OPENAI_RESP_DONE:
+                if line_data.strip() == OPENAI_RESP_DONE:
                     pass
                 else:
                     openai_obj = json.loads(line_data)
@@ -183,6 +189,8 @@ def handle_completion_error(error):
         elif status_code == 429:
             msg += ' (Hint: verify that your billing plan is "Pay as you go")'
         print_info_message(msg)
+    elif isinstance(error, KnownError):
+        print_info_message(str(error))
     else:
         raise error
 

@@ -2,9 +2,11 @@ let g:vim_ai_complete_default = {
 \  "engine": "complete",
 \  "options": {
 \    "model": "gpt-3.5-turbo-instruct",
+\    "endpoint_url": "https://api.openai.com/v1/completions",
 \    "max_tokens": 1000,
 \    "temperature": 0.1,
 \    "request_timeout": 20,
+\    "enable_auth": 1,
 \    "selection_boundary": "#####",
 \  },
 \  "ui": {
@@ -15,9 +17,11 @@ let g:vim_ai_edit_default = {
 \  "engine": "complete",
 \  "options": {
 \    "model": "gpt-3.5-turbo-instruct",
+\    "endpoint_url": "https://api.openai.com/v1/completions",
 \    "max_tokens": 1000,
 \    "temperature": 0.1,
 \    "request_timeout": 20,
+\    "enable_auth": 1,
 \    "selection_boundary": "#####",
 \  },
 \  "ui": {
@@ -34,9 +38,11 @@ END
 let g:vim_ai_chat_default = {
 \  "options": {
 \    "model": "gpt-3.5-turbo",
+\    "endpoint_url": "https://api.openai.com/v1/chat/completions",
 \    "max_tokens": 1000,
 \    "temperature": 1,
 \    "request_timeout": 20,
+\    "enable_auth": 1,
 \    "selection_boundary": "",
 \    "initial_prompt": s:initial_chat_prompt,
 \  },

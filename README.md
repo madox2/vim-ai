@@ -210,15 +210,18 @@ Below are listed all available configuration options, along with their default v
 " - engine: complete | chat - see how to configure chat engine in the section below
 " - options: openai config (see https://platform.openai.com/docs/api-reference/completions)
 " - options.request_timeout: request timeout in seconds
+" - options.enable_auth: enable authorization using openai key
 " - options.selection_boundary: seleciton prompt wrapper (eliminates empty responses, see #20)
 " - ui.paste_mode: use paste mode (see more info in the Notes below)
 let g:vim_ai_complete = {
 \  "engine": "complete",
 \  "options": {
 \    "model": "gpt-3.5-turbo-instruct",
+\    "endpoint_url": "https://api.openai.com/v1/completions",
 \    "max_tokens": 1000,
 \    "temperature": 0.1,
 \    "request_timeout": 20,
+\    "enable_auth": 1,
 \    "selection_boundary": "#####",
 \  },
 \  "ui": {
@@ -230,15 +233,18 @@ let g:vim_ai_complete = {
 " - engine: complete | chat - see how to configure chat engine in the section below
 " - options: openai config (see https://platform.openai.com/docs/api-reference/completions)
 " - options.request_timeout: request timeout in seconds
+" - options.enable_auth: enable authorization using openai key
 " - options.selection_boundary: seleciton prompt wrapper (eliminates empty responses, see #20)
 " - ui.paste_mode: use paste mode (see more info in the Notes below)
 let g:vim_ai_edit = {
 \  "engine": "complete",
 \  "options": {
 \    "model": "gpt-3.5-turbo-instruct",
+\    "endpoint_url": "https://api.openai.com/v1/completions",
 \    "max_tokens": 1000,
 \    "temperature": 0.1,
 \    "request_timeout": 20,
+\    "enable_auth": 1,
 \    "selection_boundary": "#####",
 \  },
 \  "ui": {
@@ -258,6 +264,7 @@ END
 " - options: openai config (see https://platform.openai.com/docs/api-reference/chat)
 " - options.initial_prompt: prompt prepended to every chat request (list of lines or string)
 " - options.request_timeout: request timeout in seconds
+" - options.enable_auth: enable authorization using openai key
 " - options.selection_boundary: seleciton prompt wrapper (eliminates empty responses, see #20)
 " - ui.populate_options: put [chat-options] to the chat header
 " - ui.open_chat_command: preset (preset_below, preset_tab, preset_right) or a custom command
@@ -266,9 +273,11 @@ END
 let g:vim_ai_chat = {
 \  "options": {
 \    "model": "gpt-3.5-turbo",
+\    "endpoint_url": "https://api.openai.com/v1/chat/completions",
 \    "max_tokens": 1000,
 \    "temperature": 1,
 \    "request_timeout": 20,
+\    "enable_auth": 1,
 \    "selection_boundary": "",
 \    "initial_prompt": s:initial_chat_prompt,
 \  },
@@ -293,6 +302,20 @@ let g:vim_ai_chat = {
 "   hits token limit, which respond with `OpenAI: HTTPError 400`
 ```
 
+### Using custom API
+
+It is possible to configure the plugin to use different OpenAI-compatible endpoints.
+See some cool projects listed in [Custom APIs](https://github.com/madox2/vim-ai/wiki/Custom-APIs) section on the [Community Wiki](https://github.com/madox2/vim-ai/wiki).
+
+```vim
+let g:vim_ai_chat = {
+\  "options": {
+\    "endpoint_url": "http://localhost:8000/v1/chat/completions",
+\    "enable_auth": 0,
+\  },
+\}
+```
+
 ### Using chat engine for completion and edits
 
 It is possible to configure chat models, such as `gpt-3.5-turbo`, to be used in `:AI` and `:AIEdit` commands.
@@ -315,6 +338,7 @@ let chat_engine_config = {
 \  "engine": "chat",
 \  "options": {
 \    "model": "gpt-3.5-turbo",
+\    "endpoint_url": "https://api.openai.com/v1/chat/completions",
 \    "max_tokens": 1000,
 \    "temperature": 0.1,
 \    "request_timeout": 20,
