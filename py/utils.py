@@ -167,7 +167,7 @@ def openai_request(url, data, options):
 
 def print_info_message(msg):
     vim.command("redraw")
-    vim.command(f"normal \<Esc>")
+    vim.command("normal \\<Esc>")
     vim.command("echohl ErrorMsg")
     vim.command(f"echomsg '{msg}'")
     vim.command("echohl None")
