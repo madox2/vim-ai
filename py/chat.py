@@ -52,6 +52,7 @@ initial_messages = parse_chat_messages(initial_prompt)
 
 chat_content = vim.eval('trim(join(getline(1, "$"), "\n"))')
 chat_messages = parse_chat_messages(chat_content)
+is_selection = vim.eval("l:is_selection")
 
 messages = initial_messages + chat_messages
 
@@ -75,7 +76,7 @@ try:
             printDebug("[chat] response: {}", resp)
             return resp['choices'][0]['delta'].get('content', '')
         text_chunks = map(map_chunk, response)
-        render_text_chunks(text_chunks)
+        render_text_chunks(text_chunks, is_selection)
 
         vim.command("normal! a\n\n>>> user\n\n")
         vim.command("redraw")

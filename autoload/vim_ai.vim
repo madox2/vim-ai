@@ -45,27 +45,26 @@ function! vim_ai#MakeScratchWindow()
   endif
 endfunction
 
-function! s:MakeSelectionPrompt(is_selection, lines, instruction, config)
+function! s:MakeSelectionPrompt(selection, instruction, config)
   let l:selection = ""
   if a:instruction == ""
-    let l:selection = a:lines
-  elseif a:is_selection
+    let l:selection = a:selection
+  elseif !empty(a:selection)
     let l:boundary = a:config['options']['selection_boundary']
-    if l:boundary != "" && match(a:lines, l:boundary) == -1
+    if l:boundary != "" && match(a:selection, l:boundary) == -1
       " NOTE: surround selection with boundary (e.g. #####) in order to eliminate empty responses
-      let l:selection = l:boundary . "\n" . a:lines . "\n" . l:boundary
+      let l:selection = l:boundary . "\n" . a:selection . "\n" . l:boundary
     else
-      let l:selection = a:lines
+      let l:selection = a:selection
     endif
   endif
   return l:selection
 endfunction
 
-function! s:MakePrompt(is_selection, lines, instruction, config)
-  let l:lines = trim(join(a:lines, "\n"))
+function! s:MakePrompt(selection, instruction, config)
   let l:instruction = trim(a:instruction)
-  let l:delimiter = l:instruction != "" && a:is_selection ? ":\n" : ""
-  let l:selection = s:MakeSelectionPrompt(a:is_selection, l:lines, l:instruction, a:config)
+  let l:delimiter = l:instruction != "" && a:selection != "" ? ":\n" : ""
+  let l:selection = s:MakeSelectionPrompt(a:selection, l:instruction, a:config)
   return join([l:instruction, l:delimiter, l:selection], "")
 endfunction
 
@@ -88,6 +87,35 @@ function! s:set_nopaste(config)
   endif
 endfunction
 
+function! s:GetCurrentLineOrSelection(is_selection)
+  if a:is_selection
+    return s:GetVisualSelection()
+  else
+    return trim(join(getline(a:firstline, a:lastline), "\n"))
+  endif
+endfunction
+
+function! s:SelectCurrentLineOrSelection(is_selection)
+  if a:is_selection
+    execute "normal! gv"
+  else
+    execute 'normal! V' 
+  endif
+endfunction
+
+function! s:GetVisualSelection()
+  let [line_start, column_start] = getpos("'<")[1:2]
+  let [line_end, column_end] = getpos("'>")[1:2]
+  let lines = getline(line_start, line_end)
+  if len(lines) == 0
+    return ''
+  endif
+  " The exclusive mode means that the last character of the selection area is not included in the operation scope.
+  let lines[-1] = lines[-1][: column_end - (&selection == 'inclusive' ? 1 : 2)]
+  let lines[0] = lines[0][column_start - 1:]
+  return join(lines, "\n")
+endfunction
+
 " Complete prompt
 " - is_selection - <range> parameter
 " - config       - function scoped vim_ai_complete config
@@ -96,15 +124,17 @@ function! vim_ai#AIRun(is_selection, config, ...) range
   let l:config = vim_ai_config#ExtendDeep(g:vim_ai_complete, a:config)
 
   let l:instruction = a:0 ? a:1 : ""
-  let l:lines = getline(a:firstline, a:lastline)
-  let l:prompt = s:MakePrompt(a:is_selection, l:lines, l:instruction, l:config)
+  let l:selection = s:GetCurrentLineOrSelection(a:is_selection)
+  let l:prompt = s:MakePrompt(l:selection, l:instruction, l:config)
+  " used for getting in Python script
+  let l:is_selection = a:is_selection
 
   let s:last_command = "complete"
   let s:last_config = a:config
   let s:last_instruction = l:instruction
   let s:last_is_selection = a:is_selection
 
-  let l:cursor_on_empty_line = trim(join(l:lines, "\n")) == ""
+  let l:cursor_on_empty_line = empty(getline('.'))
   call s:set_paste(l:config)
   if l:cursor_on_empty_line
     execute "normal! " . a:lastline . "GA"
@@ -124,7 +154,10 @@ function! vim_ai#AIEditRun(is_selection, config, ...) range
   let l:config = vim_ai_config#ExtendDeep(g:vim_ai_edit, a:config)
 
   let l:instruction = a:0 ? a:1 : ""
-  let l:prompt = s:MakePrompt(a:is_selection, getline(a:firstline, a:lastline), l:instruction, l:config)
+  let l:selection = s:GetCurrentLineOrSelection(a:is_selection)
+  " used for getting in Python script
+  let l:is_selection = a:is_selection
+  let l:prompt = s:MakePrompt(l:selection, l:instruction, l:config)
 
   let s:last_command = "edit"
   let s:last_config = a:config
@@ -132,7 +165,8 @@ function! vim_ai#AIEditRun(is_selection, config, ...) range
   let s:last_is_selection = a:is_selection
 
   call s:set_paste(l:config)
-  execute "normal! " . a:firstline . "GV" . a:lastline . "Gc"
+  call s:SelectCurrentLineOrSelection(a:is_selection)
+  execute "normal! c"
   execute "py3file " . s:complete_py
   call s:set_nopaste(l:config)
 endfunction
@@ -145,7 +179,9 @@ function! vim_ai#AIChatRun(is_selection, config, ...) range
   let l:config = vim_ai_config#ExtendDeep(g:vim_ai_chat, a:config)
 
   let l:instruction = ""
-  let l:lines = getline(a:firstline, a:lastline)
+  let l:selection = s:GetVisualSelection()
+  " used for getting in Python script
+  let l:is_selection = a:is_selection
   call s:set_paste(l:config)
   if &filetype != 'aichat'
     let l:chat_win_id = bufwinid(s:scratch_buffer_name)
@@ -163,7 +199,7 @@ function! vim_ai#AIChatRun(is_selection, config, ...) range
   let l:prompt = ""
   if a:0 || a:is_selection
     let l:instruction = a:0 ? a:1 : ""
-    let l:prompt = s:MakePrompt(a:is_selection, l:lines, l:instruction, l:config)
+    let l:prompt = s:MakePrompt(l:selection, l:instruction, l:config)
   endif
 
   let s:last_command = "chat"
