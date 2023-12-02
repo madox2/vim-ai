@@ -62,14 +62,41 @@ def make_http_options(options):
         'enable_auth': bool(int(options['enable_auth'])),
     }
 
-def render_text_chunks(chunks):
+# During text manipulation in Vim's visual mode, we utilize "normal! c" command. This command deletes the highlighted text,
+# immediately followed by entering insert mode where it generates desirable text.
+
+# Normally, Vim contemplates the position of the first character in selection to decide whether to place the entered text
+# before or after the cursor. For instance, if the given line is "abcd", and "abc" is selected for deletion and "1234" is
+# written in its place, the result is as expected "1234d" rather than "d1234". However, if "bc" is chosen for deletion, the
+# achieved output is "a1234d", whereas "1234ad" is not.
+
+# Despite this, post Vim script's execution of "normal! c", it takes an exit immediately returning to the normal mode. This
+# might trigger a potential misalignment issue especially when the most extreme left character is the line’s second character.
+
+# To avoid such pitfalls, the method "need_insert_before_cursor" checks not only the selection status, but also the character
+# at the first position of the highlighting. If the selection is off or the first position is not the second character in the line,
+# it determines no need for prefixing the cursor.
+def need_insert_before_cursor(is_selection):
+    if is_selection == False:
+        return False
+    pos = vim.eval("getpos(\"'<\")[1:2]")
+    if not isinstance(pos, list) or len(pos) != 2:
+        raise ValueError("Unexpected getpos value, it should be a list with two elements")
+    return pos[1] == "1"
+
+def render_text_chunks(chunks, is_selection):
     generating_text = False
     full_text = ''
+    insert_before_cursor = need_insert_before_cursor(is_selection)
     for text in chunks:
         if not text.strip() and not generating_text:
             continue # trim newlines from the beginning
         generating_text = True
-        vim.command("normal! a" + text)
+        if insert_before_cursor:
+            vim.command("normal! i" + text)
+            insert_before_cursor = False
+        else:
+            vim.command("normal! a" + text)
         vim.command("undojoin")
         vim.command("redraw")
         full_text += text
