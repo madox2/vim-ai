@@ -99,7 +99,7 @@ function! s:SelectCurrentLineOrSelection(is_selection)
   if a:is_selection
     execute "normal! gv"
   else
-    execute 'normal! V' 
+    execute 'normal! V'
   endif
 endfunction
 
