@@ -131,7 +131,22 @@ You are a Clean Code expert, I have the following code, please refactor it in a 
 
 ```
 
-Supported chat roles are **`>>> system`**, **`>>> user`** and **`<<< assistant`**
+To include files in the chat a special `include` role is used:
+
+```
+>>> user
+
+Generate documentation for the following files
+
+>>> include
+
+/home/user/myproject/requirements.txt
+/home/user/myproject/**/*.py
+```
+
+Each file's contents will be added to an additional `user` role message with the files separated by `==> {path} <==`, where path is the path to the file. Globbing is expanded out via `glob.gob` and relative paths to the current working directory (as determined by `getcwd()`) will be resolved to absolute paths.
+
+Supported chat roles are **`>>> system`**, **`>>> user`**, **`>>> include`** and **`<<< assistant`**
 
 ### `:AINewChat`
 
