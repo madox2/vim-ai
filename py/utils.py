@@ -1,5 +1,6 @@
 import vim
 import datetime
+import glob
 import sys
 import os
 import json
@@ -103,6 +104,7 @@ def render_text_chunks(chunks, is_selection):
     if not full_text.strip():
         print_info_message('Empty response received. Tip: You can try modifying the prompt and retry.')
 
+
 def parse_chat_messages(chat_content):
     lines = chat_content.splitlines()
     messages = []
@@ -112,6 +114,9 @@ def parse_chat_messages(chat_content):
             continue
         if line.startswith(">>> user"):
             messages.append({"role": "user", "content": ""})
+            continue
+        if line.startswith(">>> include"):
+            messages.append({"role": "include", "content": ""})
             continue
         if line.startswith("<<< assistant"):
             messages.append({"role": "assistant", "content": ""})
@@ -123,6 +128,37 @@ def parse_chat_messages(chat_content):
     for message in messages:
         # strip newlines from the content as it causes empty responses
         message["content"] = message["content"].strip()
+
+        if message["role"] == "include":
+            message["role"] = "user"
+            paths = message["content"].split("\n")
+            message["content"] = ""
+
+            pwd = vim.eval("getcwd()")
+            for i in range(len(paths)):
+                path = os.path.expanduser(paths[i])
+                if not os.path.isabs(path):
+                    path = os.path.join(pwd, path)
+
+                paths[i] = path
+
+                if '**' in path:
+                    paths[i] = None
+                    paths.extend(glob.glob(path, recursive=True))
+
+            for path in paths:
+                if path is None:
+                    continue
+
+                if os.path.isdir(path):
+                    continue
+
+                try:
+                    with open(path, "r") as file:
+                        message["content"] += f"\n\n==> {path} <==\n" + file.read()
+                except UnicodeDecodeError:
+                    message["content"] += "\n\n" + f"==> {path} <=="
+                    message["content"] += "\n" + "Binary file, cannot display"
 
     return messages
 
