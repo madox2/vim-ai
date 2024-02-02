@@ -1,8 +1,9 @@
+let windows_localhost = expand('$WINDOWS_LOCALHOST')
 let g:vim_ai_complete_default = {
 \  "engine": "complete",
 \  "options": {
 \    "model": "gpt-3.5-turbo-instruct",
-\    "endpoint_url": "http://172.23.144.1:1234/v1/completions",
+\    "endpoint_url": "http://" . windows_localhost . ":1234/v1/completions",
 \    "max_tokens": 1000,
 \    "temperature": 0.1,
 \    "request_timeout": 20,
@@ -17,7 +18,7 @@ let g:vim_ai_edit_default = {
 \  "engine": "complete",
 \  "options": {
 \    "model": "gpt-3.5-turbo-instruct",
-\    "endpoint_url": "http://172.23.144.1:1234/v1/completions",
+\    "endpoint_url": "http://" . windows_localhost . ":1234/v1/completions",
 \    "max_tokens": 1000,
 \    "temperature": 0.1,
 \    "request_timeout": 20,
@@ -38,7 +39,7 @@ END
 let g:vim_ai_chat_default = {
 \  "options": {
 \    "model": "gpt-3.5-turbo",
-\    "endpoint_url": "http://172.23.144.1:1234/v1/chat/completions",
+\    "endpoint_url": "http://" . windows_localhost . ":1234/v1/chat/completions",
 \    "max_tokens": 1000,
 \    "temperature": 1,
 \    "request_timeout": 20,
