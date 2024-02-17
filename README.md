@@ -199,7 +199,7 @@ let g:vim_ai_chat = {
 \}
 ```
 
-Or modify options directly during the vim session:
+Once the above is set, you can modify options directly during the vim session:
 
 ```vim
 let g:vim_ai_chat['options']['model'] = 'gpt-4'
