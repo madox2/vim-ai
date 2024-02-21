@@ -87,19 +87,19 @@ function! s:set_nopaste(config)
   endif
 endfunction
 
-function! s:GetCurrentLineOrSelection(is_selection)
+function! s:GetSelectionOrRange(is_selection, ...)
   if a:is_selection
     return s:GetVisualSelection()
   else
-    return trim(join(getline(a:firstline, a:lastline), "\n"))
+    return trim(join(getline(a:1, a:2), "\n"))
   endif
 endfunction
 
-function! s:SelectCurrentLineOrSelection(is_selection)
+function! s:SelectSelectionOrRange(is_selection, ...)
   if a:is_selection
     execute "normal! gv"
   else
-    execute 'normal! V'
+    execute 'normal!' . a:1 . 'GV' . a:2 . 'G'
   endif
 endfunction
 
@@ -116,15 +116,16 @@ function! s:GetVisualSelection()
   return join(lines, "\n")
 endfunction
 
+
 " Complete prompt
-" - is_selection - <range> parameter
+" - is_selection - obsoleted by auto updated g:vim_ai_is_selection_pending
 " - config       - function scoped vim_ai_complete config
 " - a:1          - optional instruction prompt
 function! vim_ai#AIRun(is_selection, config, ...) range
   let l:config = vim_ai_config#ExtendDeep(g:vim_ai_complete, a:config)
 
   let l:instruction = a:0 ? a:1 : ""
-  let l:selection = s:GetCurrentLineOrSelection(a:is_selection)
+  let l:selection = s:GetSelectionOrRange(a:is_selection, a:firstline, a:lastline)
   let l:prompt = s:MakePrompt(l:selection, l:instruction, l:config)
   " used for getting in Python script
   let l:is_selection = a:is_selection
@@ -147,14 +148,14 @@ function! vim_ai#AIRun(is_selection, config, ...) range
 endfunction
 
 " Edit prompt
-" - is_selection - <range> parameter
+" - is_selection - obsoleted by auto updated g:vim_ai_is_selection_pending
 " - config       - function scoped vim_ai_edit config
 " - a:1          - optional instruction prompt
 function! vim_ai#AIEditRun(is_selection, config, ...) range
   let l:config = vim_ai_config#ExtendDeep(g:vim_ai_edit, a:config)
 
   let l:instruction = a:0 ? a:1 : ""
-  let l:selection = s:GetCurrentLineOrSelection(a:is_selection)
+  let l:selection = s:GetSelectionOrRange(a:is_selection, a:firstline, a:lastline)
   " used for getting in Python script
   let l:is_selection = a:is_selection
   let l:prompt = s:MakePrompt(l:selection, l:instruction, l:config)
@@ -165,21 +166,21 @@ function! vim_ai#AIEditRun(is_selection, config, ...) range
   let s:last_is_selection = a:is_selection
 
   call s:set_paste(l:config)
-  call s:SelectCurrentLineOrSelection(a:is_selection)
+  call s:SelectSelectionOrRange(a:is_selection, a:firstline, a:lastline)
   execute "normal! c"
   execute "py3file " . s:complete_py
   call s:set_nopaste(l:config)
 endfunction
 
 " Start and answer the chat
-" - is_selection - <range> parameter
+" - is_selection - obsoleted by auto updated g:vim_ai_is_selection_pending
 " - config       - function scoped vim_ai_chat config
 " - a:1          - optional instruction prompt
 function! vim_ai#AIChatRun(is_selection, config, ...) range
   let l:config = vim_ai_config#ExtendDeep(g:vim_ai_chat, a:config)
 
   let l:instruction = ""
-  let l:selection = s:GetVisualSelection()
+  let l:selection = s:GetSelectionOrRange(a:is_selection, a:firstline, a:lastline)
   " used for getting in Python script
   let l:is_selection = a:is_selection
   call s:set_paste(l:config)
