@@ -4,10 +4,31 @@ if !has('python3')
   finish
 endif
 
-" to detect if a selection pending: https://stackoverflow.com/a/20133772
+" detect if a visual selection is pending
+let g:vim_ai_is_selection_pending = 0
 augroup vim_ai
   autocmd!
-  autocmd CursorMoved * let g:vim_ai_is_selection_pending = mode() =~# "^[vV\<C-v>]"
+  if exists('##ModeChanged')
+    autocmd ModeChanged         *:[vV\x16]*
+          \ let g:vim_ai_is_selection_pending = 1
+    autocmd ModeChanged [vV\x16]*:*
+          \ let g:vim_ai_is_selection_pending =
+          \   v:event.new_mode =~# '^c' &&
+          \     (getcmdtype() =~# '[/?]' ||
+          \      getcmdtype() ==# ':'    && getcmdline() =~# "^\s*'<'>")
+  else
+    " workaround for version < 8.2.3424 from https://stackoverflow.com/a/20133772
+    autocmd CursorMoved *
+          \ let g:vim_ai_is_selection_pending = mode() =~# "^[vV\<C-v>]"
+    autocmd CmdLineEnter,CmdwinEnter *
+          \ if g:vim_ai_is_selection_pending && getcmdtype() ==# ':' |
+          \   let g:vim_ai_is_selection_pending = getcmdline() =~# "^\s*'<'>" |
+          \ endif
+    autocmd CmdLineLeave,CmdwinLeave *
+          \ if g:vim_ai_is_selection_pending && getcmdtype() !~# '[/?]' |
+          \   let g:vim_ai_is_selection_pending = 0 |
+          \ endif
+  endif
 augroup END
 
 command! -range -nargs=? AI <line1>,<line2>call vim_ai#AIRun(g:vim_ai_is_selection_pending, {}, <f-args>)
