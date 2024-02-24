@@ -6,6 +6,8 @@ let s:chat_py = s:plugin_root . "/py/chat.py"
 
 " remembers last command parameters to be used in AIRedoRun
 let s:last_is_selection = 0
+let s:last_firstline = 1
+let s:last_lastline = 1
 let s:last_instruction = ""
 let s:last_command = ""
 let s:last_config = {}
@@ -116,7 +118,6 @@ function! s:GetVisualSelection()
   return join(lines, "\n")
 endfunction
 
-
 " Complete prompt
 " - is_selection - obsoleted by auto updated g:vim_ai_is_selection_pending
 " - config       - function scoped vim_ai_complete config
@@ -134,6 +135,8 @@ function! vim_ai#AIRun(is_selection, config, ...) range
   let s:last_config = a:config
   let s:last_instruction = l:instruction
   let s:last_is_selection = a:is_selection
+  let s:last_firstline = a:firstline
+  let s:last_lastline = a:lastline
 
   let l:cursor_on_empty_line = empty(getline('.'))
   call s:set_paste(l:config)
@@ -164,6 +167,8 @@ function! vim_ai#AIEditRun(is_selection, config, ...) range
   let s:last_config = a:config
   let s:last_instruction = l:instruction
   let s:last_is_selection = a:is_selection
+  let s:last_firstline = a:firstline
+  let s:last_lastline = a:lastline
 
   call s:set_paste(l:config)
   call s:SelectSelectionOrRange(a:is_selection, a:firstline, a:lastline)
@@ -205,8 +210,6 @@ function! vim_ai#AIChatRun(is_selection, config, ...) range
 
   let s:last_command = "chat"
   let s:last_config = a:config
-  let s:last_instruction = l:instruction
-  let s:last_is_selection = a:is_selection
 
   execute "py3file " . s:chat_py
   call s:set_nopaste(l:config)
@@ -224,18 +227,10 @@ endfunction
 function! vim_ai#AIRedoRun()
   execute "normal! u"
   if s:last_command == "complete"
-    if s:last_is_selection
-      '<,'>call vim_ai#AIRun(s:last_is_selection, s:last_config, s:last_instruction)
-    else
-      call vim_ai#AIRun(s:last_is_selection, s:last_config, s:last_instruction)
-    endif
+    exe s:last_firstline.",".s:last_lastline . "call vim_ai#AIRun(s:last_is_selection, s:last_config, s:last_instruction)"
   endif
   if s:last_command == "edit"
-    if s:last_is_selection
-      '<,'>call vim_ai#AIEditRun(s:last_is_selection, s:last_config, s:last_instruction)
-    else
-      call vim_ai#AIEditRun(s:last_is_selection, s:last_config, s:last_instruction)
-    endif
+    exe s:last_firstline.",".s:last_lastline . "call vim_ai#AIEditRun(s:last_is_selection, s:last_config, s:last_instruction)"
   endif
   if s:last_command == "chat"
     " chat does not need prompt, all information are in the buffer already
