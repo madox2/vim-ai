@@ -31,8 +31,11 @@ augroup vim_ai
   endif
 augroup END
 
-command! -range -nargs=? AI <line1>,<line2>call vim_ai#AIRun(g:vim_ai_is_selection_pending, {}, <f-args>)
-command! -range -nargs=? AIEdit <line1>,<line2>call vim_ai#AIEditRun(g:vim_ai_is_selection_pending, {}, <f-args>)
-command! -range -nargs=? AIChat <line1>,<line2>call vim_ai#AIChatRun(g:vim_ai_is_selection_pending, {}, <f-args>)
-command! -nargs=? AINewChat call vim_ai#AINewChatRun(<f-args>)
-command! AIRedo call vim_ai#AIRedoRun()
+command! -range   -nargs=? AI        <line1>,<line2>call vim_ai#AIRun({}, <q-args>)
+command! -range   -nargs=? AIEdit    <line1>,<line2>call vim_ai#AIEditRun({}, <q-args>)
+" Whereas AI and AIEdit default to passing the current line as range
+" AIChat defaults to passing nothing which is achieved by -range=0 and passing
+" <count> as described at https://stackoverflow.com/a/20133772
+command! -range=0 -nargs=? AIChat    <line1>,<line2>call vim_ai#AIChatRun(<count>, {}, <q-args>)
+command! -nargs=?          AINewChat                call vim_ai#AINewChatRun(<q-args>)
+command!                   AIRedo                   call vim_ai#AIRedoRun()
