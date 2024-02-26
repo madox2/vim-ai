@@ -377,7 +377,6 @@ To create a custom command, you can call `AIRun`, `AIEditRun` and `AIChatRun` fu
 function! GitCommitMessageFn()
   let l:diff = system('git --no-pager diff --staged')
   let l:prompt = "generate a short commit message from the diff below:\n" . l:diff
-  let l:range = 0
   let l:config = {
   \  "engine": "chat",
   \  "options": {
@@ -386,7 +385,7 @@ function! GitCommitMessageFn()
   \    "temperature": 1,
   \  },
   \}
-  call vim_ai#AIRun(l:range, l:config, l:prompt)
+  call vim_ai#AIRun(l:config, l:prompt)
 endfunction
 command! GitCommitMessage call GitCommitMessageFn()
 
@@ -398,9 +397,9 @@ function! CodeReviewFn(range) range
   \    "initial_prompt": ">>> system\nyou are a clean code expert",
   \  },
   \}
-  '<,'>call vim_ai#AIChatRun(a:range, l:config, l:prompt)
+  exe a:firstline.",".a:lastline . "call vim_ai#AIChatRun(a:range, l:config, l:prompt)"
 endfunction
-command! -range CodeReview <line1>,<line2>call CodeReviewFn(<range>)
+command! -range=0 CodeReview <line1>,<line2>call CodeReviewFn(<count>)
 ```
 
 ## Contributing
