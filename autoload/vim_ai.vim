@@ -6,7 +6,6 @@ let s:chat_py = s:plugin_root . "/py/chat.py"
 
 " remembers last command parameters to be used in AIRedoRun
 let s:last_is_selection = 0
-let s:last_uses_range = 0
 let s:last_firstline = 1
 let s:last_lastline = 1
 let s:last_instruction = ""
@@ -92,6 +91,7 @@ endfunction
 
 function! s:GetSelectionOrRange(is_selection, ...)
   if a:is_selection
+    echoerr a:is_selection
     return s:GetVisualSelection()
   else
     return trim(join(getline(a:1, a:2), "\n"))
@@ -134,7 +134,7 @@ function! vim_ai#AIRun(config, ...) range
   let s:last_command = "complete"
   let s:last_config = a:config
   let s:last_instruction = l:instruction
-  let s:last_is_selection = a:is_selection
+  let s:last_is_selection = l:is_selection
   let s:last_firstline = a:firstline
   let s:last_lastline = a:lastline
 
@@ -212,7 +212,6 @@ function! vim_ai#AIChatRun(uses_range, config, ...) range
   endif
 
   let s:last_command = "chat"
-  let s:last_uses_range = a:uses_range
   let s:last_config = a:config
 
   execute "py3file " . s:chat_py
