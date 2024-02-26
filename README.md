@@ -81,13 +81,15 @@ To use an AI command, type the command followed by an instruction prompt. You ca
 
 **Tip:** Press `Ctrl-c` anytime to cancel completion
 
-**Tip:** setup your own [key bindings](#key-bindings) or use command shortcuts - `:AIE`, `:AIC`, `:AIR`
+**Tip:** Setup your own [key bindings](#key-bindings) or use command shortcuts - `:AIE`, `:AIC`, `:AIR`
+
+**Tip:** Combine commands with a range `:help range`, for example to select the whole buffer - `:%AIE fix grammar`
 
 If you are interested in more tips or would like to level up your Vim with more commands like [`:GitCommitMessage`](https://github.com/madox2/vim-ai/wiki/Custom-commands#suggest-a-git-commit-message) - suggesting a git commit message, visit the [Community Wiki](https://github.com/madox2/vim-ai/wiki).
 
 ## Reference
 
-In the documentation below,  `<selection>` denotes a visual selection, `{instruction}` an instruction prompt and `?` symbol an optional parameter.
+In the documentation below,  `<selection>` denotes a visual selection or any other range, `{instruction}` an instruction prompt and `?` symbol an optional parameter.
 
 ### `:AI`
 
