@@ -91,7 +91,6 @@ endfunction
 
 function! s:GetSelectionOrRange(is_selection, ...)
   if a:is_selection
-    echoerr a:is_selection
     return s:GetVisualSelection()
   else
     return trim(join(getline(a:1, a:2), "\n"))
