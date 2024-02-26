@@ -127,7 +127,7 @@ function! s:MarkdownClearSyntaxVariables()
   endif
 endfunction
 
-augroup Aichat
+augroup AichatSyntax
   autocmd! * <buffer>
   autocmd BufWinEnter <buffer> call s:MarkdownRefreshSyntax(1)
   autocmd BufUnload <buffer> call s:MarkdownClearSyntaxVariables()

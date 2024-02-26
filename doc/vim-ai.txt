@@ -213,6 +213,15 @@ To create custom commands, call `AIRun`, `AIEditRun` and `AIChatRun` functions: 
   endfunction
   command! -range AIPromptCodeReview <line1>,<line2>call AIPromptCodeReviewFn(<range>)
 
+AICHAT Files                                    *aichat*
+
+- Jump back and forth between the prompts typing [[ and ]]
+- Jump between the opening <<< and closing marker >>> of a prompt typing %
+  using the 'matchit' plug-in
+- select a chat prompt typing ic or ac (excluding or including the enclosing
+  markers)
+- enable folds of chat prompts by `g:vim_ai_folding = 1`
+
 ABOUT                                           *vim-ai-about*
 
 Contributions are welcome on GitHub:
