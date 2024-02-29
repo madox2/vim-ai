@@ -49,12 +49,13 @@ endfunction
 
 function! s:MakeSelectionPrompt(selection, instruction, config)
   let l:selection = ""
-  if a:instruction == ""
+  if empty(a:instruction)
     let l:selection = a:selection
   elseif !empty(a:selection)
     let l:boundary = a:config['options']['selection_boundary']
-    if l:boundary != "" && match(a:selection, l:boundary) == -1
-      " NOTE: surround selection with boundary (e.g. #####) in order to eliminate empty responses
+    if !empty(l:boundary) && match(a:selection, l:boundary) == -1
+      " NOTE: surround selection with boundary (e.g. #####) in order to
+      " eliminate empty responses
       let l:selection = l:boundary . "\n" . a:selection . "\n" . l:boundary
     else
       let l:selection = a:selection
@@ -63,9 +64,9 @@ function! s:MakeSelectionPrompt(selection, instruction, config)
   return l:selection
 endfunction
 
-function! s:MakePrompt(selection, instruction, config)
+function! s:MakePrompt(config, instruction, selection)
   let l:instruction = trim(a:instruction)
-  let l:delimiter = l:instruction != "" && a:selection != "" ? ":\n" : ""
+  let l:delimiter = empty(l:instruction) || empty(a:selection) ? "" : ":\n"
   let l:selection = s:MakeSelectionPrompt(a:selection, l:instruction, a:config)
   return join([l:instruction, l:delimiter, l:selection], "")
 endfunction
@@ -122,15 +123,24 @@ endfunction
 " - config       - function scoped vim_ai_complete config
 " - a:1          - optional instruction prompt
 " - a:2          - optional selection pending (to override g:vim_ai_is_selection_pending)
-function! vim_ai#AIRun(config, ...) range
+function! vim_ai#AIRun(config, ...) range abort
   let l:config = vim_ai_config#ExtendDeep(g:vim_ai_complete, a:config)
-  let l:instruction = a:0 > 0 ? a:1 : ""
+
+  let l:instruction = a:0 > 0 ? trim(a:1) : ''
+  if l:instruction =~# '^/'
+    let i = match(l:instruction . ' ', '\s')
+    let role = l:instruction[1:i-1]
+    let l:instruction = l:instruction[i:-1]
+    call vim_ai_roles#set_config_role(l:config, role)
+  endif
+
   " used for getting in Python script
   let l:is_selection = a:0 > 1 ? a:2 : g:vim_ai_is_selection_pending
   let l:selection = s:GetSelectionOrRange(l:is_selection, a:firstline, a:lastline)
-  let l:prompt = s:MakePrompt(l:selection, l:instruction, l:config)
 
-  let s:last_command = "complete"
+  let l:prompt = s:MakePrompt(l:config, l:instruction, l:selection)
+
+  let s:last_command = 'complete'
   let s:last_config = a:config
   let s:last_instruction = l:instruction
   let s:last_is_selection = l:is_selection
@@ -144,7 +154,7 @@ function! vim_ai#AIRun(config, ...) range
   else
     execute "normal! " . a:lastline . "Go"
   endif
-  execute "py3file " . s:complete_py
+  execute 'py3file ' . s:complete_py
   execute "normal! " . a:lastline . "G"
   call s:set_nopaste(l:config)
 endfunction
@@ -153,15 +163,24 @@ endfunction
 " - config       - function scoped vim_ai_edit config
 " - a:1          - optional instruction prompt
 " - a:2          - optional selection pending (to override g:vim_ai_is_selection_pending)
-function! vim_ai#AIEditRun(config, ...) range
+function! vim_ai#AIEditRun(config, ...) range abort
   let l:config = vim_ai_config#ExtendDeep(g:vim_ai_edit, a:config)
-  let l:instruction = a:0 > 0 ? a:1 : ""
+
+  let l:instruction = a:0 > 0 ? trim(a:1) : ''
+  if l:instruction =~# '^/'
+    let i = match(l:instruction . ' ', '\s')
+    let role = l:instruction[1:i-1]
+    let l:instruction = l:instruction[i:-1]
+    call vim_ai_roles#set_config_role(l:config, role)
+  endif
+
   " used for getting in Python script
   let l:is_selection = a:0 > 1 ? a:2 : g:vim_ai_is_selection_pending
   let l:selection = s:GetSelectionOrRange(l:is_selection, a:firstline, a:lastline)
-  let l:prompt = s:MakePrompt(l:selection, l:instruction, l:config)
 
-  let s:last_command = "edit"
+  let l:prompt = s:MakePrompt(l:config, l:instruction, l:selection)
+
+  let s:last_command = 'edit'
   let s:last_config = a:config
   let s:last_instruction = l:instruction
   let s:last_is_selection = l:is_selection
@@ -171,7 +190,7 @@ function! vim_ai#AIEditRun(config, ...) range
   call s:set_paste(l:config)
   call s:SelectSelectionOrRange(l:is_selection, a:firstline, a:lastline)
   execute "normal! c"
-  execute "py3file " . s:complete_py
+  execute 'py3file ' . s:complete_py
   call s:set_nopaste(l:config)
 endfunction
 
@@ -179,9 +198,9 @@ endfunction
 " - uses_range   - true if range passed
 " - config       - function scoped vim_ai_chat config
 " - a:1          - optional instruction prompt
-function! vim_ai#AIChatRun(uses_range, config, ...) range
+function! vim_ai#AIChatRun(uses_range, config, ...) range abort
   let l:config = vim_ai_config#ExtendDeep(g:vim_ai_chat, a:config)
-  let l:instruction = ""
+
   " l:is_selection used in Python script
   if a:uses_range
     let l:is_selection = g:vim_ai_is_selection_pending
@@ -190,13 +209,32 @@ function! vim_ai#AIChatRun(uses_range, config, ...) range
     let l:is_selection = 0
     let l:selection = ''
   endif
+
+  if a:0 > 0 || a:uses_range
+    let l:instruction = a:0 > 0 ? trim(a:1) : ''
+    if l:instruction =~# '^/'
+      let i = match(l:instruction . ' ', '\s')
+      let role = l:instruction[1:i-1]
+      let l:instruction = l:instruction[i:-1]
+      call vim_ai_roles#set_config_role(l:config, role)
+    endif
+
+    let l:prompt = s:MakePrompt(l:config, l:instruction, l:selection)
+  else
+    let l:instruction = ""
+    let l:prompt = ""
+  endif
+
+  let s:last_command = 'chat'
+  let s:last_config = a:config
+
   call s:set_paste(l:config)
   if &filetype != 'aichat'
-    let l:chat_win_id = bufwinid(s:scratch_buffer_name)
-    if l:chat_win_id != -1
-      " TODO: look for first active chat buffer, in case .aichat file is used
-      " reuse chat in active window
-      call win_gotoid(l:chat_win_id)
+    let l:chat_win_ids = win_findbuf(bufnr(s:scratch_buffer_name))
+    if !empty(l:chat_win_ids)
+      " TODO: look for first active chat buffer. If .aichat file is used,
+      " then reuse chat in active window
+      call win_gotoid(l:chat_win_ids[0])
     else
       " open new chat window
       let l:open_conf = l:config['ui']['open_chat_command']
@@ -204,22 +242,13 @@ function! vim_ai#AIChatRun(uses_range, config, ...) range
     endif
   endif
 
-  let l:prompt = ""
-  if a:0 > 0 || a:uses_range
-    let l:instruction = a:0 > 0 ? a:1 : ""
-    let l:prompt = s:MakePrompt(l:selection, l:instruction, l:config)
-  endif
-
-  let s:last_command = "chat"
-  let s:last_config = a:config
-
-  execute "py3file " . s:chat_py
+  execute 'py3file ' . s:chat_py
   call s:set_nopaste(l:config)
 endfunction
 
 " Start a new chat
 " a:1 - optional preset shorcut (below, right, tab)
-function! vim_ai#AINewChatRun(...)
+function! vim_ai#AINewChatRun(...) abort
   let l:open_conf = a:0 > 0 ? "preset_" . a:1 : g:vim_ai_chat['ui']['open_chat_command']
   call s:OpenChatWindow(l:open_conf)
   call vim_ai#AIChatRun(0, {})
