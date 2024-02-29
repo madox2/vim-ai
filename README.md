@@ -65,25 +65,19 @@ git clone https://github.com/madox2/vim-ai.git ~/.local/share/nvim/site/pack/plu
 To use an AI command, type the command followed by an instruction prompt. You can also combine it with a visual selection. Here is a brief overview of available commands:
 
 ```
-=============== Basic AI commands ===============
+========== Basic AI commands ========
 
 :AI         complete text
 :AIEdit     edit text
 :AIChat     continue or open new chat
-
-=============== Role AI commands ================
-
-:AIAs {role}      complete text as {role}
-:AIEditAs {role}  edit text as {role}
-:AIChatAs {role}  continue or open new chat as {role}
-
-=================== Utilities ===================
 
 :AIRedo     repeat last AI command
 :AINewChat  open new chat
 
 :help vim-ai
 ```
+
+**Tip:** A role {role} can be passed to the above commands by an initial parameter /{role}, for example `:AIEdit /refactorer`. 
 
 **Tip:** Press `Ctrl-c` anytime to cancel completion
 
@@ -323,6 +317,20 @@ let g:vim_ai_chat = {
 " - setting max tokens to 0 will exclude it from the OpenAI API request parameters, it is
 "   unclear/undocumented what it exactly does, but it seems to resolve issues when the model
 "   hits token limit, which respond with `OpenAI: HTTPError 400`
+```
+
+### Roles
+
+Roles are configured in `vimfiles/vim_ai/roles.yaml` (where `vimfiles` is `~/.vim` on Linux or `%USERPROFILE%/vimfiles` on Microsoft Windows) which uses the following syntax:
+
+```
+- name: refactorer
+  prompt: >
+    You are a Clean Code expert, I have the following code, please refactor it in
+    a more clean and concise way so that my colleagues can maintain the code more
+    easily. Also, explain why you want to refactor the code so that I can add the
+    explanation to the Pull Request.
+  temperature: 0.2
 ```
 
 ### Using custom API
