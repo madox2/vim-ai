@@ -104,6 +104,41 @@ Options: >
 Check OpenAI docs for more information:
 https://platform.openai.com/docs/api-reference/chat
 
+ROLES                                        *vim-ai-roles*
+
+Roles are configured in 'vimfiles'/vim_ai/roles.yaml (where 'vimfiles' is ~/.vim on
+Linux or %USERPROFILE%/vimfiles on Microsoft Windows) which uses the following
+syntax:
+
+>
+- name: refactorer
+  prompt: >
+    You are a Clean Code expert, I have the following code, please refactor it in
+    a more clean and concise way so that my colleagues can maintain the code more
+    easily. Also, explain why you want to refactor the code so that I can add the
+    explanation to the Pull Request.
+  temperature: 0.2
+
+                                                *:AIAs*
+
+:AIAs {role}                           complete the text on the current line
+:AIAs {role} {prompt}                  complete the prompt
+<selection> :AIAs {role}               complete the selection
+<selection> :AIAs {role} {instruction} complete the selection using the instruction
+
+                                                *:AIEditAs*
+
+<selection>? :AIEditAs {role}                edit the current line or the selection
+<selection>? :AIEditAs {role} {instruction}  edit the current line or the
+                                             selection using the instruction
+
+                                                *:AIChatAs*
+
+:AIChat {role}                              continue or start a new conversation.
+<selection>? :AIChat {role} {instruction}?  start a new conversation given the
+                                            selection, the instruction or both
+
+
 INCLUDE FILES                                  *vim-ai-include*
 
 To include files in the chat a special `include` role is used: >

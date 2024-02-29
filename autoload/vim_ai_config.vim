@@ -93,6 +93,25 @@ call s:MakeConfig("vim_ai_chat")
 call s:MakeConfig("vim_ai_complete")
 call s:MakeConfig("vim_ai_edit")
 
+if !exists('g:vim_ai_roles_path')
+  let s:vimfiles_dir = split(&runtimepath, ',')[0]
+  if isdirectory(s:vimfiles_dir)
+    let g:vimfiles_dir = s:vimfiles_dir
+  elseif has('unix')
+    let g:vimfiles_dir = expand('$HOME') . '/.vim'
+  else " if has('win32')
+    " see :help vimfiles
+    let g:vimfiles_dir = expand('$HOME') . '\vimfiles'
+  endif
+  let g:vim_ai_roles_path = s:vimfiles_dir . '/vim_ai/roles.yaml'
+  unlet s:vimfiles_dir
+endif
+
+" " Only warn once roles are used completing or calling *Ascommands
+" if !filereadable(g:vim_ai_roles_path)
+"   echoerr 'Error: g:vim_ai_roles_path = ' g:vim_ai_roles_path . 'not readable!'
+" endif
+
 function! vim_ai_config#load()
   " nothing to do - triggers autoloading of this file
 endfunction
