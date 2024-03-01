@@ -321,17 +321,22 @@ let g:vim_ai_chat = {
 
 ### Roles
 
-Roles are configured in `vimfiles/vim_ai/roles.yaml` (where `vimfiles` is `~/.vim` on Linux or `%USERPROFILE%/vimfiles` on Microsoft Windows) which uses the following syntax:
+Roles are defined
 
-```
-- name: refactorer
-  prompt: >
-    You are a Clean Code expert, I have the following code, please refactor it in
-    a more clean and concise way so that my colleagues can maintain the code more
-    easily. Also, explain why you want to refactor the code so that I can add the
-    explanation to the Pull Request.
-  temperature: 0.2
-```
+- either in `vimfiles/vim_ai/roles/*.aichat` files using the above syntax
+- or in the single file `vimfiles/vim_ai/roles.yaml` using the following [aichat](https://github.com/sigoden/aichat/wiki/Role-Examples) syntax
+
+    ```
+    - name: refactorer
+      prompt: >
+        You are a clean-code expert.
+        Please refactor the input and explain why.
+      temperature: 0.2
+    ```
+
+
+Here `vimfiles` is `~/.vim` on Unix or `%USERPROFILE%/vimfiles` on Microsoft
+Windows) 
 
 ### Using custom API
 

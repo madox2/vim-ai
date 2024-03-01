@@ -109,17 +109,19 @@ ROLES                                        *vim-ai-roles*
 A role {role} can be passed to the above commands by an initial parameter
 /{role}, for example :AIEdit /refactorer.
 
-Roles are configured in 'vimfiles'/vim_ai/roles.yaml (where 'vimfiles' is ~/.vim on
-Linux or %USERPROFILE%/vimfiles on Microsoft Windows) which uses the following
-syntax:
+Roles are defined
+
+  - either in 'vimfiles'/vim_ai/roles/*.aichat files
+  - or in the single file 'vimfiles'/vim_ai/roles.yaml
+
+Here 'vimfiles' is ~/.vim on Linux or %USERPROFILE%/vimfiles on Microsoft
+Windows) which uses the following aichat syntax:
 
 >
 - name: refactorer
   prompt: >
-    You are a Clean Code expert, I have the following code, please refactor it in
-    a more clean and concise way so that my colleagues can maintain the code more
-    easily. Also, explain why you want to refactor the code so that I can add the
-    explanation to the Pull Request.
+    You are a clean-code expert.
+    Please refactor the input and explain why.
   temperature: 0.2
 
 
