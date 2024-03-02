@@ -124,14 +124,14 @@ endfunction
 " - a:1          - optional instruction prompt
 " - a:2          - optional selection pending (to override g:vim_ai_is_selection_pending)
 function! vim_ai#AIRun(config, ...) range abort
-  let l:config = vim_ai_config#ExtendDeep(g:vim_ai_complete, a:config)
+  let l:config = vim_ai_config#ExtendDeep(deepcopy(g:vim_ai_complete), a:config)
 
   let l:instruction = a:0 > 0 ? trim(a:1) : ''
   if l:instruction =~# '^/'
     let i = match(l:instruction . ' ', '\s')
     let role = l:instruction[1:i-1]
     let l:instruction = l:instruction[i:-1]
-    call vim_ai_roles#set_config_role(l:config, role)
+    let l:config = vim_ai_roles#set_config_role(l:config, role)
   endif
 
   " used for getting in Python script
@@ -164,14 +164,14 @@ endfunction
 " - a:1          - optional instruction prompt
 " - a:2          - optional selection pending (to override g:vim_ai_is_selection_pending)
 function! vim_ai#AIEditRun(config, ...) range abort
-  let l:config = vim_ai_config#ExtendDeep(g:vim_ai_edit, a:config)
+  let l:config = vim_ai_config#ExtendDeep(deepcopy(g:vim_ai_edit), a:config)
 
   let l:instruction = a:0 > 0 ? trim(a:1) : ''
   if l:instruction =~# '^/'
     let i = match(l:instruction . ' ', '\s')
     let role = l:instruction[1:i-1]
     let l:instruction = l:instruction[i:-1]
-    call vim_ai_roles#set_config_role(l:config, role)
+    let l:config = vim_ai_roles#set_config_role(l:config, role)
   endif
 
   " used for getting in Python script
@@ -199,7 +199,7 @@ endfunction
 " - config       - function scoped vim_ai_chat config
 " - a:1          - optional instruction prompt
 function! vim_ai#AIChatRun(uses_range, config, ...) range abort
-  let l:config = vim_ai_config#ExtendDeep(g:vim_ai_chat, a:config)
+  let l:config = vim_ai_config#ExtendDeep(deepcopy(g:vim_ai_chat), a:config)
 
   " l:is_selection used in Python script
   if a:uses_range
@@ -216,7 +216,7 @@ function! vim_ai#AIChatRun(uses_range, config, ...) range abort
       let i = match(l:instruction . ' ', '\s')
       let role = l:instruction[1:i-1]
       let l:instruction = l:instruction[i:-1]
-      call vim_ai_roles#set_config_role(l:config, role)
+      let l:config = vim_ai_roles#set_config_role(l:config, role)
     endif
 
     let l:prompt = s:MakePrompt(l:config, l:instruction, l:selection)

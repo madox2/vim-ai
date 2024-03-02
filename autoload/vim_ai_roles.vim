@@ -111,4 +111,5 @@ function! vim_ai_roles#set_config_role(config, role) abort
   if has_key(roles[a:role], 'temperature')
     let a:config.temperature = roles[a:role].temperature
   endif
+  return vim_ai_config#ExtendDeep(deepcopy(a:config), roles[a:role])
 endfunction
