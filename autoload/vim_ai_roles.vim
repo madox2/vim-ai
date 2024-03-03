@@ -45,7 +45,6 @@ function! s:ParseChatHeaderOptions(filepath)
           let key = parts[0]
           let value = parts[1]
           if key == 'initial_prompt'
-            let key = 'prompt'
             let value = split(value, '\\n')
           endif
           let options[key] = value
@@ -84,6 +83,18 @@ function! vim_ai_roles#get_roles_file(file) abort
     endif
   endfor
 
+  " convert to vim-ai config dictionary form
+  for role in keys(roles)
+    let roles[role].options = {}
+    if has_key(roles[role], 'prompt')
+      let roles[role].options.initial_prompt = ">>> system\n" . roles[role].prompt
+      unlet roles[role].prompt
+    endif
+    if has_key(roles[role], 'temperature')
+      let roles[role].options.temperature = roles[role].temperature
+      unlet roles[role].temperature
+    endif
+  endfor
   return roles
 endfunction
 
@@ -99,17 +110,11 @@ function! vim_ai_roles#set_config_role(config, role) abort
     if !has_key(roles, a:role)
       throw "The role " . a:role . " does not exist!"
     endif
-    if !has_key(roles[a:role], 'prompt')
+    if !has_key(roles[a:role].options, 'initial_prompt')
       throw "The role " . a:role . " does not have a prompt!"
     endif
   catch
-    " Handle the exception here, e.g., by displaying an error message
     echohl ErrorMsg | echomsg v:exception | echohl None
   endtry
-  let a:config.options.initial_prompt =
-        \ ">>> system\n" . roles[a:role].prompt
-  if has_key(roles[a:role], 'temperature')
-    let a:config.temperature = roles[a:role].temperature
-  endif
   return vim_ai_config#ExtendDeep(deepcopy(a:config), roles[a:role])
 endfunction
