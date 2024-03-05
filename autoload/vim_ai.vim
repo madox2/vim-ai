@@ -124,9 +124,9 @@ endfunction
 " - a:1          - optional instruction prompt
 " - a:2          - optional selection pending (to override g:vim_ai_is_selection_pending)
 function! vim_ai#AIRun(config, ...) range abort
-  let l:config = vim_ai_config#ExtendDeep(deepcopy(g:vim_ai_complete), a:config)
-
+  let l:config = a:config
   let l:instruction = a:0 > 0 ? trim(a:1) : ''
+
   if l:instruction =~# '^/'
     let i = match(l:instruction . ' ', '\s')
     let role = l:instruction[1:i-1]
@@ -134,16 +134,19 @@ function! vim_ai#AIRun(config, ...) range abort
     let l:config = vim_ai_roles#set_config_role(l:config, role)
   endif
 
+  let s:last_config = deepcopy(l:config)
+
+  let l:config = vim_ai_config#ExtendDeep(deepcopy(g:vim_ai_complete), l:config)
+
   " used for getting in Python script
   let l:is_selection = a:0 > 1 ? a:2 : g:vim_ai_is_selection_pending
   let l:selection = s:GetSelectionOrRange(l:is_selection, a:firstline, a:lastline)
 
   let l:prompt = s:MakePrompt(l:config, l:instruction, l:selection)
 
-  let s:last_command = 'complete'
-  let s:last_config = a:config
   let s:last_instruction = l:instruction
   let s:last_is_selection = l:is_selection
+  let s:last_command = 'complete'
   let s:last_firstline = a:firstline
   let s:last_lastline = a:lastline
 
@@ -164,9 +167,9 @@ endfunction
 " - a:1          - optional instruction prompt
 " - a:2          - optional selection pending (to override g:vim_ai_is_selection_pending)
 function! vim_ai#AIEditRun(config, ...) range abort
-  let l:config = vim_ai_config#ExtendDeep(deepcopy(g:vim_ai_edit), a:config)
-
+  let l:config = a:config
   let l:instruction = a:0 > 0 ? trim(a:1) : ''
+
   if l:instruction =~# '^/'
     let i = match(l:instruction . ' ', '\s')
     let role = l:instruction[1:i-1]
@@ -174,16 +177,19 @@ function! vim_ai#AIEditRun(config, ...) range abort
     let l:config = vim_ai_roles#set_config_role(l:config, role)
   endif
 
+  let s:last_config = deepcopy(l:config)
+
+  let l:config = vim_ai_config#ExtendDeep(deepcopy(g:vim_ai_edit), l:config)
+
   " used for getting in Python script
   let l:is_selection = a:0 > 1 ? a:2 : g:vim_ai_is_selection_pending
   let l:selection = s:GetSelectionOrRange(l:is_selection, a:firstline, a:lastline)
 
   let l:prompt = s:MakePrompt(l:config, l:instruction, l:selection)
 
-  let s:last_command = 'edit'
-  let s:last_config = a:config
   let s:last_instruction = l:instruction
   let s:last_is_selection = l:is_selection
+  let s:last_command = 'edit'
   let s:last_firstline = a:firstline
   let s:last_lastline = a:lastline
 
@@ -199,8 +205,6 @@ endfunction
 " - config       - function scoped vim_ai_chat config
 " - a:1          - optional instruction prompt
 function! vim_ai#AIChatRun(uses_range, config, ...) range abort
-  let l:config = vim_ai_config#ExtendDeep(deepcopy(g:vim_ai_chat), a:config)
-
   " l:is_selection used in Python script
   if a:uses_range
     let l:is_selection = g:vim_ai_is_selection_pending
@@ -210,23 +214,30 @@ function! vim_ai#AIChatRun(uses_range, config, ...) range abort
     let l:selection = ''
   endif
 
-  if a:0 > 0 || a:uses_range
-    let l:instruction = a:0 > 0 ? trim(a:1) : ''
+  let l:config = a:config
+
+  if a:0 > 0
+    let l:instruction = trim(a:1)
     if l:instruction =~# '^/'
       let i = match(l:instruction . ' ', '\s')
       let role = l:instruction[1:i-1]
       let l:instruction = l:instruction[i:-1]
       let l:config = vim_ai_roles#set_config_role(l:config, role)
     endif
-
-    let l:prompt = s:MakePrompt(l:config, l:instruction, l:selection)
   else
     let l:instruction = ""
+  endif
+
+  let s:last_config = deepcopy(l:config)
+  let l:config = vim_ai_config#ExtendDeep(deepcopy(g:vim_ai_chat), l:config)
+
+  if a:0 > 0 || a:uses_range
+    let l:prompt = s:MakePrompt(l:config, l:instruction, l:selection)
+  else
     let l:prompt = ""
   endif
 
   let s:last_command = 'chat'
-  let s:last_config = a:config
 
   call s:set_paste(l:config)
   if &filetype != 'aichat'
