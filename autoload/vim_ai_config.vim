@@ -70,6 +70,9 @@ endif
 if !exists("g:vim_ai_debug_log_file")
   let g:vim_ai_debug_log_file = "/tmp/vim_ai_debug.log"
 endif
+if !exists("g:vim_ai_token_file_path")
+  let g:vim_ai_token_file_path = "~/.config/openai.token"
+endif
 
 function! vim_ai_config#ExtendDeep(defaults, override) abort
   let l:result = a:defaults
