@@ -161,6 +161,10 @@ You can also customize the options in the chat header: >
   generate a paragraph of lorem ipsum
   ...
 
+MARKDOWN HIGHLIGHTING                            *g:aichat_markdown*
+
+Set g:aichat_markdown = 1 to enable full markdown highlighting in aichat files
+
 KEY BINDINGS
 
 Examples how configure key bindings and customize commands: >
