@@ -40,6 +40,12 @@ echo "YOUR_OPENAI_API_KEY,YOUR_OPENAI_ORG_ID" > ~/.config/openai.token
 export OPENAI_API_KEY="YOUR_OPENAI_API_KEY,YOUR_OPENAI_ORG_ID"
 ```
 
+The default api key file location is `~/.config/openai.token`, but you can change it by setting the `g:vim_ai_token_file_path` in your `.vimrc` file:
+
+```vim
+let g:vim_ai_token_file_path = '~/.config/openai.token'
+```
+
 ### Using `vim-plug`
 
 ```vim

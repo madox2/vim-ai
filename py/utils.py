@@ -19,7 +19,7 @@ class KnownError(Exception):
     pass
 
 def load_api_key():
-    config_file_path = os.path.join(os.path.expanduser("~"), ".config/openai.token")
+    config_file_path = os.path.expanduser(vim.eval("g:vim_ai_token_file_path"))
     api_key_param_value = os.getenv("OPENAI_API_KEY")
     try:
         with open(config_file_path, 'r') as file:

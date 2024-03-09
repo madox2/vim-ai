@@ -138,8 +138,13 @@ function! vim_ai#AIRun(config, ...) range abort
 
   let l:config = vim_ai_config#ExtendDeep(deepcopy(g:vim_ai_complete), l:config)
 
-  " used for getting in Python script
-  let l:is_selection = a:0 > 1 ? a:2 : g:vim_ai_is_selection_pending
+  " l:is_selection used in Python script
+  if a:0 > 1
+    let l:is_selection = a:2
+  else
+    let l:is_selection = g:vim_ai_is_selection_pending &&
+          \ a:firstline == line("'<") && a:lastline == line("'>")
+  endif
   let l:selection = s:GetSelectionOrRange(l:is_selection, a:firstline, a:lastline)
 
   let l:prompt = s:MakePrompt(l:config, l:instruction, l:selection)
@@ -181,8 +186,13 @@ function! vim_ai#AIEditRun(config, ...) range abort
 
   let l:config = vim_ai_config#ExtendDeep(deepcopy(g:vim_ai_edit), l:config)
 
-  " used for getting in Python script
-  let l:is_selection = a:0 > 1 ? a:2 : g:vim_ai_is_selection_pending
+  " l:is_selection used in Python script
+  if a:0 > 1
+    let l:is_selection = a:2
+  else
+    let l:is_selection = g:vim_ai_is_selection_pending &&
+          \ a:firstline == line("'>") && a:lastline == line("'>")
+  endif
   let l:selection = s:GetSelectionOrRange(l:is_selection, a:firstline, a:lastline)
 
   let l:prompt = s:MakePrompt(l:config, l:instruction, l:selection)
@@ -207,7 +217,8 @@ endfunction
 function! vim_ai#AIChatRun(uses_range, config, ...) range abort
   " l:is_selection used in Python script
   if a:uses_range
-    let l:is_selection = g:vim_ai_is_selection_pending
+    let l:is_selection = g:vim_ai_is_selection_pending &&
+          \ a:firstline == line("'<") && a:lastline == line("'>")
     let l:selection = s:GetSelectionOrRange(l:is_selection, a:firstline, a:lastline)
   else
     let l:is_selection = 0
