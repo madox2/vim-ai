@@ -10,7 +10,8 @@ engine = config['engine']
 prompt, role_options = parse_prompt_and_role(vim.eval("l:prompt"))
 config_options = {
     **config['options'],
-    **role_options,
+    **role_options['options_default'],
+    **role_options['options_complete'],
 }
 openai_options = make_openai_options(config_options)
 http_options = make_http_options(config_options)

@@ -269,19 +269,37 @@ def load_role_config(role):
     roles.read(roles_config_path)
     if not role in roles:
         raise KnownError(f"Role {role} not found") # TODO handle errors
-    return roles[role]
+
+    options = roles[f"{role}.options"] if f"{role}.options" in roles else {}
+    options_complete =roles[f"{role}.options-complete"] if f"{role}.options-complete" in roles else {}
+    options_chat = roles[f"{role}.options-chat"] if f"{role}.options-chat" in roles else {}
+
+    return {
+        'role': dict(roles[role]),
+        'options': {
+            'options_default': dict(options),
+            'options_complete': dict(options_complete),
+            'options_chat': dict(options_chat),
+        },
+    }
+
+empty_role_options = {
+    'options_default': {},
+    'options_complete': {},
+    'options_chat': {},
+}
 
 def parse_prompt_and_role(raw_prompt):
     prompt = raw_prompt.strip()
     role = re.split(' |:', prompt)[0]
     if not role.startswith('/'):
         # does not require role
-        return (prompt, {})
+        return (prompt, empty_role_options)
 
     prompt = prompt[len(role):].strip()
     role = role[1:]
 
-    role_config = load_role_config(role)
+    config = load_role_config(role)
     delim = '' if prompt.startswith(':') else ':\n'
-    prompt = role_config['prompt'] + delim + prompt
-    return (prompt, {})
+    prompt = config['role']['prompt'] + delim + prompt
+    return (prompt, config['options'])

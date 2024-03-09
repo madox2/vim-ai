@@ -8,7 +8,8 @@ prompt, role_options = parse_prompt_and_role(vim.eval("l:prompt"))
 config = normalize_config(vim.eval("l:config"))
 config_options = {
     **config['options'],
-    **role_options,
+    **role_options['options_default'],
+    **role_options['options_chat'],
 }
 config_ui = config['ui']
 
