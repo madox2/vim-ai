@@ -11,6 +11,7 @@ import re
 from urllib.error import URLError
 from urllib.error import HTTPError
 import traceback
+import configparser
 
 is_debugging = vim.eval("g:vim_ai_debug") == "1"
 debug_log_file = vim.eval("g:vim_ai_debug_log_file")
@@ -261,3 +262,26 @@ def handle_completion_error(error):
 def clear_echo_message():
     # https://neovim.discourse.group/t/how-to-clear-the-echo-message-in-the-command-line/268/3
     vim.command("call feedkeys(':','nx')")
+
+def load_role_config(role):
+    roles_config_path = os.path.expanduser('~/.vim/roles.ini') # TODO configure
+    roles = configparser.ConfigParser()
+    roles.read(roles_config_path)
+    if not role in roles:
+        raise KnownError(f"Role {role} not found") # TODO handle errors
+    return roles[role]
+
+def parse_prompt_and_role(raw_prompt):
+    prompt = raw_prompt.strip()
+    role = re.split(' |:', prompt)[0]
+    if not role.startswith('/'):
+        # does not require role
+        return (prompt, {})
+
+    prompt = prompt[len(role):].strip()
+    role = role[1:]
+
+    role_config = load_role_config(role)
+    delim = '' if prompt.startswith(':') else ':\n'
+    prompt = role_config['prompt'] + delim + prompt
+    return (prompt, {})
