@@ -1,11 +1,4 @@
 call vim_ai_config#load()
-if &compatible || exists('g:loaded_vim_ai')
-    finish
-endif
-
-function! s:vim_ai()
-    
-endfunction
 
 let g:loaded_vim_ai = 1
 
