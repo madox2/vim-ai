@@ -1,8 +1,10 @@
 call vim_ai_config#load()
 
+
 let s:plugin_root = expand('<sfile>:p:h:h')
 let s:complete_py = s:plugin_root . "/py/complete.py"
 let s:chat_py = s:plugin_root . "/py/chat.py"
+let s:roles_py = s:plugin_root . "/py/roles.py"
 
 " remembers last command parameters to be used in AIRedoRun
 let s:last_is_selection = 0
@@ -248,4 +250,11 @@ function! vim_ai#AIRedoRun()
     " chat does not need prompt, all information are in the buffer already
     call vim_ai#AIChatRun(0, s:last_config)
   endif
+endfunction
+
+function! vim_ai#RoleCompletion(A,L,P) abort
+  execute "py3file " . s:roles_py
+  call map(l:role_list, '"/" . v:val')
+  echom a:A
+  return filter(l:role_list, 'v:val =~ "^' . a:A . '"')
 endfunction
