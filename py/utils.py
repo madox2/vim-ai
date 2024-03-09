@@ -265,10 +265,14 @@ def clear_echo_message():
 
 def load_role_config(role):
     roles_config_path = os.path.expanduser(vim.eval("g:vim_ai_roles_config_file"))
+    if not os.path.exists(roles_config_path):
+        raise Exception(f"Role config file does not exist: {roles_config_path}")
+
     roles = configparser.ConfigParser()
     roles.read(roles_config_path)
+
     if not role in roles:
-        raise KnownError(f"Role {role} not found") # TODO handle errors
+        raise Exception(f"Role `{role}` not found")
 
     options = roles[f"{role}.options"] if f"{role}.options" in roles else {}
     options_complete =roles[f"{role}.options-complete"] if f"{role}.options-complete" in roles else {}
