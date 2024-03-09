@@ -90,7 +90,7 @@ To use an AI command, type the command followed by an instruction prompt. You ca
 
 **Tip:** Setup your own [key bindings](#key-bindings) or use command shortcuts - `:AIE`, `:AIC`, `:AIR`
 
-**Tip:** A [custom role](#role) {role} can be passed to the above commands by an initial parameter /{role}, for example `:AIEdit /grammar`.
+**Tip:** A [custom role](#roles) {role} can be passed to the above commands by an initial parameter /{role}, for example `:AIEdit /grammar`.
 
 **Tip:** Combine commands with a range `:help range`, for example to select the whole buffer - `:%AIE fix grammar`
 
