@@ -1,4 +1,13 @@
 call vim_ai_config#load()
+if &compatible || exists('g:loaded_vim_ai')
+    finish
+endif
+
+function! s:vim_ai()
+    
+endfunction
+
+let g:loaded_vim_ai = 1
 
 let s:plugin_root = expand('<sfile>:p:h:h')
 let s:complete_py = s:plugin_root . "/py/complete.py"
@@ -130,7 +139,7 @@ function! vim_ai#AIRun(config, ...) range
     let l:is_selection = a:2
   else
     let l:is_selection = g:vim_ai_is_selection_pending &&
-          \ a:firstline == line("'>") && a:lastline == line("'>")
+          \ a:firstline == line("'<") && a:lastline == line("'>")
   endif
 
   let l:selection = s:GetSelectionOrRange(l:is_selection, a:firstline, a:lastline)
@@ -196,7 +205,7 @@ function! vim_ai#AIChatRun(uses_range, config, ...) range
   " l:is_selection used in Python script
   if a:uses_range
     let l:is_selection = g:vim_ai_is_selection_pending &&
-          \ a:firstline == line("'>") && a:lastline == line("'>")
+          \ a:firstline == line("'<") && a:lastline == line("'>")
     let l:selection = s:GetSelectionOrRange(l:is_selection, a:firstline, a:lastline)
   else
     let l:is_selection = 0
