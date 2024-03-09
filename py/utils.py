@@ -264,7 +264,7 @@ def clear_echo_message():
     vim.command("call feedkeys(':','nx')")
 
 def load_role_config(role):
-    roles_config_path = os.path.expanduser('~/.vim/roles.ini') # TODO configure
+    roles_config_path = os.path.expanduser(vim.eval("g:vim_ai_roles_config_file"))
     roles = configparser.ConfigParser()
     roles.read(roles_config_path)
     if not role in roles:

@@ -1,6 +1,5 @@
 call vim_ai_config#load()
 
-
 let s:plugin_root = expand('<sfile>:p:h:h')
 let s:complete_py = s:plugin_root . "/py/complete.py"
 let s:chat_py = s:plugin_root . "/py/chat.py"
