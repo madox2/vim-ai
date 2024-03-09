@@ -254,6 +254,5 @@ endfunction
 function! vim_ai#RoleCompletion(A,L,P) abort
   execute "py3file " . s:roles_py
   call map(l:role_list, '"/" . v:val')
-  echom a:A
   return filter(l:role_list, 'v:val =~ "^' . a:A . '"')
 endfunction
