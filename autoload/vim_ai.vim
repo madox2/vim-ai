@@ -1,5 +1,7 @@
 call vim_ai_config#load()
 
+let g:loaded_vim_ai = 1
+
 let s:plugin_root = expand('<sfile>:p:h:h')
 let s:complete_py = s:plugin_root . "/py/complete.py"
 let s:chat_py = s:plugin_root . "/py/chat.py"
@@ -125,8 +127,14 @@ endfunction
 function! vim_ai#AIRun(config, ...) range
   let l:config = vim_ai_config#ExtendDeep(g:vim_ai_complete, a:config)
   let l:instruction = a:0 > 0 ? a:1 : ""
-  " used for getting in Python script
-  let l:is_selection = a:0 > 1 ? a:2 : g:vim_ai_is_selection_pending
+  " l:is_selection used in Python script
+  if a:0 > 1
+    let l:is_selection = a:2
+  else
+    let l:is_selection = g:vim_ai_is_selection_pending &&
+          \ a:firstline == line("'<") && a:lastline == line("'>")
+  endif
+
   let l:selection = s:GetSelectionOrRange(l:is_selection, a:firstline, a:lastline)
   let l:prompt = s:MakePrompt(l:selection, l:instruction, l:config)
 
@@ -156,8 +164,13 @@ endfunction
 function! vim_ai#AIEditRun(config, ...) range
   let l:config = vim_ai_config#ExtendDeep(g:vim_ai_edit, a:config)
   let l:instruction = a:0 > 0 ? a:1 : ""
-  " used for getting in Python script
-  let l:is_selection = a:0 > 1 ? a:2 : g:vim_ai_is_selection_pending
+  " l:is_selection used in Python script
+  if a:0 > 1
+    let l:is_selection = a:2
+  else
+    let l:is_selection = g:vim_ai_is_selection_pending &&
+          \ a:firstline == line("'>") && a:lastline == line("'>")
+  endif
   let l:selection = s:GetSelectionOrRange(l:is_selection, a:firstline, a:lastline)
   let l:prompt = s:MakePrompt(l:selection, l:instruction, l:config)
 
@@ -184,7 +197,8 @@ function! vim_ai#AIChatRun(uses_range, config, ...) range
   let l:instruction = ""
   " l:is_selection used in Python script
   if a:uses_range
-    let l:is_selection = g:vim_ai_is_selection_pending
+    let l:is_selection = g:vim_ai_is_selection_pending &&
+          \ a:firstline == line("'<") && a:lastline == line("'>")
     let l:selection = s:GetSelectionOrRange(l:is_selection, a:firstline, a:lastline)
   else
     let l:is_selection = 0
