@@ -161,6 +161,22 @@ You can also customize the options in the chat header: >
   generate a paragraph of lorem ipsum
   ...
 
+ROLES
+
+Roles are defined in the `.ini` file: >
+
+    let g:vim_ai_roles_config_file = '/path/to/my/roles.ini'
+
+Example of a role: >
+
+    [grammar]
+    prompt = fix spelling and grammar
+
+    [grammar.options]
+    temperature = 0.4
+
+See roles-example.ini for more examples.
+
 KEY BINDINGS
 
 Examples how configure key bindings and customize commands: >
