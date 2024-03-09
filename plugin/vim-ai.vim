@@ -18,5 +18,5 @@ command! -range   -nargs=? AIEdit    <line1>,<line2>call vim_ai#AIEditRun({}, <q
 " AIChat defaults to passing nothing which is achieved by -range=0 and passing
 " <count> as described at https://stackoverflow.com/a/20133772
 command! -range=0 -nargs=? AIChat    <line1>,<line2>call vim_ai#AIChatRun(<count>, {}, <q-args>)
-command! -nargs=?          AINewChat                call vim_ai#AINewChatRun(<q-args>)
+command! -nargs=?          AINewChat                call vim_ai#AINewChatRun(<f-args>)
 command!                   AIRedo                   call vim_ai#AIRedoRun()
