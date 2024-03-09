@@ -42,7 +42,7 @@ def initialize_chat_window():
         vim.command("normal! i\n>>> user\n\n")
 
     if prompt:
-        vim.command("normal! a" + prompt)
+        vim.command("normal! i" + prompt)
         vim_break_undo_sequence()
         vim.command("redraw")
 
