@@ -304,6 +304,7 @@ def parse_prompt_and_role(raw_prompt):
     role = role[1:]
 
     config = load_role_config(role)
-    delim = '' if prompt.startswith(':') else ':\n'
-    prompt = config['role']['prompt'] + delim + prompt
+    if 'prompt' in config['role'] and config['role']['prompt']:
+        delim = '' if prompt.startswith(':') else ':\n'
+        prompt = config['role']['prompt'] + delim + prompt
     return (prompt, config['options'])
