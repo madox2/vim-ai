@@ -203,12 +203,13 @@ function! vim_ai#AIChatRun(uses_range, config, ...) range
     let l:selection = ''
   endif
   call s:set_paste(l:config)
+
   if &filetype != 'aichat'
-    let l:chat_win_id = bufwinid(s:scratch_buffer_name)
-    if l:chat_win_id != -1
-      " TODO: look for first active chat buffer, in case .aichat file is used
-      " reuse chat in active window
-      call win_gotoid(l:chat_win_id)
+    let l:chat_win_ids = win_findbuf(bufnr(s:scratch_buffer_name))
+    if !empty(l:chat_win_ids)
+      " TODO: look for first active chat buffer. If .aichat file is used,
+      " then reuse chat in active window
+      call win_gotoid(l:chat_win_ids[0])
     else
       " open new chat window
       let l:open_conf = l:config['ui']['open_chat_command']
