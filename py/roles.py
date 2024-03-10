@@ -3,6 +3,9 @@ import os
 import configparser
 
 roles_config_path = os.path.expanduser(vim.eval("g:vim_ai_roles_config_file"))
+if not os.path.exists(roles_config_path):
+    raise Exception(f"Role config file does not exist: {roles_config_path}")
+
 roles = configparser.ConfigParser()
 roles.read(roles_config_path)
 
