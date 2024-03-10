@@ -177,6 +177,11 @@ Example of a role: >
 
 See roles-example.ini for more examples.
 
+The roles in g:vim_ai_roles_config_file are converted to a Vim dictionary whose
+labels are the names of the roles. Optionally, roles can be added by setting
+g:vim_ai_roles_config_function to the name of a Vimscript function returning a
+dictionary of the same format as g:vim_ai_roles_config_file.
+
 KEY BINDINGS
 
 Examples how configure key bindings and customize commands: >
