@@ -6,6 +6,9 @@ if get(g:, 'aichat_markdown', 0) == 1
   runtime! syntax/markdown.vim
 endif
 
+syntax region myRegion start=/>>>.*$\zs/ end=/\ze<<<.*$/
+highlight default link myRegion Normal
+
 syntax match aichatRole ">>> system"
 syntax match aichatRole ">>> user"
 syntax match aichatRole ">>> include"
