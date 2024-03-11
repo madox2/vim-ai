@@ -207,13 +207,30 @@ function! vim_ai#AIChatRun(uses_range, config, ...) range
   if &filetype != 'aichat'
     let l:chat_win_ids = win_findbuf(bufnr(s:scratch_buffer_name))
     if !empty(l:chat_win_ids)
-      " TODO: look for first active chat buffer. If .aichat file is used,
-      " then reuse chat in active window
+      "  reuse chat in active window or tab
       call win_gotoid(l:chat_win_ids[0])
     else
-      " open new chat window
-      let l:open_conf = l:config['ui']['open_chat_command']
-      call s:OpenChatWindow(l:open_conf)
+      " allow .aichat files windows to be switched to, preferably on same tab
+			let buffer_list_tab = tabpagebuflist(tabpagenr())
+      let buffer_list_tab = filter(buffer_list_tab, 'getbufvar(v:val, "&filetype") ==# "aichat"')
+
+      if len(buffer_list_tab) > 0
+        call win_gotoid(win_findbuf(buffer_list_tab[0])[0])
+      else
+			  let buffer_list = []
+			  for i in range(tabpagenr('$'))
+			    call extend(buffer_list, tabpagebuflist(i + 1))
+			  endfor
+        let buffer_list = filter(buffer_list, 'getbufvar(v:val, "&filetype") ==# "aichat"')
+
+        if len(buffer_list) > 0
+          call win_gotoid(win_findbuf(buffer_list[0])[0])
+        else
+          " open new chat window
+          let l:open_conf = l:config['ui']['open_chat_command']
+          call s:OpenChatWindow(l:open_conf)
+        endif
+      endif
     endif
   endif
 
