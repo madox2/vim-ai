@@ -271,6 +271,13 @@ def load_role_config(role):
     roles = configparser.ConfigParser()
     roles.read(roles_config_path)
 
+    if vim.eval("exists('g:vim_ai_roles_config_function')") == '1':
+        roles_config_function = vim.eval("g:vim_ai_roles_config_function")
+        if not vim.eval("exists('*" + roles_config_function + "')"):
+            raise Exception(f"Role config function does not exist: {roles_config_function}")
+        else:
+            roles.update(vim.eval(roles_config_function + "()"))
+
     if not role in roles:
         raise Exception(f"Role `{role}` not found")
 
