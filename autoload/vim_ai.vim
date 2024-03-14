@@ -78,15 +78,13 @@ function! s:OpenChatWindow(open_conf)
 endfunction
 
 function! s:set_paste(config)
-  if a:config['ui']['paste_mode']
-    setlocal paste
-  endif
-endfunction
-
-function! s:set_nopaste(config)
-  if a:config['ui']['paste_mode']
-    setlocal nopaste
-  endif
+  if !a:config['ui']['paste_mode'] | return | endif
+  if &paste | return | endif
+  setlocal paste
+  augroup AiPaste
+    autocmd!
+    autocmd ModeChanged i:* exe 'set nopaste' | autocmd! AiPaste InsertLeave
+  augroup END
 endfunction
 
 function! s:GetSelectionOrRange(is_selection, ...)
@@ -152,7 +150,6 @@ function! vim_ai#AIRun(config, ...) range
   endif
   execute "py3file " . s:complete_py
   execute "normal! " . a:lastline . "G"
-  call s:set_nopaste(l:config)
 endfunction
 
 " Edit prompt
@@ -183,7 +180,6 @@ function! vim_ai#AIEditRun(config, ...) range
   call s:SelectSelectionOrRange(l:is_selection, a:firstline, a:lastline)
   execute "normal! c"
   execute "py3file " . s:complete_py
-  call s:set_nopaste(l:config)
 endfunction
 
 " Start and answer the chat
@@ -226,7 +222,6 @@ function! vim_ai#AIChatRun(uses_range, config, ...) range
   let s:last_config = a:config
 
   execute "py3file " . s:chat_py
-  call s:set_nopaste(l:config)
 endfunction
 
 " Start a new chat
