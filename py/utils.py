@@ -263,6 +263,14 @@ def clear_echo_message():
     # https://neovim.discourse.group/t/how-to-clear-the-echo-message-in-the-command-line/268/3
     vim.command("call feedkeys(':','nx')")
 
+def enhance_roles_with_custom_function(roles):
+    if vim.eval("exists('g:vim_ai_roles_config_function')") == '1':
+        roles_config_function = vim.eval("g:vim_ai_roles_config_function")
+        if not vim.eval("exists('*" + roles_config_function + "')"):
+            raise Exception(f"Role config function does not exist: {roles_config_function}")
+        else:
+            roles.update(vim.eval(roles_config_function + "()"))
+
 def load_role_config(role):
     roles_config_path = os.path.expanduser(vim.eval("g:vim_ai_roles_config_file"))
     if not os.path.exists(roles_config_path):
@@ -271,12 +279,7 @@ def load_role_config(role):
     roles = configparser.ConfigParser()
     roles.read(roles_config_path)
 
-    if vim.eval("exists('g:vim_ai_roles_config_function')") == '1':
-        roles_config_function = vim.eval("g:vim_ai_roles_config_function")
-        if not vim.eval("exists('*" + roles_config_function + "')"):
-            raise Exception(f"Role config function does not exist: {roles_config_function}")
-        else:
-            roles.update(vim.eval(roles_config_function + "()"))
+    enhance_roles_with_custom_function(roles)
 
     if not role in roles:
         raise Exception(f"Role `{role}` not found")
