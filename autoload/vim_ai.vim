@@ -83,7 +83,8 @@ function! s:set_paste(config)
   setlocal paste
   augroup AiPaste
     autocmd!
-    autocmd ModeChanged i:* exe 'set nopaste' | autocmd! AiPaste InsertLeave
+    autocmd ModeChanged i:* exe 'set nopaste'
+    autocmd! AiPaste InsertLeave
   augroup END
 endfunction
 
