@@ -184,6 +184,40 @@ function! vim_ai#AIEditRun(config, ...) range
   execute "py3file " . s:complete_py
 endfunction
 
+function! s:ReuseOrCreateChatWindow(config)
+  if &filetype != 'aichat'
+    " reuse chat in active window or tab
+    let l:chat_win_ids = win_findbuf(bufnr(s:scratch_buffer_name))
+    if !empty(l:chat_win_ids)
+      call win_gotoid(l:chat_win_ids[0])
+      return
+    endif
+
+    " reuse .aichat file on the same tab
+    let buffer_list_tab = tabpagebuflist(tabpagenr())
+    let buffer_list_tab = filter(buffer_list_tab, 'getbufvar(v:val, "&filetype") ==# "aichat"')
+    if len(buffer_list_tab) > 0
+      call win_gotoid(win_findbuf(buffer_list_tab[0])[0])
+      return
+    endif
+
+    " reuse any .aichat buffer in the session
+    let buffer_list = []
+    for i in range(tabpagenr('$'))
+      call extend(buffer_list, tabpagebuflist(i + 1))
+    endfor
+    let buffer_list = filter(buffer_list, 'getbufvar(v:val, "&filetype") ==# "aichat"')
+    if len(buffer_list) > 0
+      call win_gotoid(win_findbuf(buffer_list[0])[0])
+      return
+    endif
+
+    " open new chat window if no active buffer found
+    let l:open_conf = a:config['ui']['open_chat_command']
+    call s:OpenChatWindow(l:open_conf)
+  endif
+endfunction
+
 " Start and answer the chat
 " - uses_range   - true if range passed
 " - config       - function scoped vim_ai_chat config
@@ -201,18 +235,8 @@ function! vim_ai#AIChatRun(uses_range, config, ...) range
     let l:selection = ''
   endif
   call s:set_paste(l:config)
-  if &filetype != 'aichat'
-    let l:chat_win_id = bufwinid(s:scratch_buffer_name)
-    if l:chat_win_id != -1
-      " TODO: look for first active chat buffer, in case .aichat file is used
-      " reuse chat in active window
-      call win_gotoid(l:chat_win_id)
-    else
-      " open new chat window
-      let l:open_conf = l:config['ui']['open_chat_command']
-      call s:OpenChatWindow(l:open_conf)
-    endif
-  endif
+
+  call s:ReuseOrCreateChatWindow(l:config)
 
   let l:prompt = ""
   if a:0 > 0 || a:uses_range
