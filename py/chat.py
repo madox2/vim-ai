@@ -4,10 +4,14 @@ import vim
 plugin_root = vim.eval("s:plugin_root")
 vim.command(f"py3file {plugin_root}/py/utils.py")
 
+prompt, role_options = parse_prompt_and_role(vim.eval("l:prompt"))
 config = normalize_config(vim.eval("l:config"))
-config_options = config['options']
+config_options = {
+    **config['options'],
+    **role_options['options_default'],
+    **role_options['options_chat'],
+}
 config_ui = config['ui']
-prompt = vim.eval("l:prompt").strip()
 
 def initialize_chat_window():
     lines = vim.eval('getline(1, "$")')
@@ -38,7 +42,7 @@ def initialize_chat_window():
         vim.command("normal! i\n>>> user\n\n")
 
     if prompt:
-        vim.command("normal! a" + prompt)
+        vim.command("normal! i" + prompt)
         vim_break_undo_sequence()
         vim.command("redraw")
 
@@ -72,7 +76,7 @@ try:
             **openai_options
         }
         printDebug("[chat] request: {}", request)
-        url = config_options['endpoint_url']
+        url = options['endpoint_url']
         response = openai_request(url, request, http_options)
         def map_chunk(resp):
             printDebug("[chat] response: {}", resp)
