@@ -211,16 +211,16 @@ function! vim_ai#AIChatRun(uses_range, config, ...) range
       call win_gotoid(l:chat_win_ids[0])
     else
       " allow .aichat files windows to be switched to, preferably on same tab
-			let buffer_list_tab = tabpagebuflist(tabpagenr())
+      let buffer_list_tab = tabpagebuflist(tabpagenr())
       let buffer_list_tab = filter(buffer_list_tab, 'getbufvar(v:val, "&filetype") ==# "aichat"')
 
       if len(buffer_list_tab) > 0
         call win_gotoid(win_findbuf(buffer_list_tab[0])[0])
       else
-			  let buffer_list = []
-			  for i in range(tabpagenr('$'))
-			    call extend(buffer_list, tabpagebuflist(i + 1))
-			  endfor
+        let buffer_list = []
+        for i in range(tabpagenr('$'))
+          call extend(buffer_list, tabpagebuflist(i + 1))
+        endfor
         let buffer_list = filter(buffer_list, 'getbufvar(v:val, "&filetype") ==# "aichat"')
 
         if len(buffer_list) > 0
