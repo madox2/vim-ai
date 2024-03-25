@@ -81,12 +81,8 @@ endfunction
 function! s:set_paste(config)
   if !a:config['ui']['paste_mode'] | return | endif
   if &paste | return | endif
-  setlocal paste
-  augroup AiPaste
-    autocmd!
-    autocmd ModeChanged i:* exe 'set nopaste'
-    autocmd! AiPaste InsertLeave
-  augroup END
+  set paste
+  let g:vim_ai_paste = 1
 endfunction
 
 function! s:GetSelectionOrRange(is_selection, ...)
@@ -143,14 +139,20 @@ function! vim_ai#AIRun(config, ...) range
   let s:last_firstline = a:firstline
   let s:last_lastline = a:lastline
 
-  let l:cursor_on_empty_line = empty(getline('.'))
-  call s:set_paste(l:config)
-  if l:cursor_on_empty_line
+  if empty(trim(getline('.')))
     execute "normal! " . a:lastline . "GA"
   else
     execute "normal! " . a:lastline . "Go"
   endif
-  execute "py3file " . s:complete_py
+  try
+    call s:set_paste(l:config)
+    execute "py3file " . s:complete_py
+  finally
+    if exists('g:vim_ai_paste')
+      unlet g:vim_ai_paste
+      set nopaste
+    endif
+  endtry
   execute "normal! " . a:lastline . "G"
 endfunction
 
@@ -178,10 +180,17 @@ function! vim_ai#AIEditRun(config, ...) range
   let s:last_firstline = a:firstline
   let s:last_lastline = a:lastline
 
-  call s:set_paste(l:config)
   call s:SelectSelectionOrRange(l:is_selection, a:firstline, a:lastline)
   execute "normal! c"
-  execute "py3file " . s:complete_py
+  try
+    call s:set_paste(l:config)
+    execute "py3file " . s:complete_py
+  finally
+    if exists('g:vim_ai_paste')
+      unlet g:vim_ai_paste
+      set nopaste
+    endif
+  endtry
 endfunction
 
 function! s:ReuseOrCreateChatWindow(config)
@@ -234,7 +243,6 @@ function! vim_ai#AIChatRun(uses_range, config, ...) range
     let l:is_selection = 0
     let l:selection = ''
   endif
-  call s:set_paste(l:config)
 
   call s:ReuseOrCreateChatWindow(l:config)
 
@@ -247,7 +255,15 @@ function! vim_ai#AIChatRun(uses_range, config, ...) range
   let s:last_command = "chat"
   let s:last_config = a:config
 
-  execute "py3file " . s:chat_py
+  try
+    call s:set_paste(l:config)
+    execute "py3file " . s:chat_py
+  finally
+    if exists('g:vim_ai_paste')
+      unlet g:vim_ai_paste
+      set nopaste
+    endif
+  endtry
 endfunction
 
 " Start a new chat
