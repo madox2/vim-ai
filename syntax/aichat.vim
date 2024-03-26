@@ -13,7 +13,7 @@ syntax match aichatRole "<<< assistant"
 
 highlight default link aichatRole Comment
 
-syntax region userInput start=/^>>>\s/ end=/^<<<\s/ contains=aichatRole
+syntax region userInput start=/^>>>\s\+/hs=e end=/^\ze<<<\s\+/ keepend contains=aichatRole
 highlight link userInput NONE
 
 let b:current_syntax = 'aichat'
