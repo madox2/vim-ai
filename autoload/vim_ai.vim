@@ -1,4 +1,4 @@
-call vim_ai_config#load()
+call vim_ai_config#load() abort
 
 let s:plugin_root = expand('<sfile>:p:h:h')
 let s:complete_py = s:plugin_root . "/py/complete.py"
@@ -20,7 +20,7 @@ let s:scratch_buffer_name = ">>> AI chat"
 " - scratch_buffer_keep_open = 1
 "   - opens last ai-chat buffer
 "   - keeps the buffer in the buffer list
-function! vim_ai#MakeScratchWindow()
+function! vim_ai#MakeScratchWindow() abort
   let l:keep_open = g:vim_ai_chat['ui']['scratch_buffer_keep_open']
   if l:keep_open && bufexists(s:scratch_buffer_name)
     " reuse chat buffer
@@ -121,7 +121,7 @@ endfunction
 " - config       - function scoped vim_ai_complete config
 " - a:1          - optional instruction prompt
 " - a:2          - optional selection pending (to override g:vim_ai_is_selection_pending)
-function! vim_ai#AIRun(config, ...) range
+function! vim_ai#AIRun(config, ...) range abort
   let l:config = vim_ai_config#ExtendDeep(g:vim_ai_complete, a:config)
   let l:instruction = a:0 > 0 ? a:1 : ""
   " l:is_selection used in Python script
@@ -157,7 +157,7 @@ endfunction
 " - config       - function scoped vim_ai_edit config
 " - a:1          - optional instruction prompt
 " - a:2          - optional selection pending (to override g:vim_ai_is_selection_pending)
-function! vim_ai#AIEditRun(config, ...) range
+function! vim_ai#AIEditRun(config, ...) range abort
   let l:config = vim_ai_config#ExtendDeep(g:vim_ai_edit, a:config)
   let l:instruction = a:0 > 0 ? a:1 : ""
   " l:is_selection used in Python script
@@ -187,7 +187,7 @@ endfunction
 " - uses_range   - true if range passed
 " - config       - function scoped vim_ai_chat config
 " - a:1          - optional instruction prompt
-function! vim_ai#AIChatRun(uses_range, config, ...) range
+function! vim_ai#AIChatRun(uses_range, config, ...) range abort
   let l:config = vim_ai_config#ExtendDeep(g:vim_ai_chat, a:config)
   let l:instruction = ""
   " l:is_selection used in Python script
@@ -227,14 +227,14 @@ endfunction
 
 " Start a new chat
 " a:1 - optional preset shorcut (below, right, tab)
-function! vim_ai#AINewChatRun(...)
+function! vim_ai#AINewChatRun(...) abort
   let l:open_conf = a:0 > 0 ? "preset_" . a:1 : g:vim_ai_chat['ui']['open_chat_command']
   call s:OpenChatWindow(l:open_conf)
   call vim_ai#AIChatRun(0, {})
 endfunction
 
 " Repeat last AI command
-function! vim_ai#AIRedoRun()
+function! vim_ai#AIRedoRun() abort
   undo
   if s:last_command ==# "complete"
     exe s:last_firstline.",".s:last_lastline . "call vim_ai#AIRun(s:last_config, s:last_instruction, s:last_is_selection)"
