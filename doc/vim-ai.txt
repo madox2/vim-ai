@@ -104,6 +104,25 @@ Options: >
 Check OpenAI docs for more information:
 https://platform.openai.com/docs/api-reference/chat
 
+INCLUDE FILES                                  *vim-ai-include*
+
+To include files in the chat a special `include` role is used: >
+
+  >>> user
+
+  Generate documentation for the following files
+
+  >>> include
+
+  /home/user/myproject/requirements.txt
+  /home/user/myproject/**/*.py
+
+Each file's contents will be added to an additional `user` role message with
+the files separated by `==> {path} <==`, where path is the path to the file.
+Globbing is expanded out via `glob.gob` and relative paths to the current
+working directory (as determined by `getcwd()`) will be resolved to absolute
+paths.
+
                                                 *:AINewChat*
 
 :AINewChat {preset shortname}?      spawn a new conversation with a given open
@@ -142,6 +161,27 @@ You can also customize the options in the chat header: >
   generate a paragraph of lorem ipsum
   ...
 
+ROLES
+
+Roles are defined in the `.ini` file: >
+
+    let g:vim_ai_roles_config_file = '/path/to/my/roles.ini'
+
+Example of a role: >
+
+    [grammar]
+    prompt = fix spelling and grammar
+
+    [grammar.options]
+    temperature = 0.4
+
+See roles-example.ini for more examples.
+
+The roles in g:vim_ai_roles_config_file are converted to a Vim dictionary whose
+labels are the names of the roles. Optionally, roles can be added by setting
+g:vim_ai_roles_config_function to the name of a Vimscript function returning a
+dictionary of the same format as g:vim_ai_roles_config_file.
+
 KEY BINDINGS
 
 Examples how configure key bindings and customize commands: >
@@ -169,7 +209,6 @@ To create custom commands, call `AIRun`, `AIEditRun` and `AIChatRun` functions: 
   function! AIPromptCommitMessageFn()
     let l:diff = system('git diff --staged')
     let l:prompt = "generate a short commit message from the diff below:\n" . l:diff
-    let l:range = 0
     let l:config = {
     \  "engine": "chat",
     \  "options": {
@@ -178,12 +217,12 @@ To create custom commands, call `AIRun`, `AIEditRun` and `AIChatRun` functions: 
     \    "temperature": 1,
     \  },
     \}
-    call vim_ai#AIRun(l:range, l:config, l:prompt)
+    call vim_ai#AIRun(l:config, l:prompt)
   endfunction
-  command! AIPromptCommitMessage call AIPromptCommitMessageFn()
+  command! AIPromptCommitMessage call AIPromptCommitMessageFn(range)
 
   " custom command that provides a code review for selected code block
-  function! AIPromptCodeReviewFn(range) range
+  function! AIPromptCodeReviewFn() range
     let l:prompt = "programming syntax is " . &filetype . ", review the code below"
     let l:config = {
     \  "options": {
@@ -192,7 +231,7 @@ To create custom commands, call `AIRun`, `AIEditRun` and `AIChatRun` functions: 
     \}
     '<,'>call vim_ai#AIChatRun(a:range, l:config, l:prompt)
   endfunction
-  command! -range AIPromptCodeReview <line1>,<line2>call AIPromptCodeReviewFn(<range>)
+  command! -range=0 AIPromptCodeReview <line1>,<line2>call AIPromptCodeReviewFn(<count>)
 
 ABOUT                                           *vim-ai-about*
 

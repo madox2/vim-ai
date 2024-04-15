@@ -12,6 +12,7 @@ To get an idea what is possible to do with AI commands see the [prompts](https:/
 - Generate text or code, answer questions with AI
 - Edit selected text in-place with AI
 - Interactive conversation with ChatGPT
+- Supports custom roles and more
 
 ## How it works
 
@@ -38,6 +39,12 @@ export OPENAI_API_KEY="YOUR_OPENAI_API_KEY"
 # or configure it with your organization id
 echo "YOUR_OPENAI_API_KEY,YOUR_OPENAI_ORG_ID" > ~/.config/openai.token
 export OPENAI_API_KEY="YOUR_OPENAI_API_KEY,YOUR_OPENAI_ORG_ID"
+```
+
+The default api key file location is `~/.config/openai.token`, but you can change it by setting the `g:vim_ai_token_file_path` in your `.vimrc` file:
+
+```vim
+let g:vim_ai_token_file_path = '~/.config/openai.token'
 ```
 
 ### Using `vim-plug`
@@ -81,13 +88,17 @@ To use an AI command, type the command followed by an instruction prompt. You ca
 
 **Tip:** Press `Ctrl-c` anytime to cancel completion
 
-**Tip:** setup your own [key bindings](#key-bindings) or use command shortcuts - `:AIE`, `:AIC`, `:AIR`
+**Tip:** Setup your own [key bindings](#key-bindings) or use command shortcuts - `:AIE`, `:AIC`, `:AIR`
+
+**Tip:** A [custom role](#roles) {role} can be passed to the above commands by an initial parameter /{role}, for example `:AIEdit /grammar`.
+
+**Tip:** Combine commands with a range `:help range`, for example to select the whole buffer - `:%AIE fix grammar`
 
 If you are interested in more tips or would like to level up your Vim with more commands like [`:GitCommitMessage`](https://github.com/madox2/vim-ai/wiki/Custom-commands#suggest-a-git-commit-message) - suggesting a git commit message, visit the [Community Wiki](https://github.com/madox2/vim-ai/wiki).
 
 ## Reference
 
-In the documentation below,  `<selection>` denotes a visual selection, `{instruction}` an instruction prompt and `?` symbol an optional parameter.
+In the documentation below,  `<selection>` denotes a visual selection or any other range, `{instruction}` an instruction prompt, `{role}` a [custom role](#roles) and `?` symbol an optional parameter.
 
 ### `:AI`
 
@@ -99,17 +110,23 @@ In the documentation below,  `<selection>` denotes a visual selection, `{instruc
 
 `<selection> :AI {instruction}` - complete the selection using the instruction
 
+`<selection>? :AI /{role} {instruction}?` - use role to complete
+
 ### `:AIEdit`
 
 `<selection>? :AIEdit` - edit the current line or the selection
 
 `<selection>? :AIEdit {instruction}` - edit the current line or the selection using the instruction
 
+`<selection>? :AIEdit /{role} {instruction}?` - use role to edit
+
 ### `:AIChat`
 
 `:AIChat` - continue or start a new conversation.
 
 `<selection>? :AIChat {instruction}?` - start a new conversation given the selection, the instruction or both
+
+`<selection>? :AIChat /{role} {instruction}?` - use role to complete
 
 When the AI finishes answering, you can continue the conversation by entering insert mode, adding your prompt, and then using the command `:AIChat` once again.
 
@@ -131,7 +148,22 @@ You are a Clean Code expert, I have the following code, please refactor it in a 
 
 ```
 
-Supported chat roles are **`>>> system`**, **`>>> user`** and **`<<< assistant`**
+To include files in the chat a special `include` role is used:
+
+```
+>>> user
+
+Generate documentation for the following files
+
+>>> include
+
+/home/user/myproject/requirements.txt
+/home/user/myproject/**/*.py
+```
+
+Each file's contents will be added to an additional `user` role message with the files separated by `==> {path} <==`, where path is the path to the file. Globbing is expanded out via `glob.gob` and relative paths to the current working directory (as determined by `getcwd()`) will be resolved to absolute paths.
+
+Supported chat roles are **`>>> system`**, **`>>> user`**, **`>>> include`** and **`<<< assistant`**
 
 ### `:AINewChat`
 
@@ -148,6 +180,27 @@ As a parameter you put an open chat command preset shortcut - `below`, `tab` or 
 Use this immediately after `AI`/`AIEdit`/`AIChat` command in order to re-try or get an alternative completion.
 Note that the randomness of responses heavily depends on the [`temperature`](https://platform.openai.com/docs/api-reference/completions/create#completions/create-temperature) parameter.
 
+## Roles
+
+In the context of this plugin, a role means a re-usable AI instruction and/or configuration. Roles are defined in the configuration `.ini` file. For example by defining a `grammar` role:
+
+```vim
+let g:vim_ai_roles_config_file = '/path/to/my/roles.ini'
+```
+
+```ini
+# /path/to/my/roles.ini
+
+[grammar]
+prompt = fix spelling and grammar
+
+[grammar.options]
+temperature = 0.4
+```
+
+Now you can select text and run it with command `:AIEdit /grammar`.
+
+See [roles-example.ini](./roles-example.ini) for more examples.
 
 ## Key bindings
 
@@ -184,7 +237,7 @@ let g:vim_ai_chat = {
 \}
 ```
 
-Or modify options directly during the vim session:
+Once the above is set, you can modify options directly during the vim session:
 
 ```vim
 let g:vim_ai_chat['options']['model'] = 'gpt-4'
@@ -362,7 +415,6 @@ To create a custom command, you can call `AIRun`, `AIEditRun` and `AIChatRun` fu
 function! GitCommitMessageFn()
   let l:diff = system('git --no-pager diff --staged')
   let l:prompt = "generate a short commit message from the diff below:\n" . l:diff
-  let l:range = 0
   let l:config = {
   \  "engine": "chat",
   \  "options": {
@@ -371,7 +423,7 @@ function! GitCommitMessageFn()
   \    "temperature": 1,
   \  },
   \}
-  call vim_ai#AIRun(l:range, l:config, l:prompt)
+  call vim_ai#AIRun(l:config, l:prompt)
 endfunction
 command! GitCommitMessage call GitCommitMessageFn()
 
@@ -383,9 +435,9 @@ function! CodeReviewFn(range) range
   \    "initial_prompt": ">>> system\nyou are a clean code expert",
   \  },
   \}
-  '<,'>call vim_ai#AIChatRun(a:range, l:config, l:prompt)
+  exe a:firstline.",".a:lastline . "call vim_ai#AIChatRun(a:range, l:config, l:prompt)"
 endfunction
-command! -range CodeReview <line1>,<line2>call CodeReviewFn(<range>)
+command! -range=0 CodeReview <line1>,<line2>call CodeReviewFn(<count>)
 ```
 
 ## Contributing

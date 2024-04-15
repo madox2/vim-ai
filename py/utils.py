@@ -1,5 +1,6 @@
 import vim
 import datetime
+import glob
 import sys
 import os
 import json
@@ -10,6 +11,7 @@ import re
 from urllib.error import URLError
 from urllib.error import HTTPError
 import traceback
+import configparser
 
 is_debugging = vim.eval("g:vim_ai_debug") == "1"
 debug_log_file = vim.eval("g:vim_ai_debug_log_file")
@@ -18,7 +20,7 @@ class KnownError(Exception):
     pass
 
 def load_api_key():
-    config_file_path = os.path.join(os.path.expanduser("~"), ".config/openai.token")
+    config_file_path = os.path.expanduser(vim.eval("g:vim_ai_token_file_path"))
     api_key_param_value = os.getenv("OPENAI_API_KEY")
     try:
         with open(config_file_path, 'r') as file:
@@ -103,6 +105,7 @@ def render_text_chunks(chunks, is_selection):
     if not full_text.strip():
         print_info_message('Empty response received. Tip: You can try modifying the prompt and retry.')
 
+
 def parse_chat_messages(chat_content):
     lines = chat_content.splitlines()
     messages = []
@@ -112,6 +115,9 @@ def parse_chat_messages(chat_content):
             continue
         if line.startswith(">>> user"):
             messages.append({"role": "user", "content": ""})
+            continue
+        if line.startswith(">>> include"):
+            messages.append({"role": "include", "content": ""})
             continue
         if line.startswith("<<< assistant"):
             messages.append({"role": "assistant", "content": ""})
@@ -123,6 +129,37 @@ def parse_chat_messages(chat_content):
     for message in messages:
         # strip newlines from the content as it causes empty responses
         message["content"] = message["content"].strip()
+
+        if message["role"] == "include":
+            message["role"] = "user"
+            paths = message["content"].split("\n")
+            message["content"] = ""
+
+            pwd = vim.eval("getcwd()")
+            for i in range(len(paths)):
+                path = os.path.expanduser(paths[i])
+                if not os.path.isabs(path):
+                    path = os.path.join(pwd, path)
+
+                paths[i] = path
+
+                if '**' in path:
+                    paths[i] = None
+                    paths.extend(glob.glob(path, recursive=True))
+
+            for path in paths:
+                if path is None:
+                    continue
+
+                if os.path.isdir(path):
+                    continue
+
+                try:
+                    with open(path, "r") as file:
+                        message["content"] += f"\n\n==> {path} <==\n" + file.read()
+                except UnicodeDecodeError:
+                    message["content"] += "\n\n" + f"==> {path} <=="
+                    message["content"] += "\n" + "Binary file, cannot display"
 
     return messages
 
@@ -225,3 +262,59 @@ def handle_completion_error(error):
 def clear_echo_message():
     # https://neovim.discourse.group/t/how-to-clear-the-echo-message-in-the-command-line/268/3
     vim.command("call feedkeys(':','nx')")
+
+def enhance_roles_with_custom_function(roles):
+    if vim.eval("exists('g:vim_ai_roles_config_function')") == '1':
+        roles_config_function = vim.eval("g:vim_ai_roles_config_function")
+        if not vim.eval("exists('*" + roles_config_function + "')"):
+            raise Exception(f"Role config function does not exist: {roles_config_function}")
+        else:
+            roles.update(vim.eval(roles_config_function + "()"))
+
+def load_role_config(role):
+    roles_config_path = os.path.expanduser(vim.eval("g:vim_ai_roles_config_file"))
+    if not os.path.exists(roles_config_path):
+        raise Exception(f"Role config file does not exist: {roles_config_path}")
+
+    roles = configparser.ConfigParser()
+    roles.read(roles_config_path)
+
+    enhance_roles_with_custom_function(roles)
+
+    if not role in roles:
+        raise Exception(f"Role `{role}` not found")
+
+    options = roles[f"{role}.options"] if f"{role}.options" in roles else {}
+    options_complete =roles[f"{role}.options-complete"] if f"{role}.options-complete" in roles else {}
+    options_chat = roles[f"{role}.options-chat"] if f"{role}.options-chat" in roles else {}
+
+    return {
+        'role': dict(roles[role]),
+        'options': {
+            'options_default': dict(options),
+            'options_complete': dict(options_complete),
+            'options_chat': dict(options_chat),
+        },
+    }
+
+empty_role_options = {
+    'options_default': {},
+    'options_complete': {},
+    'options_chat': {},
+}
+
+def parse_prompt_and_role(raw_prompt):
+    prompt = raw_prompt.strip()
+    role = re.split(' |:', prompt)[0]
+    if not role.startswith('/'):
+        # does not require role
+        return (prompt, empty_role_options)
+
+    prompt = prompt[len(role):].strip()
+    role = role[1:]
+
+    config = load_role_config(role)
+    if 'prompt' in config['role'] and config['role']['prompt']:
+        delim = '' if prompt.startswith(':') else ':\n'
+        prompt = config['role']['prompt'] + delim + prompt
+    return (prompt, config['options'])
