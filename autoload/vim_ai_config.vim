@@ -1,11 +1,12 @@
 let s:plugin_root = expand('<sfile>:p:h:h')
-let windows_localhost = expand('$WINDOWS_LOCALHOST')
+let llm_endpont = exists('$LOCAL_LLM_URL') ? expand('$LOCAL_LLM_URL') : "https://api.openai.com"
+let llm_api_url = llm_endpont . "/v1/chat/completions"
 
 let g:vim_ai_complete_default = {
 \  "engine": "complete",
 \  "options": {
 \    "model": "gpt-3.5-turbo-instruct",
-\    "endpoint_url": "http://" . windows_localhost . ":1234/v1/completions",
+\    "endpoint_url": llm_api_url,
 \    "max_tokens": 1000,
 \    "temperature": 0.1,
 \    "request_timeout": 20,
@@ -20,7 +21,7 @@ let g:vim_ai_edit_default = {
 \  "engine": "complete",
 \  "options": {
 \    "model": "gpt-3.5-turbo-instruct",
-\    "endpoint_url": "http://" . windows_localhost . ":1234/v1/completions",
+\    "endpoint_url": llm_api_url,
 \    "max_tokens": 1000,
 \    "temperature": 0.1,
 \    "request_timeout": 20,
@@ -41,7 +42,7 @@ END
 let g:vim_ai_chat_default = {
 \  "options": {
 \    "model": "gpt-3.5-turbo",
-\    "endpoint_url": "http://" . windows_localhost . ":1234/v1/chat/completions",
+\    "endpoint_url": llm_api_url,
 \    "max_tokens": 1000,
 \    "temperature": 1,
 \    "request_timeout": 20,
