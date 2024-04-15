@@ -13,6 +13,7 @@ To get an idea what is possible to do with AI commands see the [prompts](https:/
 - Edit selected text in-place with AI
 - Interactive conversation with ChatGPT
 - Supports custom roles and more
+- Supports local LLM API
 
 ## How it works
 
@@ -201,6 +202,14 @@ temperature = 0.4
 Now you can select text and run it with command `:AIEdit /grammar`.
 
 See [roles-example.ini](./roles-example.ini) for more examples.
+
+## Local LLM
+
+If you set up the `LOCAL_LLM_URL` environment variable to point to your locally running LLM server (or any other openAI API compatible server) vim-ai will use this endpoint instead of `https://api.openai.com`
+
+# set it as an environment variable
+export LOCAL_LLM_URL="YOUR_LOCAL_LLM_HOST:PORT"
+
 
 ## Key bindings
 
