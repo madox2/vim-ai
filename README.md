@@ -210,7 +210,6 @@ If you set up the `LOCAL_LLM_URL` environment variable to point to your locally 
 # set it as an environment variable
 export LOCAL_LLM_URL="YOUR_LOCAL_LLM_HOST:PORT"
 
-
 ## Key bindings
 
 This plugin does not set any key binding. Create your own bindings in the `.vimrc` to trigger AI commands, for example:
