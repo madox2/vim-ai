@@ -226,7 +226,11 @@ def openai_request(url, data, options):
                 if line_data.strip() == OPENAI_RESP_DONE:
                     pass
                 else:
-                    openai_obj = json.loads(line_data)
+                    try:
+                        openai_obj = json.loads(line_data)
+                    except json.decoder.JSONDecodeError:
+                        continue
+
                     yield openai_obj
 
 def print_info_message(msg):
