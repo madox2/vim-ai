@@ -256,7 +256,8 @@ temperature=0.2
 generate a paragraph of lorem ipsum
 ```
 
-Below are listed all available configuration options, along with their default values:
+Below are listed all available configuration options, along with their default values.
+Please note that there isn't any token limit imposed, though 1000 is recommended.
 
 ```vim
 " :AI
@@ -271,7 +272,7 @@ let g:vim_ai_complete = {
 \  "options": {
 \    "model": "gpt-3.5-turbo-instruct",
 \    "endpoint_url": "https://api.openai.com/v1/completions",
-\    "max_tokens": 1000,
+\    "max_tokens": 0,
 \    "temperature": 0.1,
 \    "request_timeout": 20,
 \    "enable_auth": 1,
@@ -294,7 +295,7 @@ let g:vim_ai_edit = {
 \  "options": {
 \    "model": "gpt-3.5-turbo-instruct",
 \    "endpoint_url": "https://api.openai.com/v1/completions",
-\    "max_tokens": 1000,
+\    "max_tokens": 0,
 \    "temperature": 0.1,
 \    "request_timeout": 20,
 \    "enable_auth": 1,
@@ -327,7 +328,7 @@ let g:vim_ai_chat = {
 \  "options": {
 \    "model": "gpt-3.5-turbo",
 \    "endpoint_url": "https://api.openai.com/v1/chat/completions",
-\    "max_tokens": 1000,
+\    "max_tokens": 0,
 \    "temperature": 1,
 \    "request_timeout": 20,
 \    "enable_auth": 1,
@@ -392,7 +393,7 @@ let chat_engine_config = {
 \  "options": {
 \    "model": "gpt-3.5-turbo",
 \    "endpoint_url": "https://api.openai.com/v1/chat/completions",
-\    "max_tokens": 1000,
+\    "max_tokens": 0,
 \    "temperature": 0.1,
 \    "request_timeout": 20,
 \    "selection_boundary": "",
