@@ -5,7 +5,7 @@ let g:vim_ai_complete_default = {
 \  "options": {
 \    "model": "gpt-3.5-turbo-instruct",
 \    "endpoint_url": "https://api.openai.com/v1/completions",
-\    "max_tokens": 0,
+\    "max_tokens": 1000,
 \    "temperature": 0.1,
 \    "request_timeout": 20,
 \    "enable_auth": 1,
@@ -20,7 +20,7 @@ let g:vim_ai_edit_default = {
 \  "options": {
 \    "model": "gpt-3.5-turbo-instruct",
 \    "endpoint_url": "https://api.openai.com/v1/completions",
-\    "max_tokens": 0,
+\    "max_tokens": 1000,
 \    "temperature": 0.1,
 \    "request_timeout": 20,
 \    "enable_auth": 1,
