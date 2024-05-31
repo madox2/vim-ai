@@ -39,7 +39,7 @@ If you attach a code block add syntax type after ``` to enable syntax highlighti
 END
 let g:vim_ai_chat_default = {
 \  "options": {
-\    "model": "gpt-3.5-turbo",
+\    "model": "gpt-4o",
 \    "endpoint_url": "https://api.openai.com/v1/chat/completions",
 \    "max_tokens": 0,
 \    "temperature": 1,

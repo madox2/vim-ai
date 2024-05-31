@@ -326,7 +326,7 @@ END
 " - ui.paste_mode: use paste mode (see more info in the Notes below)
 let g:vim_ai_chat = {
 \  "options": {
-\    "model": "gpt-3.5-turbo",
+\    "model": "gpt-4o",
 \    "endpoint_url": "https://api.openai.com/v1/chat/completions",
 \    "max_tokens": 0,
 \    "temperature": 1,
@@ -372,7 +372,7 @@ let g:vim_ai_chat = {
 
 ### Using chat engine for completion and edits
 
-It is possible to configure chat models, such as `gpt-3.5-turbo`, to be used in `:AI` and `:AIEdit` commands.
+It is possible to configure chat models, such as `gpt-4o`, to be used in `:AI` and `:AIEdit` commands.
 These models are cheaper, but currently less suitable for code editing/completion, as they respond with human-like text and commentary.
 
 Depending on the use case, a good initial prompt can help to instruct the chat model to respond in the desired way:
@@ -391,7 +391,7 @@ END
 let chat_engine_config = {
 \  "engine": "chat",
 \  "options": {
-\    "model": "gpt-3.5-turbo",
+\    "model": "gpt-4o",
 \    "endpoint_url": "https://api.openai.com/v1/chat/completions",
 \    "max_tokens": 0,
 \    "temperature": 0.1,
@@ -419,7 +419,7 @@ function! GitCommitMessageFn()
   let l:config = {
   \  "engine": "chat",
   \  "options": {
-  \    "model": "gpt-3.5-turbo",
+  \    "model": "gpt-4o",
   \    "initial_prompt": ">>> system\nyou are a code assistant",
   \    "temperature": 1,
   \  },

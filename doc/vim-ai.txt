@@ -82,7 +82,7 @@ Options: >
 
   let g:vim_ai_chat = {
   \  "options": {
-  \    "model": "gpt-3.5-turbo",
+  \    "model": "gpt-4o",
   \    "max_tokens": 0,
   \    "endpoint_url": "https://api.openai.com/v1/chat/completions",
   \    "temperature": 1,
@@ -211,7 +211,7 @@ To create custom commands, call `AIRun`, `AIEditRun` and `AIChatRun` functions: 
     let l:config = {
     \  "engine": "chat",
     \  "options": {
-    \    "model": "gpt-3.5-turbo",
+    \    "model": "gpt-4o",
     \    "initial_prompt": ">>> system\nyou are a code assistant",
     \    "temperature": 1,
     \  },
