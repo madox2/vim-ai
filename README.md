@@ -77,11 +77,11 @@ To use an AI command, type the command followed by an instruction prompt. You ca
 :AI         complete text
 :AIEdit     edit text
 :AIChat     continue or open new chat
+:AINewChat  open new chat
 
 ============= Utilities =============
 
 :AIRedo     repeat last AI command
-:AINewChat  open new chat
 
 :help vim-ai
 ```
@@ -167,11 +167,15 @@ Supported chat roles are **`>>> system`**, **`>>> user`**, **`>>> include`** and
 
 ### `:AINewChat`
 
-`:AINewChat {preset shortname}?` - start a new conversation
-
 This command is used when you need to spawn a new chat in a specific way or in situation when `:AIChat` would normally continue conversation instead.
 
-As a parameter you put an open chat command preset shortcut - `below`, `tab` or `right`. For example: `:AINewChat right`.
+`:AINewChat` - spawn a new conversation.
+
+`<selection>? :AINewChat {instruction}?` - spawn a new conversation given the selection, the instruction or both
+
+`<selection>? :AINewChat /{role} {instruction}?` - spawn a new conversation using role to complete
+
+`:AINewChat {preset shortname}?` - start a new conversation using open chat command preset shortcut - `below`, `tab` or `right`, for example: `:AINewChat right`.
 
 ### `:AIRedo`
 

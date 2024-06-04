@@ -72,6 +72,15 @@ https://platform.openai.com/docs/api-reference/completions
 <selection>? :AIChat {instruction}? start a new conversation given the selection,
                                     the instruction or both
 
+                                                *:AINewChat*
+
+:AINewChat                             spawn a new conversation.
+<selection>? :AINewChat {instruction}? spawn a new conversation given the selection,
+                                       the instruction or both
+:AINewChat {preset shortname}?         spawn a new conversation with a given open
+                                       chat preset - below, tab or right.
+
+
 Options: >
   let s:initial_chat_prompt =<< trim END
   >>> system
@@ -121,11 +130,6 @@ the files separated by `==> {path} <==`, where path is the path to the file.
 Globbing is expanded out via `glob.gob` and relative paths to the current
 working directory (as determined by `getcwd()`) will be resolved to absolute
 paths.
-
-                                                *:AINewChat*
-
-:AINewChat {preset shortname}?      spawn a new conversation with a given open
-                                    chat preset - below, tab or right.
 
                                                 *:AIRedo*
 
