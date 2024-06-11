@@ -181,6 +181,10 @@ labels are the names of the roles. Optionally, roles can be added by setting
 g:vim_ai_roles_config_function to the name of a Vimscript function returning a
 dictionary of the same format as g:vim_ai_roles_config_file.
 
+MARKDOWN HIGHLIGHTING                            *g:aichat_markdown*
+
+Set g:aichat_markdown = 1 to enable full markdown highlighting in aichat files
+
 KEY BINDINGS
 
 Examples how configure key bindings and customize commands: >
