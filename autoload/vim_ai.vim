@@ -21,9 +21,9 @@ let s:scratch_buffer_name = ">>> AI chat"
 " - scratch_buffer_keep_open = 1
 "   - opens last ai-chat buffer
 "   - keeps the buffer in the buffer list
-function! vim_ai#MakeScratchWindow() abort
+function! vim_ai#MakeScratchWindow(force_new) abort
   let l:keep_open = g:vim_ai_chat['ui']['scratch_buffer_keep_open']
-  if l:keep_open && bufexists(s:scratch_buffer_name)
+  if l:keep_open && bufexists(s:scratch_buffer_name) && !a:force_new
     " reuse chat buffer
     execute "buffer " . s:scratch_buffer_name
     return
@@ -71,11 +71,12 @@ function! s:MakePrompt(selection, instruction, config)
   return join([l:instruction, l:delimiter, l:selection], "")
 endfunction
 
-function! s:OpenChatWindow(open_conf)
+function! s:OpenChatWindow(open_conf, force_new)
   let l:open_cmd = has_key(g:vim_ai_open_chat_presets, a:open_conf)
         \ ? g:vim_ai_open_chat_presets[a:open_conf]
         \ : a:open_conf
   execute l:open_cmd
+  call vim_ai#MakeScratchWindow(a:force_new)
 endfunction
 
 
@@ -228,7 +229,7 @@ function! s:ReuseOrCreateChatWindow(config)
 
     " open new chat window if no active buffer found
     let l:open_conf = a:config['ui']['open_chat_command']
-    call s:OpenChatWindow(l:open_conf)
+    call s:OpenChatWindow(l:open_conf, 0)
   endif
 endfunction
 
@@ -272,7 +273,7 @@ endfunction
 " a:1 - optional preset shorcut (below, right, tab)
 function! vim_ai#AINewChatRun(...) abort
   let l:open_conf = a:0 > 0 ? "preset_" . a:1 : g:vim_ai_chat['ui']['open_chat_command']
-  call s:OpenChatWindow(l:open_conf)
+  call s:OpenChatWindow(l:open_conf, 1)
   call vim_ai#AIChatRun(0, {})
 endfunction
 
