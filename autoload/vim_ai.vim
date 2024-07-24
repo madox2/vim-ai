@@ -15,6 +15,21 @@ let s:last_config = {}
 
 let s:scratch_buffer_name = ">>> AI chat"
 
+function! s:StartsWith(longer, shorter) abort
+  return a:longer[0:len(a:shorter)-1] ==# a:shorter
+endfunction
+
+function! s:GetLastScratchBufferName()
+  let l:all_buffer_names = map(map(filter(copy(getbufinfo()), 'v:val.listed'), 'v:val.bufnr'), 'bufname(v:val)')
+  let l:buffer_name = -1
+  for l:name in l:all_buffer_names
+    if s:StartsWith(l:name, s:scratch_buffer_name)
+      let l:buffer_name = l:name
+    endif
+  endfor
+  return l:buffer_name
+endfunction
+
 " Configures ai-chat scratch window.
 " - scratch_buffer_keep_open = 0
 "   - opens new ai-chat every time
@@ -23,9 +38,10 @@ let s:scratch_buffer_name = ">>> AI chat"
 "   - keeps the buffer in the buffer list
 function! vim_ai#MakeScratchWindow(force_new) abort
   let l:keep_open = g:vim_ai_chat['ui']['scratch_buffer_keep_open']
-  if l:keep_open && bufexists(s:scratch_buffer_name) && !a:force_new
+  let l:last_scratch_buffer_name = s:GetLastScratchBufferName()
+  if l:keep_open && bufexists(l:last_scratch_buffer_name) && !a:force_new
     " reuse chat buffer
-    execute "buffer " . s:scratch_buffer_name
+    execute "buffer " . l:last_scratch_buffer_name
     return
   endif
   setlocal buftype=nofile
