@@ -33,10 +33,11 @@ endfunction
 " Configures ai-chat scratch window.
 " - scratch_buffer_keep_open = 0
 "   - opens new ai-chat every time
+"   - excludes buffer from buffer list
 " - scratch_buffer_keep_open = 1
-"   - opens last ai-chat buffer
+"   - opens last ai-chat buffer (unless force_new = 1)
 "   - keeps the buffer in the buffer list
-function! vim_ai#MakeScratchWindow(force_new) abort
+function! s:MakeScratchWindow(force_new) abort
   let l:keep_open = g:vim_ai_chat['ui']['scratch_buffer_keep_open']
   let l:last_scratch_buffer_name = s:GetLastScratchBufferName()
   if l:keep_open && bufexists(l:last_scratch_buffer_name) && !a:force_new
@@ -92,7 +93,7 @@ function! s:OpenChatWindow(open_conf, force_new)
         \ ? g:vim_ai_open_chat_presets[a:open_conf]
         \ : a:open_conf
   execute l:open_cmd
-  call vim_ai#MakeScratchWindow(a:force_new)
+  call s:MakeScratchWindow(a:force_new)
 endfunction
 
 
