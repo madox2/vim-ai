@@ -37,14 +37,25 @@ endfunction
 " - scratch_buffer_keep_open = 1
 "   - opens last ai-chat buffer (unless force_new = 1)
 "   - keeps the buffer in the buffer list
-function! s:MakeScratchWindow(force_new) abort
+function! s:OpenChatWindow(open_conf, force_new) abort
+  " open new buffer that will be used as a chat
+  let l:open_cmd = has_key(g:vim_ai_open_chat_presets, a:open_conf)
+        \ ? g:vim_ai_open_chat_presets[a:open_conf]
+        \ : a:open_conf
+  execute l:open_cmd
+
+  " reuse chat in keep-open mode
   let l:keep_open = g:vim_ai_chat['ui']['scratch_buffer_keep_open']
   let l:last_scratch_buffer_name = s:GetLastScratchBufferName()
   if l:keep_open && bufexists(l:last_scratch_buffer_name) && !a:force_new
+    let l:current_buffer = bufnr('%')
     " reuse chat buffer
     execute "buffer " . l:last_scratch_buffer_name
+    " close new buffer that was created by l:open_cmd
+    execute "bd " . l:current_buffer
     return
   endif
+
   setlocal buftype=nofile
   setlocal noswapfile
   setlocal ft=aichat
@@ -87,15 +98,6 @@ function! s:MakePrompt(selection, instruction, config)
   let l:selection = s:MakeSelectionPrompt(a:selection, l:instruction, a:config)
   return join([l:instruction, l:delimiter, l:selection], "")
 endfunction
-
-function! s:OpenChatWindow(open_conf, force_new)
-  let l:open_cmd = has_key(g:vim_ai_open_chat_presets, a:open_conf)
-        \ ? g:vim_ai_open_chat_presets[a:open_conf]
-        \ : a:open_conf
-  execute l:open_cmd
-  call s:MakeScratchWindow(a:force_new)
-endfunction
-
 
 let s:is_handling_paste_mode = 0
 
