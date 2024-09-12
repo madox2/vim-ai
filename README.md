@@ -265,7 +265,7 @@ Please note that there isn't any token limit imposed on chat model.
 " - options: openai config (see https://platform.openai.com/docs/api-reference/completions)
 " - options.request_timeout: request timeout in seconds
 " - options.enable_auth: enable authorization using openai key
-" - options.selection_boundary: seleciton prompt wrapper (eliminates empty responses, see #20)
+" - options.selection_boundary: selection prompt wrapper (eliminates empty responses, see #20)
 " - ui.paste_mode: use paste mode (see more info in the Notes below)
 let g:vim_ai_complete = {
 \  "engine": "complete",
@@ -288,7 +288,7 @@ let g:vim_ai_complete = {
 " - options: openai config (see https://platform.openai.com/docs/api-reference/completions)
 " - options.request_timeout: request timeout in seconds
 " - options.enable_auth: enable authorization using openai key
-" - options.selection_boundary: seleciton prompt wrapper (eliminates empty responses, see #20)
+" - options.selection_boundary: selection prompt wrapper (eliminates empty responses, see #20)
 " - ui.paste_mode: use paste mode (see more info in the Notes below)
 let g:vim_ai_edit = {
 \  "engine": "complete",
@@ -319,7 +319,7 @@ END
 " - options.initial_prompt: prompt prepended to every chat request (list of lines or string)
 " - options.request_timeout: request timeout in seconds
 " - options.enable_auth: enable authorization using openai key
-" - options.selection_boundary: seleciton prompt wrapper (eliminates empty responses, see #20)
+" - options.selection_boundary: selection prompt wrapper (eliminates empty responses, see #20)
 " - ui.populate_options: put [chat-options] to the chat header
 " - ui.open_chat_command: preset (preset_below, preset_tab, preset_right) or a custom command
 " - ui.scratch_buffer_keep_open: re-use scratch buffer within the vim session
