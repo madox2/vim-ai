@@ -41,11 +41,24 @@ echo "YOUR_OPENAI_API_KEY,YOUR_OPENAI_ORG_ID" > ~/.config/openai.token
 export OPENAI_API_KEY="YOUR_OPENAI_API_KEY,YOUR_OPENAI_ORG_ID"
 ```
 
-The default api key file location is `~/.config/openai.token`, but you can change it by setting the `g:vim_ai_token_file_path` in your `.vimrc` file:
+The default api key file location is `~/.config/openai.token`, but you can
+change it by setting the `g:vim_ai_token_file_path` in your `.vimrc` file:
 
 ```vim
 let g:vim_ai_token_file_path = '~/.config/openai.token'
 ```
+
+You can also store your OpenAI token in a GPG encrypted file. The default
+location of the encrypted GPG file is `~/.config/openai.token.asc`. You can
+change it by setting the `g:vim_gpg_ai_token_file_path` in your `.vimrc` file:
+
+```vim
+let g:vim_gpg_ai_token_file_path = '~/.config/else/where/whatever.you.like.asc'
+```
+
+In order for GPG decryption to work, you will need to make sure that you have
+the `python-gnupg` module installed. Of course, you also need to have GPG
+installed and have created your GPG public and private key pair.
 
 ### Using `vim-plug`
 

@@ -12,20 +12,33 @@ from urllib.error import URLError
 from urllib.error import HTTPError
 import traceback
 import configparser
+import gnupg
 
 is_debugging = vim.eval("g:vim_ai_debug") == "1"
 debug_log_file = vim.eval("g:vim_ai_debug_log_file")
+
+gpg = gnupg.GPG()
 
 class KnownError(Exception):
     pass
 
 def load_api_key():
     config_file_path = os.path.expanduser(vim.eval("g:vim_ai_token_file_path"))
+    gpg_config_file_path = os.path.expanduser(vim.eval("g:vim_gpg_ai_token_file_path"))
     api_key_param_value = os.getenv("OPENAI_API_KEY")
+
     try:
         with open(config_file_path, 'r') as file:
             api_key_param_value = file.read()
     except Exception:
+        pass
+
+    try:
+        with open(gpg_config_file_path, 'rb') as file:
+            decrypted_data = gpg.decrypt_file(file)
+            decrypted_text = decrypted_data.data.decode('utf-8')
+            api_key_param_value = decrypted_text.splitlines()[0]
+    except Exception as e:
         pass
 
     if not api_key_param_value:
