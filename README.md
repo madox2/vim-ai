@@ -47,6 +47,14 @@ The default api key file location is `~/.config/openai.token`, but you can chang
 let g:vim_ai_token_file_path = '~/.config/openai.token'
 ```
 
+If you wish to store your API key encrypted, you can load it by providing a shell command and assigning that command to the `g:vim_ai_load_api_token` variable. Here's an example of how you can define it in your `.vimrc` file:
+
+```vim
+let g:vim_ai_load_api_token = "pass path/to/your/openai.key|head -1"
+```
+
+The precedence of these alternative configurations is: `g:vim_ai_load_api_token`, `g:vim_ai_token_file_path`, `OPENAI_API_KEY`.
+
 ### Using `vim-plug`
 
 ```vim
