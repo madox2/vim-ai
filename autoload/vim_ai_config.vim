@@ -75,8 +75,8 @@ endif
 if !exists("g:vim_ai_token_file_path")
   let g:vim_ai_token_file_path = "~/.config/openai.token"
 endif
-if !exists("g:vim_gpg_ai_token_file_path")
-  let g:vim_gpg_ai_token_file_path = "~/.config/openai.token.asc"
+if !exists("g:vim_ai_load_api_token")
+  let g:vim_ai_load_api_token = ""
 endif
 if !exists("g:vim_ai_roles_config_file")
   let g:vim_ai_roles_config_file = s:plugin_root . "/roles-example.ini"
