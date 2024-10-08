@@ -71,16 +71,23 @@ try:
         vim.command("redraw")
 
         request = {
-            'stream': True,
             'messages': messages,
             **openai_options
         }
         printDebug("[chat] request: {}", request)
         url = options['endpoint_url']
         response = openai_request(url, request, http_options)
-        def map_chunk(resp):
+
+        def map_chunk_no_stream(resp):
+            printDebug("[chat] response: {}", resp)
+            return resp['choices'][0]['message'].get('content', '')
+
+        def map_chunk_stream(resp):
             printDebug("[chat] response: {}", resp)
             return resp['choices'][0]['delta'].get('content', '')
+
+        map_chunk = map_chunk_stream if openai_options['stream'] else map_chunk_no_stream
+
         text_chunks = map(map_chunk, response)
         render_text_chunks(text_chunks, is_selection)
 

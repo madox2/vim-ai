@@ -20,7 +20,6 @@ is_selection = vim.eval("l:is_selection")
 
 def complete_engine(prompt):
     request = {
-        'stream': True,
         'prompt': prompt,
         **openai_options
     }
@@ -39,7 +38,6 @@ def chat_engine(prompt):
     chat_content = f"{initial_prompt}\n\n>>> user\n\n{prompt}".strip()
     messages = parse_chat_messages(chat_content)
     request = {
-        'stream': True,
         'messages': messages,
         **openai_options
     }
