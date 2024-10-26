@@ -35,6 +35,8 @@ echo "YOUR_OPENAI_API_KEY" > ~/.config/openai.token
 
 # alternatively set it as an environment variable
 export OPENAI_API_KEY="YOUR_OPENAI_API_KEY"
+export OPENAI_ORG_ID="YOUR_OPENAI_ORG_ID"
+export OPENAI_PROJECT_ID="YOUR_OPENAI_PROJECT_ID"
 
 # or configure it with your organization id
 echo "YOUR_OPENAI_API_KEY,YOUR_OPENAI_ORG_ID" > ~/.config/openai.token
