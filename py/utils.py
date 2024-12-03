@@ -51,12 +51,17 @@ def normalize_config(config):
 
 def make_openai_options(options):
     max_tokens = int(options['max_tokens'])
-    return {
+    max_completion_tokens = int(options['max_completion_tokens'])
+    result = {
         'model': options['model'],
-        'max_tokens': max_tokens if max_tokens > 0 else None,
         'temperature': float(options['temperature']),
         'stream': int(options['stream']) == 1,
     }
+    if max_tokens > 0:
+        result['max_tokens'] = max_tokens
+    if max_completion_tokens > 0:
+        result['max_completion_tokens'] = max_completion_tokens
+    return result
 
 def make_http_options(options):
     return {
