@@ -237,28 +237,33 @@ def openai_request(url, data, options):
 
 def print_info_message(msg):
     vim.command("redraw")
-    vim.command(r'call feedkeys("\<Esc>")')
     vim.command("echohl ErrorMsg")
     vim.command(f"echomsg '{msg}'")
     vim.command("echohl None")
+
+def parse_error_message(error):
+    try:
+        parsed = json.loads(error.read().decode())
+        return parsed["error"]["message"]
+    except:
+        pass
 
 def handle_completion_error(error):
     # nvim throws - pynvim.api.common.NvimError: Keyboard interrupt
     is_nvim_keyboard_interrupt = "Keyboard interrupt" in str(error)
     if isinstance(error, KeyboardInterrupt) or is_nvim_keyboard_interrupt:
         print_info_message("Completion cancelled...")
-    elif isinstance(error, URLError) and isinstance(error.reason, socket.timeout):
-        print_info_message("Request timeout...")
     elif isinstance(error, HTTPError):
         status_code = error.getcode()
+        error_message = parse_error_message(error)
         msg = f"OpenAI: HTTPError {status_code}"
-        if status_code == 401:
-            msg += ' (Hint: verify that your API key is valid)'
-        if status_code == 404:
-            msg += ' (Hint: verify that you have access to the OpenAI API and to the model)'
-        elif status_code == 429:
-            msg += ' (Hint: verify that your billing plan is "Pay as you go")'
+        if error_message:
+            msg += f": {error_message}"
         print_info_message(msg)
+    elif isinstance(error, URLError) and isinstance(error.reason, socket.timeout):
+        print_info_message("Request timeout...")
+    elif isinstance(error, URLError):
+        print_info_message(f"URLError: {error.reason}")
     elif isinstance(error, KnownError):
         print_info_message(str(error))
     else:
