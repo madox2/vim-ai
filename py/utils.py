@@ -12,6 +12,7 @@ from urllib.error import URLError
 from urllib.error import HTTPError
 import traceback
 import configparser
+import base64
 
 is_debugging = vim.eval("g:vim_ai_debug") == "1"
 debug_log_file = vim.eval("g:vim_ai_debug_log_file")
@@ -105,61 +106,78 @@ def render_text_chunks(chunks, is_selection):
     if not full_text.strip():
         print_info_message('Empty response received. Tip: You can try modifying the prompt and retry.')
 
+def encode_image(image_path):
+    """Encodes an image file to a base64 string."""
+    with open(image_path, "rb") as image_file:
+        return base64.b64encode(image_file.read()).decode('utf-8')
 
 def parse_chat_messages(chat_content):
     lines = chat_content.splitlines()
     messages = []
+
     for line in lines:
+        # to allow using environment variables
+        line = os.path.expandvars(line)
         if line.startswith(">>> system"):
             messages.append({"role": "system", "content": ""})
-            continue
-        if line.startswith(">>> user"):
+        elif line.startswith(">>> user"):
             messages.append({"role": "user", "content": ""})
-            continue
-        if line.startswith(">>> include"):
+        elif line.startswith(">>> include"):
             messages.append({"role": "include", "content": ""})
-            continue
-        if line.startswith("<<< assistant"):
+        elif line.startswith("<<< assistant"):
             messages.append({"role": "assistant", "content": ""})
-            continue
-        if not messages:
-            continue
-        messages[-1]["content"] += "\n" + line
+        elif messages and not line.startswith((">>>", "<<<")):
+            messages[-1]["content"] += "\n" + line
 
     for message in messages:
-        # strip newlines from the content as it causes empty responses
-        message["content"] = message["content"].strip()
+        message["content"] = message["content"].strip()  # Strip newlines
 
         if message["role"] == "include":
             message["role"] = "user"
             paths = message["content"].split("\n")
-            message["content"] = ""
+            message["content"] = []
 
+            # Resolve file paths
             pwd = vim.eval("getcwd()")
-            for i in range(len(paths)):
-                path = os.path.expanduser(paths[i])
-                if not os.path.isabs(path):
-                    path = os.path.join(pwd, path)
-
-                paths[i] = path
-
-                if '**' in path:
-                    paths[i] = None
-                    paths.extend(glob.glob(path, recursive=True))
+            resolved_paths = []
 
             for path in paths:
-                if path is None:
-                    continue
+                path = os.path.expandvars(os.path.expanduser(path.strip()))
+                if not os.path.isabs(path):
+                    path = os.path.join(pwd, path)
+                if '**' in path:
+                    resolved_paths.extend(glob.glob(path, recursive=True))
+                else:
+                    resolved_paths.append(path)
 
+            # Process each included file
+            for path in resolved_paths:
                 if os.path.isdir(path):
                     continue
 
-                try:
-                    with open(path, "r") as file:
-                        message["content"] += f"\n\n==> {path} <==\n" + file.read()
-                except UnicodeDecodeError:
-                    message["content"] += "\n\n" + f"==> {path} <=="
-                    message["content"] += "\n" + "Binary file, cannot display"
+                ext = os.path.splitext(path)[1].lower()
+                if ext in ['.jpg', '.jpeg', '.png', '.gif']:
+                    # Include images as base64
+                    base64_image = encode_image(path)
+                    message["content"].append({
+                        "type": "image_url",
+                        "image_url": {
+                            "url": f"data:image/{ext.replace('.', '')};base64,{base64_image}"
+                        }
+                    })
+                else:
+                    # Handle as text file
+                    try:
+                        with open(path, "r", encoding="utf-8") as file:
+                            message["content"].append({
+                                "type": "text",
+                                "text": f"==> {path} <==\n{file.read()}"
+                            })
+                    except (UnicodeDecodeError, FileNotFoundError):
+                        message["content"].append({
+                            "type": "text",
+                            "text": f"==> {path} <==\n[BINARY FILE OR UNREADABLE CONTENT]"
+                        })
 
     return messages
 

@@ -115,12 +115,15 @@ To include files in the chat a special `include` role is used: >
 
   /home/user/myproject/requirements.txt
   /home/user/myproject/**/*.py
+  $SOME_ENV/some/dir/**/*
+  $SOME_ENV/myimages/image.png
 
 Each file's contents will be added to an additional `user` role message with
 the files separated by `==> {path} <==`, where path is the path to the file.
 Globbing is expanded out via `glob.gob` and relative paths to the current
 working directory (as determined by `getcwd()`) will be resolved to absolute
-paths.
+paths. Exported environment variables are resolved as well. If the defined 
+model is multimodal, images in format .png, .jpg or .gif can also be included.
 
                                                 *:AINewChat*
 
