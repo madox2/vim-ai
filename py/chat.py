@@ -95,11 +95,38 @@ is_selection = vim.eval("l:is_selection")
 messages = initial_messages + chat_messages
 
 try:
-    # Validate the first message to ensure the content is not empty
-    if messages and isinstance(messages[0]["content"], str) and messages[0]["content"].strip():
-        handle_answer_sequence(messages, openai_options, is_selection)
-    else:
-        vim.command("echoerr 'No valid input found. Ensure your message is non-empty.'")
+    if messages[-1]["content"].strip():
+        vim.command("normal! Go\n<<< assistant\n\n")
+        vim.command("redraw")
+
+        print('Answering...')
+        vim.command("redraw")
+
+        request = {
+            'messages': messages,
+            **openai_options
+        }
+        printDebug("[chat] request: {}", request)
+        url = options['endpoint_url']
+        response = openai_request(url, request, http_options)
+
+        def map_chunk_no_stream(resp):
+            printDebug("[chat] response: {}", resp)
+            return resp['choices'][0]['message'].get('content', '')
+
+        def map_chunk_stream(resp):
+            printDebug("[chat] response: {}", resp)
+            return resp['choices'][0]['delta'].get('content', '')
+
+        map_chunk = map_chunk_stream if openai_options['stream'] else map_chunk_no_stream
+
+        text_chunks = map(map_chunk, response)
+        render_text_chunks(text_chunks, is_selection)
+
+        vim.command("normal! a\n\n>>> user\n\n")
+        vim.command("redraw")
+        clear_echo_message()
+
 except BaseException as error:
     handle_completion_error(error)
     printDebug("[chat] error: {}", traceback.format_exc())

@@ -50,14 +50,19 @@ def normalize_config(config):
         normalized['options']['initial_prompt'] = normalized['options']['initial_prompt'].split('\n')
     return normalized
 
-
 def make_openai_options(options):
     max_tokens = int(options['max_tokens'])
-    return {
+    max_completion_tokens = int(options['max_completion_tokens'])
+    result = {
         'model': options['model'],
-        'max_tokens': max_tokens if max_tokens > 0 else None,
         'temperature': float(options['temperature']),
+        'stream': int(options['stream']) == 1,
     }
+    if max_tokens > 0:
+        result['max_tokens'] = max_tokens
+    if max_completion_tokens > 0:
+        result['max_completion_tokens'] = max_completion_tokens
+    return result
 
 def make_http_options(options):
     return {
@@ -92,8 +97,10 @@ def render_text_chunks(chunks, is_selection):
     full_text = ''
     insert_before_cursor = need_insert_before_cursor(is_selection)
     for text in chunks:
-        if not text.strip() and not generating_text:
-            continue # trim newlines from the beginning
+        if not generating_text:
+            text = text.lstrip() # trim newlines from the beginning
+        if not text:
+            continue
         generating_text = True
         if insert_before_cursor:
             vim.command("normal! i" + text)
@@ -104,7 +111,7 @@ def render_text_chunks(chunks, is_selection):
         vim.command("redraw")
         full_text += text
     if not full_text.strip():
-        print_info_message('Empty response received. Tip: You can try modifying the prompt and retry.')
+        raise KnownError('Empty response received. Tip: You can try modifying the prompt and retry.')
 
 def encode_image(image_path):
     """Encodes an image file to a base64 string."""
@@ -236,7 +243,11 @@ def openai_request(url, data, options):
         headers=headers,
         method="POST",
     )
+
     with urllib.request.urlopen(req, timeout=request_timeout) as response:
+        if not data['stream']:
+            yield json.loads(response.read().decode())
+            return
         for line_bytes in response:
             line = line_bytes.decode("utf-8", errors="replace")
             if line.startswith(OPENAI_RESP_DATA_PREFIX):
