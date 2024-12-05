@@ -260,24 +260,37 @@ Below are listed all available configuration options, along with their default v
 Please note that there isn't any token limit imposed on chat model.
 
 ```vim
+" This prompt instructs model to be consise in order to be used inline in editor
+let s:initial_complete_prompt =<< trim END
+>>> system
+
+You are a general assistant.
+Answer shortly, consisely and only what you are asked.
+Do not provide any explanantion or comments if not requested.
+If you answer in a code, do not wrap it in markdown blocks.
+END
+
 " :AI
-" - engine: complete | chat - see how to configure chat engine in the section below
+" - engine: chat | complete - see how to configure complete engine in the section below
 " - options: openai config (see https://platform.openai.com/docs/api-reference/completions)
+" - options.initial_prompt: prompt prepended to every chat request (list of lines or string)
 " - options.request_timeout: request timeout in seconds
 " - options.enable_auth: enable authorization using openai key
 " - options.selection_boundary: selection prompt wrapper (eliminates empty responses, see #20)
 " - ui.paste_mode: use paste mode (see more info in the Notes below)
 let g:vim_ai_complete = {
-\  "engine": "complete",
+\  "engine": "chat",
 \  "options": {
-\    "model": "gpt-3.5-turbo-instruct",
-\    "endpoint_url": "https://api.openai.com/v1/completions",
-\    "max_tokens": 1000,
+\    "model": "gpt-4o",
+\    "endpoint_url": "https://api.openai.com/v1/chat/completions",
+\    "max_tokens": 0,
+\    "max_completion_tokens": 0,
 \    "temperature": 0.1,
 \    "request_timeout": 20,
 \    "stream": 1,
 \    "enable_auth": 1,
 \    "selection_boundary": "#####",
+\    "initial_prompt": s:initial_complete_prompt,
 \  },
 \  "ui": {
 \    "paste_mode": 1,
@@ -285,14 +298,15 @@ let g:vim_ai_complete = {
 \}
 
 " :AIEdit
-" - engine: complete | chat - see how to configure chat engine in the section below
+" - engine: chat | complete - see how to configure complete engine in the section below
 " - options: openai config (see https://platform.openai.com/docs/api-reference/completions)
+" - options.initial_prompt: prompt prepended to every chat request (list of lines or string)
 " - options.request_timeout: request timeout in seconds
 " - options.enable_auth: enable authorization using openai key
 " - options.selection_boundary: selection prompt wrapper (eliminates empty responses, see #20)
 " - ui.paste_mode: use paste mode (see more info in the Notes below)
 let g:vim_ai_edit = {
-\  "engine": "complete",
+\  "engine": "chat",
 \  "options": {
 \    "model": "gpt-3.5-turbo-instruct",
 \    "endpoint_url": "https://api.openai.com/v1/completions",
@@ -374,39 +388,23 @@ let g:vim_ai_chat = {
 \}
 ```
 
-### Using chat engine for completion and edits
+### Using complete engine for completion and edits
 
-It is possible to configure chat models, such as `gpt-4o`, to be used in `:AI` and `:AIEdit` commands.
-These models are cheaper, but currently less suitable for code editing/completion, as they respond with human-like text and commentary.
-
-Depending on the use case, a good initial prompt can help to instruct the chat model to respond in the desired way:
+OpenAI has recently marked [Completions API](https://platform.openai.com/docs/api-reference/completions) as a legacy API.
+Therefore `:AI` and `:AIEdit` use chat models by default.
+However it is still possible to configure and use it with models like `gpt-3.5-turbo-instruct`.
 
 ```vim
-let initial_prompt =<< trim END
->>> system
-
-You are going to play a role of a completion engine with following parameters:
-Task: Provide compact code/text completion, generation, transformation or explanation
-Topic: general programming and text editing
-Style: Plain result without any commentary, unless commentary is necessary
-Audience: Users of text editor and programmers that need to transform/generate text
-END
-
-let chat_engine_config = {
-\  "engine": "chat",
+let complete_engine_config = {
+\  "engine": "complete",
 \  "options": {
-\    "model": "gpt-4o",
-\    "endpoint_url": "https://api.openai.com/v1/chat/completions",
-\    "max_tokens": 0,
-\    "temperature": 0.1,
-\    "request_timeout": 20,
-\    "selection_boundary": "",
-\    "initial_prompt": initial_prompt,
+\    "model": "gpt-3.5-turbo-instruct",
+\    "endpoint_url": "https://api.openai.com/v1/completions",
 \  },
 \}
 
-let g:vim_ai_complete = chat_engine_config
-let g:vim_ai_edit = chat_engine_config
+let g:vim_ai_complete = complete_engine_config
+let g:vim_ai_edit = complete_engine_config
 ```
 
 ## Custom commands
