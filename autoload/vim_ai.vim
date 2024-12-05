@@ -258,42 +258,59 @@ endfunction
 " - a:1          - optional instruction prompt
 function! vim_ai#AIChatRun(uses_range, config, ...) range abort
   let l:config = vim_ai_config#ExtendDeep(g:vim_ai_chat, a:config)
+  let l:prompt = ""
   let l:instruction = ""
-  " l:is_selection used in Python script
+  let l:is_selection = 0
+
   if a:uses_range
     let l:is_selection = g:vim_ai_is_selection_pending &&
           \ a:firstline == line("'<") && a:lastline == line("'>")
     let l:selection = s:GetSelectionOrRange(l:is_selection, a:firstline, a:lastline)
   else
-    let l:is_selection = 0
     let l:selection = ''
   endif
+
+  if a:0 > 0 || a:uses_range
+    let l:instruction = a:0 > 0 ? a:1 : ""
+    let l:prompt = s:MakePrompt(l:selection, l:instruction, l:config)
+  endif
+
+  call s:set_paste(l:config)
   try
-    call s:set_paste(l:config)
-
     call s:ReuseOrCreateChatWindow(l:config)
-
-    let l:prompt = ""
-    if a:0 > 0 || a:uses_range
-      let l:instruction = a:0 > 0 ? a:1 : ""
-      let l:prompt = s:MakePrompt(l:selection, l:instruction, l:config)
+    if l:prompt == "" && !s:HasUserPrompt()
+      execute "normal! G"
+      call setline('.', '>>> user')
+      execute "normal! o\<CR>"
+    else
+      let s:last_command = "chat"
+      let s:last_config = a:config
+      execute "py3file " . s:chat_py
     endif
-
-    let s:last_command = "chat"
-    let s:last_config = a:config
-
-    execute "py3file " . s:chat_py
   finally
     call s:set_nopaste(l:config)
   endtry
+endfunction
+
+" Check if user has provided a prompt in the buffer
+function! s:HasUserPrompt()
+  let content_lines = trim(join(getline(1, "$"), "\n"))
+  return match(content_lines, '>>> user') != -1
 endfunction
 
 " Start a new chat
 " a:1 - optional preset shorcut (below, right, tab)
 function! vim_ai#AINewChatRun(...) abort
   let l:open_conf = a:0 > 0 ? "preset_" . a:1 : g:vim_ai_chat['ui']['open_chat_command']
-  call s:OpenChatWindow(l:open_conf, 1)
-  call vim_ai#AIChatRun(0, {})
+
+  call vim_ai#AIChatRun(0, {
+        \ 'ui': { 'open_chat_command': l:open_conf }
+        \ })
+endfunction
+
+function! s:HasUserPrompt()
+  let content_lines = trim(join(getline(1, "$"), "\n"))
+  return match(content_lines, '>>> user') != -1
 endfunction
 
 " Repeat last AI command
