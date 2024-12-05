@@ -231,8 +231,11 @@ To customize the default configuration, initialize the config variable with a se
 ```vim
 let g:vim_ai_chat = {
 \  "options": {
-\    "model": "gpt-4",
-\    "temperature": 0.2,
+\    "model": "o1-preview",
+\    "stream": 0,
+\    "temperature": 1,
+\    "max_completion_tokens": 25000,
+\    "initial_prompt": "",
 \  },
 \}
 ```
@@ -240,16 +243,22 @@ let g:vim_ai_chat = {
 Once the above is set, you can modify options directly during the vim session:
 
 ```vim
-let g:vim_ai_chat['options']['model'] = 'gpt-4'
-let g:vim_ai_chat['options']['temperature'] = 0.2
+let g:vim_ai_chat['options']['model'] = 'o1-preview'
+let g:vim_ai_chat['options']['stream'] = 0
+let g:vim_ai_chat['options']['temperature'] = 1
+let g:vim_ai_chat['options']['max_completion_tokens'] = 25000
+let g:vim_ai_chat['options']['initial_prompt'] = ''
 ```
 
 Or customize the options directly in the chat buffer:
 
 ```properties
 [chat-options]
-model=gpt-4
-temperature=0.2
+model=o1-preview
+stream=0
+temperature=1
+max_completion_tokens=25000
+initial_prompt=
 
 >>> user
 
