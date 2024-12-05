@@ -241,9 +241,10 @@ def openai_request(url, data, options):
                     yield openai_obj
 
 def print_info_message(msg):
+    escaped_msg = msg.replace("'", "`")
     vim.command("redraw")
     vim.command("echohl ErrorMsg")
-    vim.command(f"echomsg '{msg}'")
+    vim.command(f"echomsg '{escaped_msg}'")
     vim.command("echohl None")
 
 def parse_error_message(error):
