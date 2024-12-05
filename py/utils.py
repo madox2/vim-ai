@@ -335,3 +335,27 @@ def parse_prompt_and_role(raw_prompt):
         delim = '' if prompt.startswith(':') else ':\n'
         prompt = config['role']['prompt'] + delim + prompt
     return (prompt, config['options'])
+
+def make_chat_text_chunks(messages, config_options):
+    openai_options = make_openai_options(config_options)
+    http_options = make_http_options(config_options)
+
+    request = {
+        'messages': messages,
+        **openai_options
+    }
+    printDebug("[engine-chat] request: {}", request)
+    url = config_options['endpoint_url']
+    response = openai_request(url, request, http_options)
+
+    def map_chunk_no_stream(resp):
+        printDebug("[engine-chat] response: {}", resp)
+        return resp['choices'][0]['message'].get('content', '')
+
+    def map_chunk_stream(resp):
+        printDebug("[engine-chat] response: {}", resp)
+        return resp['choices'][0]['delta'].get('content', '')
+
+    map_chunk = map_chunk_stream if openai_options['stream'] else map_chunk_no_stream
+
+    return map(map_chunk, response)

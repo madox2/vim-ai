@@ -13,12 +13,12 @@ config_options = {
     **role_options['options_default'],
     **role_options['options_complete'],
 }
-openai_options = make_openai_options(config_options)
-http_options = make_http_options(config_options)
-
 is_selection = vim.eval("l:is_selection")
 
 def complete_engine(prompt):
+    openai_options = make_openai_options(config_options)
+    http_options = make_http_options(config_options)
+
     request = {
         'prompt': prompt,
         **openai_options
@@ -37,18 +37,7 @@ def chat_engine(prompt):
     initial_prompt = '\n'.join(initial_prompt)
     chat_content = f"{initial_prompt}\n\n>>> user\n\n{prompt}".strip()
     messages = parse_chat_messages(chat_content)
-    request = {
-        'messages': messages,
-        **openai_options
-    }
-    printDebug("[engine-chat] request: {}", request)
-    url = config_options['endpoint_url']
-    response = openai_request(url, request, http_options)
-    def map_chunk(resp):
-        printDebug("[engine-chat] response: {}", resp)
-        return resp['choices'][0]['delta'].get('content', '')
-    text_chunks = map(map_chunk, response)
-    return text_chunks
+    return make_chat_text_chunks(messages, config_options)
 
 engines = {"chat": chat_engine, "complete": complete_engine}
 
