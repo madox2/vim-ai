@@ -196,6 +196,14 @@ prompt = fix spelling and grammar
 
 [grammar.options]
 temperature = 0.4
+
+[o1-mini]
+[o1-mini.options]
+stream = 0
+model = o1-mini
+max_completion_tokens = 25000
+temperature = 1
+initial_prompt =
 ```
 
 Now you can select text and run it with command `:AIEdit /grammar`.
