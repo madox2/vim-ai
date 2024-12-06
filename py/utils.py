@@ -19,11 +19,13 @@ debug_log_file = vim.eval("g:vim_ai_debug_log_file")
 class KnownError(Exception):
     pass
 
-def load_api_key():
-    config_file_path = os.path.expanduser(vim.eval("g:vim_ai_token_file_path"))
+def load_api_key(config_token_file_path):
+    # token precedence: config file path, global file path, env variable
+    global_token_file_path = vim.eval("g:vim_ai_token_file_path")
     api_key_param_value = os.getenv("OPENAI_API_KEY")
     try:
-        with open(config_file_path, 'r') as file:
+        token_file_path = config_token_file_path or global_token_file_path
+        with open(os.path.expanduser(token_file_path), 'r') as file:
             api_key_param_value = file.read()
     except Exception:
         pass
@@ -67,6 +69,7 @@ def make_http_options(options):
     return {
         'request_timeout': float(options['request_timeout']),
         'enable_auth': bool(int(options['enable_auth'])),
+        'token_file_path': options['token_file_path'],
     }
 
 # During text manipulation in Vim's visual mode, we utilize "normal! c" command. This command deletes the highlighted text,
@@ -212,7 +215,7 @@ def openai_request(url, data, options):
         "Content-Type": "application/json",
     }
     if enable_auth:
-        (OPENAI_API_KEY, OPENAI_ORG_ID) = load_api_key()
+        (OPENAI_API_KEY, OPENAI_ORG_ID) = load_api_key(options['token_file_path'])
         headers['Authorization'] = f"Bearer {OPENAI_API_KEY}"
 
         if OPENAI_ORG_ID is not None:

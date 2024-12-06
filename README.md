@@ -293,6 +293,7 @@ END
 " - options.initial_prompt: prompt prepended to every chat request (list of lines or string)
 " - options.request_timeout: request timeout in seconds
 " - options.enable_auth: enable authorization using openai key
+" - options.token_file_path: override global token configuration
 " - options.selection_boundary: selection prompt wrapper (eliminates empty responses, see #20)
 " - ui.paste_mode: use paste mode (see more info in the Notes below)
 let g:vim_ai_complete = {
@@ -306,6 +307,7 @@ let g:vim_ai_complete = {
 \    "request_timeout": 20,
 \    "stream": 1,
 \    "enable_auth": 1,
+\    "token_file_path": "",
 \    "selection_boundary": "#####",
 \    "initial_prompt": s:initial_complete_prompt,
 \  },
@@ -320,6 +322,7 @@ let g:vim_ai_complete = {
 " - options.initial_prompt: prompt prepended to every chat request (list of lines or string)
 " - options.request_timeout: request timeout in seconds
 " - options.enable_auth: enable authorization using openai key
+" - options.token_file_path: override global token configuration
 " - options.selection_boundary: selection prompt wrapper (eliminates empty responses, see #20)
 " - ui.paste_mode: use paste mode (see more info in the Notes below)
 let g:vim_ai_edit = {
@@ -333,6 +336,7 @@ let g:vim_ai_edit = {
 \    "request_timeout": 20,
 \    "stream": 1,
 \    "enable_auth": 1,
+\    "token_file_path": "",
 \    "selection_boundary": "#####",
 \    "initial_prompt": s:initial_complete_prompt,
 \  },
@@ -354,6 +358,7 @@ END
 " - options.initial_prompt: prompt prepended to every chat request (list of lines or string)
 " - options.request_timeout: request timeout in seconds
 " - options.enable_auth: enable authorization using openai key
+" - options.token_file_path: override global token configuration
 " - options.selection_boundary: selection prompt wrapper (eliminates empty responses, see #20)
 " - ui.populate_options: put [chat-options] to the chat header
 " - ui.open_chat_command: preset (preset_below, preset_tab, preset_right) or a custom command
@@ -369,6 +374,7 @@ let g:vim_ai_chat = {
 \    "request_timeout": 20,
 \    "stream": 1,
 \    "enable_auth": 1,
+\    "token_file_path": "",
 \    "selection_boundary": "",
 \    "initial_prompt": s:initial_chat_prompt,
 \  },
