@@ -427,19 +427,19 @@ Then you set up a custom role that points to the OpenRouter endpoint:
 ```ini
 [gemini]
 [gemini.options]
-token_file_path = ~/.config/openai-openrouter.token
+token_file_path = ~/.config/vim-ai-openrouter.token
 endpoint_url = https://openrouter.ai/api/v1/chat/completions
 model = google/gemini-exp-1121:free
 
 [llama]
 [llama.options]
-token_file_path = ~/.config/openai-openrouter.token
+token_file_path = ~/.config/vim-ai-openrouter.token
 endpoint_url = https://openrouter.ai/api/v1/chat/completions
 model = meta-llama/llama-3.3-70b-instruct
 
 [claude]
 [claude.options]
-token_file_path = ~/.config/openai-openrouter.token
+token_file_path = ~/.config/vim-ai-openrouter.token
 endpoint_url = https://openrouter.ai/api/v1/chat/completions
 model = anthropic/claude-3.5-haiku
 ```
