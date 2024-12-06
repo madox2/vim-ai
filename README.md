@@ -12,7 +12,8 @@ To get an idea what is possible to do with AI commands see the [prompts](https:/
 - Generate text or code, answer questions with AI
 - Edit selected text in-place with AI
 - Interactive conversation with ChatGPT
-- Supports custom roles and more
+- Custom roles
+- Integrates with any OpenAI-compatible API
 
 ## How it works
 
@@ -21,6 +22,10 @@ You will need to [setup](https://platform.openai.com/signup) an account and obta
 Usage of the API is not free, but the cost is reasonable and depends on how many tokens you use, in simple terms, how much text you send and receive (see [pricing](https://openai.com/pricing)).
 Note that the plugin does not send any of your code behind the scenes.
 You only share and pay for what you specifically select, for prompts and chat content.
+
+In case you would like to experiment with Gemini, Claude or other models running as a service or locally, you can use any OpenAI compatible proxy.
+A simple way is to use [OpenRouter](https://openrouter.ai) which has a fair pricing (and currently offers many models for [free](https://openrouter.ai/models?max_price=0)), or setup a proxy like [LiteLLM](https://github.com/BerriAI/litellm) locally.
+See this simple [guide](#example-create-custom-roles-to-interact-with-openrouter-models) on configuring custom OpenRouter roles.
 
 ## Installation
 
@@ -412,6 +417,41 @@ let g:vim_ai_chat = {
 \  },
 \}
 ```
+
+#### Example: create custom roles to interact with OpenRouter models
+
+First you need open an account on [OpenRouter](https://openrouter.ai/) website and create an api key.
+You can start with [free models](https://openrouter.ai/models?max_price=0) and add credits later if you wish.
+Then you set up a custom role that points to the OpenRouter endpoint:
+
+```ini
+[gemini]
+[gemini.options]
+token_file_path = ~/.config/openai-openrouter.token
+endpoint_url = https://openrouter.ai/api/v1/chat/completions
+model = google/gemini-exp-1121:free
+
+[llama]
+[llama.options]
+token_file_path = ~/.config/openai-openrouter.token
+endpoint_url = https://openrouter.ai/api/v1/chat/completions
+model = meta-llama/llama-3.3-70b-instruct
+
+[claude]
+[claude.options]
+token_file_path = ~/.config/openai-openrouter.token
+endpoint_url = https://openrouter.ai/api/v1/chat/completions
+model = anthropic/claude-3.5-haiku
+```
+
+Now you can use the role:
+
+```
+:AI /gemini who created you?
+
+I was created by Google.
+```
+
 
 ### Using complete engine for completion and edits
 
