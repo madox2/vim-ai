@@ -214,6 +214,7 @@ def openai_request(url, data, options):
     enable_auth=options['enable_auth']
     headers = {
         "Content-Type": "application/json",
+        "User-Agent": "VimAI",
     }
     if enable_auth:
         (OPENAI_API_KEY, OPENAI_ORG_ID) = load_api_key(options['token_file_path'])
