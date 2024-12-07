@@ -4,15 +4,11 @@ import vim
 plugin_root = vim.eval("s:plugin_root")
 vim.command(f"py3file {plugin_root}/py/utils.py")
 
-config = normalize_config(vim.eval("l:config"))
-engine = config['engine']
+prompt, config = load_config_and_prompt()
+config_options = config['options']
+config_ui = config['ui']
 
-prompt, role_options = parse_prompt_and_role(vim.eval("l:prompt"))
-config_options = {
-    **config['options'],
-    **role_options['options_default'],
-    **role_options['options_complete'],
-}
+engine = config['engine']
 is_selection = vim.eval("l:is_selection")
 
 def complete_engine(prompt):

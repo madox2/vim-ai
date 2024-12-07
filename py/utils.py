@@ -44,12 +44,21 @@ def load_api_key(config_token_file_path):
 
     return (api_key, org_id)
 
-def normalize_config(config):
-    normalized = { **config }
+def load_config_and_prompt():
+    prompt, role_options = parse_prompt_and_role(vim.eval("l:prompt"))
+    config = vim.eval("l:config")
+    config['options'] = {
+        **normalize_options(config['options']),
+        **normalize_options(role_options['options_default']),
+        **normalize_options(role_options['options_chat']),
+    }
+    return prompt, config
+
+def normalize_options(options):
     # initial prompt can be both a string and a list of strings, normalize it to list
-    if 'initial_prompt' in config['options'] and isinstance(config['options']['initial_prompt'], str):
-        normalized['options']['initial_prompt'] = normalized['options']['initial_prompt'].split('\n')
-    return normalized
+    if 'initial_prompt' in options and isinstance(options['initial_prompt'], str):
+        options['initial_prompt'] = options['initial_prompt'].split('\n')
+    return options
 
 def make_openai_options(options):
     max_tokens = int(options['max_tokens'])
