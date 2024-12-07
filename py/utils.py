@@ -204,7 +204,8 @@ def printDebug(text, *args):
     if not is_debugging:
         return
     with open(debug_log_file, "a") as file:
-        file.write(f"[{datetime.datetime.now()}] " + text.format(*args) + "\n")
+        message = text.format(*args) if len(args) else text
+        file.write(f"[{datetime.datetime.now()}] " + message + "\n")
 
 OPENAI_RESP_DATA_PREFIX = 'data: '
 OPENAI_RESP_DONE = '[DONE]'
