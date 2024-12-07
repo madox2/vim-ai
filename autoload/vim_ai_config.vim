@@ -6,7 +6,7 @@ let s:initial_complete_prompt =<< trim END
 You are a general assistant.
 Answer shortly, consisely and only what you are asked.
 Do not provide any explanantion or comments if not requested.
-If you answer in a code, do not wrap it in markdown blocks.
+If you answer in a code, do not wrap it in markdown code block.
 END
 let g:vim_ai_complete_default = {
 \  "engine": "chat",
