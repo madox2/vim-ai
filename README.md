@@ -107,8 +107,6 @@ In the documentation below,  `<selection>` denotes a visual selection or any oth
 
 ### `:AI`
 
-`:AI` - complete the text on the current line
-
 `:AI {prompt}` - complete the prompt
 
 `<selection> :AI` - complete the selection
@@ -481,6 +479,7 @@ To create a custom command, you can call `AIRun`, `AIEditRun` and `AIChatRun` fu
 ```vim
 " custom command suggesting git commit message, takes no arguments
 function! GitCommitMessageFn()
+  let l:range = 0
   let l:diff = system('git --no-pager diff --staged')
   let l:prompt = "generate a short commit message from the diff below:\n" . l:diff
   let l:config = {
@@ -491,9 +490,10 @@ function! GitCommitMessageFn()
   \    "temperature": 1,
   \  },
   \}
-  call vim_ai#AIRun(l:config, l:prompt)
+  call vim_ai#AIRun(l:range, l:config, l:prompt)
 endfunction
 command! GitCommitMessage call GitCommitMessageFn()
+
 
 " custom command that provides a code review for selected code block
 function! CodeReviewFn(range) range
@@ -505,7 +505,7 @@ function! CodeReviewFn(range) range
   \}
   exe a:firstline.",".a:lastline . "call vim_ai#AIChatRun(a:range, l:config, l:prompt)"
 endfunction
-command! -range=0 CodeReview <line1>,<line2>call CodeReviewFn(<count>)
+command! -range -nargs=? AICodeReview <line1>,<line2>call CodeReviewFn(<range>)
 ```
 
 ## Contributing

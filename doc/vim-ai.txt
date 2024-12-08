@@ -15,7 +15,6 @@ https://github.com/madox2/vim-ai
 
                                                 *:AI*
 
-:AI                                 complete the text on the current line
 :AI {prompt}                        complete the prompt
 <selection> :AI                     complete the selection
 <selection> :AI {instruction}       complete the selection using the instruction

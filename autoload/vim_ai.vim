@@ -118,8 +118,10 @@ endfunction
 function! s:GetSelectionOrRange(is_selection, ...)
   if a:is_selection
     return s:GetVisualSelection()
-  else
+  elseif a:1 != a:2
     return trim(join(getline(a:1, a:2), "\n"))
+  else
+    return ""
   endif
 endfunction
 
@@ -145,20 +147,14 @@ function! s:GetVisualSelection()
 endfunction
 
 " Complete prompt
+" - uses_range   - truty if range passed
 " - config       - function scoped vim_ai_complete config
 " - a:1          - optional instruction prompt
-" - a:2          - optional selection pending (to override g:vim_ai_is_selection_pending)
-function! vim_ai#AIRun(config, ...) range abort
+function! vim_ai#AIRun(uses_range, config, ...) range abort
   let l:config = vim_ai_config#ExtendDeep(g:vim_ai_complete, a:config)
   let l:instruction = a:0 > 0 ? a:1 : ""
   " l:is_selection used in Python script
-  if a:0 > 1
-    let l:is_selection = a:2
-  else
-    let l:is_selection = g:vim_ai_is_selection_pending &&
-          \ a:firstline == line("'<") && a:lastline == line("'>")
-  endif
-
+  let l:is_selection = a:uses_range && a:firstline == line("'<") && a:lastline == line("'>")
   let l:selection = s:GetSelectionOrRange(l:is_selection, a:firstline, a:lastline)
   let l:prompt = s:MakePrompt(l:selection, l:instruction, l:config)
 
@@ -185,19 +181,14 @@ function! vim_ai#AIRun(config, ...) range abort
 endfunction
 
 " Edit prompt
+" - uses_range   - truty if range passed
 " - config       - function scoped vim_ai_edit config
 " - a:1          - optional instruction prompt
-" - a:2          - optional selection pending (to override g:vim_ai_is_selection_pending)
-function! vim_ai#AIEditRun(config, ...) range abort
+function! vim_ai#AIEditRun(uses_range, config, ...) range abort
   let l:config = vim_ai_config#ExtendDeep(g:vim_ai_edit, a:config)
   let l:instruction = a:0 > 0 ? a:1 : ""
   " l:is_selection used in Python script
-  if a:0 > 1
-    let l:is_selection = a:2
-  else
-    let l:is_selection = g:vim_ai_is_selection_pending &&
-          \ a:firstline == line("'>") && a:lastline == line("'>")
-  endif
+  let l:is_selection = a:uses_range && a:firstline == line("'<") && a:lastline == line("'>")
   let l:selection = s:GetSelectionOrRange(l:is_selection, a:firstline, a:lastline)
   let l:prompt = s:MakePrompt(l:selection, l:instruction, l:config)
 
@@ -253,21 +244,15 @@ function! s:ReuseOrCreateChatWindow(config)
 endfunction
 
 " Start and answer the chat
-" - uses_range   - true if range passed
+" - uses_range   - truty if range passed
 " - config       - function scoped vim_ai_chat config
 " - a:1          - optional instruction prompt
 function! vim_ai#AIChatRun(uses_range, config, ...) range abort
   let l:config = vim_ai_config#ExtendDeep(g:vim_ai_chat, a:config)
   let l:instruction = ""
   " l:is_selection used in Python script
-  if a:uses_range
-    let l:is_selection = g:vim_ai_is_selection_pending &&
-          \ a:firstline == line("'<") && a:lastline == line("'>")
-    let l:selection = s:GetSelectionOrRange(l:is_selection, a:firstline, a:lastline)
-  else
-    let l:is_selection = 0
-    let l:selection = ''
-  endif
+  let l:is_selection = a:uses_range && a:firstline == line("'<") && a:lastline == line("'>")
+  let l:selection = s:GetSelectionOrRange(l:is_selection, a:firstline, a:lastline)
   try
     call s:set_paste(l:config)
 
@@ -300,9 +285,9 @@ endfunction
 function! vim_ai#AIRedoRun() abort
   undo
   if s:last_command ==# "complete"
-    exe s:last_firstline.",".s:last_lastline . "call vim_ai#AIRun(s:last_config, s:last_instruction, s:last_is_selection)"
+    exe s:last_firstline.",".s:last_lastline . "call vim_ai#AIRun(s:last_is_selection, s:last_config, s:last_instruction)"
   elseif s:last_command ==# "edit"
-    exe s:last_firstline.",".s:last_lastline . "call vim_ai#AIEditRun(s:last_config, s:last_instruction, s:last_is_selection)"
+    exe s:last_firstline.",".s:last_lastline . "call vim_ai#AIEditRun(s:last_is_selection, s:last_config, s:last_instruction)"
   elseif s:last_command ==# "chat"
     " chat does not need prompt, all information are in the buffer already
     call vim_ai#AIChatRun(0, s:last_config)
