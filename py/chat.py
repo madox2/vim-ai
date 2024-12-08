@@ -50,6 +50,7 @@ initial_prompt = '\n'.join(options.get('initial_prompt', []))
 initial_messages = parse_chat_messages(initial_prompt)
 
 chat_content = vim.eval('trim(join(getline(1, "$"), "\n"))')
+printDebug("[chat] text:\n" + chat_content)
 chat_messages = parse_chat_messages(chat_content)
 is_selection = vim.eval("l:is_selection")
 

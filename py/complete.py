@@ -14,6 +14,7 @@ is_selection = vim.eval("l:is_selection")
 def complete_engine(prompt):
     openai_options = make_openai_options(config_options)
     http_options = make_http_options(config_options)
+    printDebug("[engine-complete] text:\n" + prompt)
 
     request = {
         'prompt': prompt,
@@ -33,6 +34,7 @@ def chat_engine(prompt):
     initial_prompt = '\n'.join(initial_prompt)
     chat_content = f"{initial_prompt}\n\n>>> user\n\n{prompt}".strip()
     messages = parse_chat_messages(chat_content)
+    printDebug("[engine-chat] text:\n" + chat_content)
     return make_chat_text_chunks(messages, config_options)
 
 engines = {"chat": chat_engine, "complete": complete_engine}
