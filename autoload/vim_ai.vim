@@ -115,10 +115,10 @@ function! s:set_nopaste(config)
   endif
 endfunction
 
-function! s:GetSelectionOrRange(is_selection, ...)
+function! s:GetSelectionOrRange(is_selection, is_range, ...)
   if a:is_selection
     return s:GetVisualSelection()
-  elseif a:1 != a:2
+  elseif a:is_range
     return trim(join(getline(a:1, a:2), "\n"))
   else
     return ""
@@ -155,7 +155,7 @@ function! vim_ai#AIRun(uses_range, config, ...) range abort
   let l:instruction = a:0 > 0 ? a:1 : ""
   " l:is_selection used in Python script
   let l:is_selection = a:uses_range && a:firstline == line("'<") && a:lastline == line("'>")
-  let l:selection = s:GetSelectionOrRange(l:is_selection, a:firstline, a:lastline)
+  let l:selection = s:GetSelectionOrRange(l:is_selection, a:uses_range, a:firstline, a:lastline)
   let l:prompt = s:MakePrompt(l:selection, l:instruction, l:config)
 
   let s:last_command = "complete"
@@ -189,7 +189,7 @@ function! vim_ai#AIEditRun(uses_range, config, ...) range abort
   let l:instruction = a:0 > 0 ? a:1 : ""
   " l:is_selection used in Python script
   let l:is_selection = a:uses_range && a:firstline == line("'<") && a:lastline == line("'>")
-  let l:selection = s:GetSelectionOrRange(l:is_selection, a:firstline, a:lastline)
+  let l:selection = s:GetSelectionOrRange(l:is_selection, a:uses_range, a:firstline, a:lastline)
   let l:prompt = s:MakePrompt(l:selection, l:instruction, l:config)
 
   let s:last_command = "edit"
@@ -252,7 +252,7 @@ function! vim_ai#AIChatRun(uses_range, config, ...) range abort
   let l:instruction = ""
   " l:is_selection used in Python script
   let l:is_selection = a:uses_range && a:firstline == line("'<") && a:lastline == line("'>")
-  let l:selection = s:GetSelectionOrRange(l:is_selection, a:firstline, a:lastline)
+  let l:selection = s:GetSelectionOrRange(l:is_selection, a:uses_range, a:firstline, a:lastline)
   try
     call s:set_paste(l:config)
 
