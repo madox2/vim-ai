@@ -95,7 +95,7 @@ is_selection = vim.eval("l:is_selection")
 messages = initial_messages + chat_messages
 
 try:
-    if messages[-1]["content"].strip():
+    if messages[-1]["content"]:
         vim.command("normal! Go\n<<< assistant\n\n")
         vim.command("redraw")
 
