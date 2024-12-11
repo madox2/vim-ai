@@ -362,13 +362,22 @@ def make_chat_text_chunks(messages, config_options):
     url = config_options['endpoint_url']
     response = openai_request(url, request, http_options)
 
+    def _choices(resp):
+        choices = resp.get('choices', [{}])
+
+        # NOTE choices may exist in the response, but be an empty list.
+        if not choices:
+            return [{}]
+
+        return choices
+
     def map_chunk_no_stream(resp):
         printDebug("[engine-chat] response: {}", resp)
-        return resp['choices'][0]['message'].get('content', '')
+        return _choices(resp)[0].get('message', {}).get('content', '')
 
     def map_chunk_stream(resp):
         printDebug("[engine-chat] response: {}", resp)
-        return resp['choices'][0]['delta'].get('content', '')
+        return _choices(resp)[0].get('delta', {}).get('content', '')
 
     map_chunk = map_chunk_stream if openai_options['stream'] else map_chunk_no_stream
 
