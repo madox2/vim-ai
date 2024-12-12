@@ -44,13 +44,13 @@ def load_api_key(config_token_file_path):
 
     return (api_key, org_id)
 
-def load_config_and_prompt():
+def load_config_and_prompt(command_type):
     prompt, role_options = parse_prompt_and_role(vim.eval("l:prompt"))
     config = vim.eval("l:config")
     config['options'] = {
         **normalize_options(config['options']),
         **normalize_options(role_options['options_default']),
-        **normalize_options(role_options['options_chat']),
+        **normalize_options(role_options['options_' + command_type]),
     }
     return prompt, config
 

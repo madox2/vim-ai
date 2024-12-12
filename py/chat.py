@@ -4,7 +4,7 @@ import vim
 plugin_root = vim.eval("s:plugin_root")
 vim.command(f"py3file {plugin_root}/py/utils.py")
 
-prompt, config = load_config_and_prompt()
+prompt, config = load_config_and_prompt('chat')
 config_options = config['options']
 config_ui = config['ui']
 
