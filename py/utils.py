@@ -335,7 +335,7 @@ empty_role_options = {
 }
 
 def parse_roles(prompt):
-    chunks = prompt.split()
+    chunks = re.split(r'[ :]+', prompt)
     roles = []
     for chunk in chunks:
         if not chunk.startswith("/"):
