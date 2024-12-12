@@ -334,17 +334,40 @@ empty_role_options = {
     'options_chat': {},
 }
 
+def parse_roles(prompt):
+    chunks = prompt.split()
+    roles = []
+    for chunk in chunks:
+        if not chunk.startswith("/"):
+            break
+        roles.append(chunk)
+    return [raw_role[1:] for raw_role in roles]
+
+def merge_role_configs(configs):
+    merged_options = empty_role_options
+    merged_role = {}
+    for config in configs:
+        options = config['options']
+        merged_options = {
+            'options_default': { **merged_options['options_default'], **options['options_default'] },
+            'options_complete': { **merged_options['options_complete'], **options['options_complete'] },
+            'options_chat': { **merged_options['options_chat'], **options['options_chat'] },
+        }
+        merged_role ={ **merged_role, **config['role'] }
+    return { 'role': merged_role, 'options': merged_options }
+
 def parse_prompt_and_role(raw_prompt):
     prompt = raw_prompt.strip()
-    role = re.split(' |:', prompt)[0]
-    if not role.startswith('/'):
+    roles = parse_roles(prompt)
+    if not roles:
         # does not require role
         return (prompt, empty_role_options)
 
-    prompt = prompt[len(role):].strip()
-    role = role[1:]
+    last_role = roles[-1]
+    prompt = prompt[prompt.index(last_role) + len(last_role):].strip()
 
-    config = load_role_config(role)
+    role_configs = [load_role_config(role) for role in roles]
+    config = merge_role_configs(role_configs)
     if 'prompt' in config['role'] and config['role']['prompt']:
         delim = '' if prompt.startswith(':') else ':\n'
         prompt = config['role']['prompt'] + delim + prompt

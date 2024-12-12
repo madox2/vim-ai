@@ -202,6 +202,8 @@ Example of a role: >
     [grammar.options]
     temperature = 0.4
 
+
+Now you can select text and run it with command `:AIEdit /grammar`.
 See roles-example.ini for more examples.
 
 The roles in g:vim_ai_roles_config_file are converted to a Vim dictionary whose

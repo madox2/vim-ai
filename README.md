@@ -185,7 +185,7 @@ Note that the randomness of responses heavily depends on the [`temperature`](htt
 
 ## Roles
 
-In the context of this plugin, a role means a re-usable AI instruction and/or configuration. Roles are defined in the configuration `.ini` file. For example by defining a `grammar` role:
+In the context of this plugin, a role means a re-usable AI instruction and/or configuration. Roles are defined in the configuration `.ini` file. For example by defining a `grammar` and `o1-mini` role:
 
 ```vim
 let g:vim_ai_roles_config_file = '/path/to/my/roles.ini'
@@ -200,6 +200,9 @@ prompt = fix spelling and grammar
 [grammar.options]
 temperature = 0.4
 
+[grammar]
+prompt = fix spelling and grammar
+
 [o1-mini]
 [o1-mini.options]
 stream = 0
@@ -210,6 +213,8 @@ initial_prompt =
 ```
 
 Now you can select text and run it with command `:AIEdit /grammar`.
+
+You can also combine roles `:AI /o1-mini /grammar helo world!`
 
 See [roles-example.ini](./roles-example.ini) for more examples.
 
