@@ -1,17 +1,5 @@
 import vim
-import os
-from config import make_config
-
-dirname = os.path.dirname(__file__)
-
-def default_eval_mock(cmd):
-    match cmd:
-        case 'g:vim_ai_debug_log_file':
-            return '/tmp/vim_ai_debug.log'
-        case 'g:vim_ai_roles_config_file':
-            return dirname + '/resources/roles.ini'
-        case _:
-            return None
+from config import make_config_and_prompt, make_prompt
 
 default_config = {
   "options": {
@@ -36,98 +24,104 @@ default_config = {
   },
 }
 
-def make_input_mock(mocker, input_options):
-    def eval_mock(cmd):
-        if cmd == 'l:input':
-            return input_options
-        return default_eval_mock(cmd)
-    mocker.patch('vim.eval', eval_mock)
-
-
-def test_default_config(mocker):
-    make_input_mock(mocker, {
+def test_default_config():
+    actual_output = make_config_and_prompt({
         'config_default': default_config,
         'config_extension': {},
-        'instruction': 'hello',
+        'user_instruction': 'translate to Slovak',
+        'user_selection': 'Hello world!',
         'command_type': 'chat',
     })
-    command_spy = mocker.spy(vim, "command")
-    actual_output = make_config('l:input', 'l:output')
     expected_output = {
         'config': default_config,
-        'role_prompt': '',
+        'prompt': 'translate to Slovak:\nHello world!',
     }
-    command_spy.assert_called_once_with(f"let l:output={expected_output}")
     assert expected_output == actual_output
 
-def test_param_config(mocker):
-    make_input_mock(mocker, {
+def test_param_config():
+    actual_config = make_config_and_prompt({
         'config_default': default_config,
         'config_extension': {
             'options': {
                 'max_tokens': '1000',
             },
         },
-        'instruction': 'hello',
+        'user_instruction': 'hello',
+        'user_selection': '',
         'command_type': 'chat',
-    })
-    actual_config = make_config('l:input', 'l:output')['config']
+    })['config']
     assert '1000' == actual_config['options']['max_tokens']
     assert 'gpt-4o' == actual_config['options']['model']
 
-def test_role_config(mocker):
-    make_input_mock(mocker, {
+def test_role_config():
+    config = make_config_and_prompt({
         'config_default': default_config,
         'config_extension': {},
-        'instruction': '/test-role-simple',
+        'user_instruction': '/test-role-simple user instruction',
+        'user_selection': 'selected text',
         'command_type': 'chat',
     })
-    config = make_config('l:input', 'l:output')
     actual_config = config['config']
-    actual_role_prompt = config['role_prompt']
+    actual_prompt = config['prompt']
     assert 'o1-preview' == actual_config['options']['model']
-    assert 'simple role prompt' == actual_role_prompt
+    assert 'simple role prompt:\nuser instruction:\nselected text' == actual_prompt
 
-def test_role_config_different_commands(mocker):
-    make_input_mock(mocker, {
+def test_role_config_different_commands():
+    config  = make_config_and_prompt({
         'config_default': default_config,
         'config_extension': {},
-        'instruction': '/test-role hello',
+        'user_instruction': '/test-role hello',
+        'user_selection': '',
         'command_type': 'chat',
     })
-    config = make_config('l:input', 'l:output')
     actual_config = config['config']
-    actual_role_prompt = config['role_prompt']
+    actual_prompt = config['prompt']
     assert 'model-common' == actual_config['options']['model']
     assert 'https://localhost/chat' == actual_config['options']['endpoint_url']
     assert '0' == actual_config['ui']['paste_mode']
     assert 'preset_tab' == actual_config['ui']['open_chat_command']
-    assert '' == actual_role_prompt
+    assert 'hello' == actual_prompt
 
-    make_input_mock(mocker, {
+    config = make_config_and_prompt({
         'config_default': default_config,
         'config_extension': {},
-        'instruction': '/test-role hello',
+        'user_instruction': '/test-role hello',
+        'user_selection': '',
         'command_type': 'complete',
     })
-    config = make_config('l:input', 'l:output')
     actual_config = config['config']
-    actual_role_prompt = config['role_prompt']
+    actual_prompt = config['prompt']
     assert 'model-common' == actual_config['options']['model']
     assert 'https://localhost/complete' == actual_config['options']['endpoint_url']
     assert '0' == actual_config['ui']['paste_mode']
-    assert '' == actual_role_prompt
+    assert 'hello' == actual_prompt
 
-def test_multiple_role_configs(mocker):
-    make_input_mock(mocker, {
+def test_multiple_role_configs():
+    config = make_config_and_prompt({
         'config_default': default_config,
         'config_extension': {},
-        'instruction': '/test-role /test-role-simple hello',
+        'user_instruction': '/test-role /test-role-simple hello',
+        'user_selection': '',
         'command_type': 'chat',
     })
-    config = make_config('l:input', 'l:output')
     actual_config = config['config']
-    actual_role_prompt = config['role_prompt']
+    actual_prompt = config['prompt']
     assert 'o1-preview' == actual_config['options']['model']
     assert 'https://localhost/chat' == actual_config['options']['endpoint_url']
-    assert 'simple role prompt' == actual_role_prompt
+    assert 'simple role prompt:\nhello' == actual_prompt
+
+def test_user_prompt():
+    assert 'fix grammar: helo word' == make_prompt( '', 'fix grammar: helo word', '', '')
+    assert 'fix grammar:\nhelo word' == make_prompt( '', 'fix grammar', 'helo word', '')
+
+def test_role_prompt():
+    assert 'fix grammar:\nhelo word' == make_prompt( 'fix grammar', 'helo word', '', '')
+    assert 'fix grammar:\nhelo word' == make_prompt( 'fix grammar', '', 'helo word', '')
+    assert 'fix grammar:\nand spelling:\nhelo word' == make_prompt( 'fix grammar', 'and spelling', 'helo word', '')
+
+def test_selection_prompt():
+    assert 'fix grammar:\nhelo word' == make_prompt( '', '', 'fix grammar:\nhelo word', '')
+
+def test_selection_boundary():
+    assert 'fix grammar:\n###\nhelo word\n###' == make_prompt( '', 'fix grammar', 'helo word', '###')
+    assert 'fix grammar:\n###\nhelo word\n###' == make_prompt( 'fix grammar', '', 'helo word', '###')

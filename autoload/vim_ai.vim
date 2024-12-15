@@ -77,29 +77,6 @@ function! s:OpenChatWindow(open_conf, force_new) abort
   endif
 endfunction
 
-function! s:MakeSelectionPrompt(selection, instruction, config)
-  let l:selection = ""
-  if a:instruction == ""
-    let l:selection = a:selection
-  elseif !empty(a:selection)
-    let l:boundary = a:config['options']['selection_boundary']
-    if l:boundary != "" && match(a:selection, l:boundary) == -1
-      " NOTE: surround selection with boundary (e.g. #####) in order to eliminate empty responses
-      let l:selection = l:boundary . "\n" . a:selection . "\n" . l:boundary
-    else
-      let l:selection = a:selection
-    endif
-  endif
-  return l:selection
-endfunction
-
-function! s:MakePrompt(selection, instruction, config)
-  let l:instruction = trim(a:instruction)
-  let l:delimiter = l:instruction != "" && a:selection != "" ? ":\n" : ""
-  let l:selection = s:MakeSelectionPrompt(a:selection, l:instruction, a:config)
-  return join([l:instruction, l:delimiter, l:selection], "")
-endfunction
-
 let s:is_handling_paste_mode = 0
 
 function! s:set_paste(config)
@@ -153,21 +130,21 @@ endfunction
 " - a:1          - optional instruction prompt
 function! vim_ai#AIRun(uses_range, config, ...) range abort
   let l:instruction = a:0 > 0 ? a:1 : ""
-  let l:config_input = {
-  \  "config_default": g:vim_ai_edit,
-  \  "config_extension": a:config,
-  \  "instruction": l:instruction,
-  \  "command_type": 'complete',
-  \}
-  execute "py3file " . s:config_py
-  execute "py3 make_config('l:config_input', 'l:config_output')"
-  let l:config = l:config_output['config']
-  let l:role_prompt = l:config_output['role_prompt']
-
   " l:is_selection used in Python script
   let l:is_selection = a:uses_range && a:firstline == line("'<") && a:lastline == line("'>")
   let l:selection = s:GetSelectionOrRange(l:is_selection, a:uses_range, a:firstline, a:lastline)
-  let l:prompt = s:MakePrompt(l:selection, l:instruction, l:config)
+
+  let l:config_input = {
+  \  "config_default": g:vim_ai_edit,
+  \  "config_extension": a:config,
+  \  "user_instruction": l:instruction,
+  \  "user_selection": l:selection,
+  \  "command_type": 'complete',
+  \}
+  execute "py3file " . s:config_py
+  let l:config_output = py3eval("make_config_and_prompt(unwrap('l:config_input'))")
+  let l:config = l:config_output['config']
+  let l:prompt = l:config_output['prompt']
 
   let s:last_command = "complete"
   let s:last_config = a:config
@@ -197,21 +174,21 @@ endfunction
 " - a:1          - optional instruction prompt
 function! vim_ai#AIEditRun(uses_range, config, ...) range abort
   let l:instruction = a:0 > 0 ? a:1 : ""
-  let l:config_input = {
-  \  "config_default": g:vim_ai_edit,
-  \  "config_extension": a:config,
-  \  "instruction": l:instruction,
-  \  "command_type": 'complete',
-  \}
-  execute "py3file " . s:config_py
-  execute "py3 make_config('l:config_input', 'l:config_output')"
-  let l:config = l:config_output['config']
-  let l:role_prompt = l:config_output['role_prompt']
-
   " l:is_selection used in Python script
   let l:is_selection = a:uses_range && a:firstline == line("'<") && a:lastline == line("'>")
   let l:selection = s:GetSelectionOrRange(l:is_selection, a:uses_range, a:firstline, a:lastline)
-  let l:prompt = s:MakePrompt(l:selection, l:instruction, l:config)
+
+  let l:config_input = {
+  \  "config_default": g:vim_ai_edit,
+  \  "config_extension": a:config,
+  \  "user_instruction": l:instruction,
+  \  "user_selection": l:selection,
+  \  "command_type": 'complete',
+  \}
+  execute "py3file " . s:config_py
+  let l:config_output = py3eval("make_config_and_prompt(unwrap('l:config_input'))")
+  let l:config = l:config_output['config']
+  let l:prompt = l:config_output['prompt']
 
   let s:last_command = "edit"
   let s:last_config = a:config
@@ -270,29 +247,29 @@ endfunction
 " - a:1          - optional instruction prompt
 function! vim_ai#AIChatRun(uses_range, config, ...) range abort
   let l:instruction = a:0 > 0 ? a:1 : ""
-  let l:config_input = {
-  \  "config_default": g:vim_ai_chat,
-  \  "config_extension": a:config,
-  \  "instruction": l:instruction,
-  \  "command_type": 'chat',
-  \}
-  execute "py3file " . s:config_py
-  execute "py3 make_config('l:config_input', 'l:config_output')"
-  let l:config = l:config_output['config']
-  let l:role_prompt = l:config_output['role_prompt']
-
   " l:is_selection used in Python script
   let l:is_selection = a:uses_range && a:firstline == line("'<") && a:lastline == line("'>")
   let l:selection = s:GetSelectionOrRange(l:is_selection, a:uses_range, a:firstline, a:lastline)
+
+  let l:config_input = {
+  \  "config_default": g:vim_ai_chat,
+  \  "config_extension": a:config,
+  \  "user_instruction": l:instruction,
+  \  "user_selection": l:selection,
+  \  "command_type": 'chat',
+  \}
+  execute "py3file " . s:config_py
+  let l:config_output = py3eval("make_config_and_prompt(unwrap('l:config_input'))")
+  let l:config = l:config_output['config']
+  let l:prompt = ""
+  if a:0 > 0 || a:uses_range
+    let l:prompt = l:config_output['prompt']
+  endif
+
+
   try
     call s:set_paste(l:config)
-
     call s:ReuseOrCreateChatWindow(l:config)
-
-    let l:prompt = ""
-    if a:0 > 0 || a:uses_range
-      let l:prompt = s:MakePrompt(l:selection, l:instruction, l:config)
-    endif
 
     let s:last_command = "chat"
     let s:last_config = a:config

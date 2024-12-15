@@ -44,30 +44,6 @@ def load_api_key(config_token_file_path):
 
     return (api_key, org_id)
 
-def strip_roles(prompt):
-    chunks = re.split(r'[ :]+', prompt)
-    roles = []
-    for chunk in chunks:
-        if not chunk.startswith("/"):
-            break
-        roles.append(chunk)
-    if not roles:
-        return prompt
-    last_role = roles[-1]
-    return prompt[prompt.index(last_role) + len(last_role):].strip()
-
-def make_prompt(raw_prompt, role_prompt):
-    prompt = raw_prompt.strip()
-    prompt = strip_roles(prompt)
-
-    if not role_prompt:
-        return prompt
-
-    delim = '' if prompt.startswith(':') else ':\n'
-    prompt = role_prompt + delim + prompt
-
-    return prompt
-
 def make_config(config):
     options = config['options']
     # initial prompt can be both a string and a list of strings, normalize it to list

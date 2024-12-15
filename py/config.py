@@ -3,6 +3,9 @@ import re
 import os
 import configparser
 
+def unwrap(input_var):
+    return vim.eval(input_var)
+
 def merge_deep_recursive(target, source = {}):
     source = source.copy()
     for key, value in source.items():
@@ -74,32 +77,55 @@ def parse_role_names(prompt):
         roles.append(chunk)
     return [raw_role[1:] for raw_role in roles]
 
-def parse_prompt_and_role_config(instruction, command_type):
-    instruction = instruction.strip()
-    roles = parse_role_names(instruction)
+def parse_prompt_and_role_config(user_instruction, command_type):
+    user_instruction = user_instruction.strip()
+    roles = parse_role_names(user_instruction)
     if not roles:
         # does not require role
-        return ('', {})
+        return (user_instruction, '', {})
 
     last_role = roles[-1]
+    user_prompt = user_instruction[user_instruction.index(last_role) + len(last_role):].strip() # strip roles
+
     role_configs = merge_deep([load_role_config(role) for role in roles])
     config = merge_deep([role_configs['config_default'], role_configs['config_' + command_type]])
     role_prompt = role_configs['role'].get('prompt', '')
-    return role_prompt, config
+    return user_prompt, role_prompt, config
 
-def make_config(input_var, output_var):
-    input_options = vim.eval(input_var)
-    config_default = input_options['config_default']
-    config_extension = input_options['config_extension']
-    instruction = input_options['instruction']
-    command_type = input_options['command_type']
+def make_selection_prompt(user_selection, user_prompt, role_prompt, selection_boundary):
+    if not user_prompt and not role_prompt:
+        return user_selection
+    elif user_selection:
+        if selection_boundary and selection_boundary not in user_selection:
+            return f"{selection_boundary}\n{user_selection}\n{selection_boundary}"
+        else:
+            return user_selection
+    return ''
 
-    role_prompt, role_config = parse_prompt_and_role_config(instruction, command_type)
+def make_prompt(role_prompt, user_prompt, user_selection, selection_boundary):
+    user_prompt = user_prompt.strip()
+    delimiter = ":\n" if user_prompt and user_selection else ""
+    user_selection = make_selection_prompt(user_selection, user_prompt, role_prompt, selection_boundary)
+    prompt = f"{user_prompt}{delimiter}{user_selection}"
+    if not role_prompt:
+        return prompt
+    delimiter = '' if prompt.startswith(':') else ':\n'
+    prompt = f"{role_prompt}{delimiter}{prompt}"
+    return prompt
 
+def make_config_and_prompt(params):
+    config_default = params['config_default']
+    config_extension = params['config_extension']
+    user_instruction = params['user_instruction']
+    user_selection = params['user_selection']
+    command_type = params['command_type']
+
+    user_prompt, role_prompt, role_config = parse_prompt_and_role_config(user_instruction, command_type)
     final_config = merge_deep([config_default, config_extension, role_config])
+    selection_boundary = final_config['options']['selection_boundary']
+    prompt = make_prompt(role_prompt, user_prompt, user_selection, selection_boundary)
 
-    output = {}
-    output['config'] = final_config
-    output['role_prompt'] = role_prompt
-    vim.command(f'let {output_var}={output}')
-    return output
+    return {
+        'config': final_config,
+        'prompt': prompt,
+    }
