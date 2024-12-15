@@ -4,6 +4,7 @@ let s:plugin_root = expand('<sfile>:p:h:h')
 let s:complete_py = s:plugin_root . "/py/complete.py"
 let s:chat_py = s:plugin_root . "/py/chat.py"
 let s:roles_py = s:plugin_root . "/py/roles.py"
+let s:config_py = s:plugin_root . "/py/config.py"
 
 " remembers last command parameters to be used in AIRedoRun
 let s:last_is_selection = 0
@@ -45,7 +46,7 @@ function! s:OpenChatWindow(open_conf, force_new) abort
   execute l:open_cmd
 
   " reuse chat in keep-open mode
-  let l:keep_open = g:vim_ai_chat['ui']['scratch_buffer_keep_open']
+  let l:keep_open = g:vim_ai_chat['ui']['scratch_buffer_keep_open'] == '1'
   let l:last_scratch_buffer_name = s:GetLastScratchBufferName()
   if l:keep_open && bufexists(l:last_scratch_buffer_name) && !a:force_new
     let l:current_buffer = bufnr('%')
@@ -102,7 +103,7 @@ endfunction
 let s:is_handling_paste_mode = 0
 
 function! s:set_paste(config)
-  if !&paste && a:config['ui']['paste_mode']
+  if !&paste && a:config['ui']['paste_mode'] == '1'
     let s:is_handling_paste_mode = 1
     setlocal paste
   endif
@@ -151,8 +152,18 @@ endfunction
 " - config       - function scoped vim_ai_complete config
 " - a:1          - optional instruction prompt
 function! vim_ai#AIRun(uses_range, config, ...) range abort
-  let l:config = vim_ai_config#ExtendDeep(g:vim_ai_complete, a:config)
   let l:instruction = a:0 > 0 ? a:1 : ""
+  let l:config_input = {
+  \  "config_default": g:vim_ai_edit,
+  \  "config_extension": a:config,
+  \  "instruction": l:instruction,
+  \  "command_type": 'complete',
+  \}
+  execute "py3file " . s:config_py
+  execute "py3 make_config('l:config_input', 'l:config_output')"
+  let l:config = l:config_output['config']
+  let l:role_prompt = l:config_output['role_prompt']
+
   " l:is_selection used in Python script
   let l:is_selection = a:uses_range && a:firstline == line("'<") && a:lastline == line("'>")
   let l:selection = s:GetSelectionOrRange(l:is_selection, a:uses_range, a:firstline, a:lastline)
@@ -185,8 +196,18 @@ endfunction
 " - config       - function scoped vim_ai_edit config
 " - a:1          - optional instruction prompt
 function! vim_ai#AIEditRun(uses_range, config, ...) range abort
-  let l:config = vim_ai_config#ExtendDeep(g:vim_ai_edit, a:config)
   let l:instruction = a:0 > 0 ? a:1 : ""
+  let l:config_input = {
+  \  "config_default": g:vim_ai_edit,
+  \  "config_extension": a:config,
+  \  "instruction": l:instruction,
+  \  "command_type": 'complete',
+  \}
+  execute "py3file " . s:config_py
+  execute "py3 make_config('l:config_input', 'l:config_output')"
+  let l:config = l:config_output['config']
+  let l:role_prompt = l:config_output['role_prompt']
+
   " l:is_selection used in Python script
   let l:is_selection = a:uses_range && a:firstline == line("'<") && a:lastline == line("'>")
   let l:selection = s:GetSelectionOrRange(l:is_selection, a:uses_range, a:firstline, a:lastline)
@@ -248,8 +269,18 @@ endfunction
 " - config       - function scoped vim_ai_chat config
 " - a:1          - optional instruction prompt
 function! vim_ai#AIChatRun(uses_range, config, ...) range abort
-  let l:config = vim_ai_config#ExtendDeep(g:vim_ai_chat, a:config)
-  let l:instruction = ""
+  let l:instruction = a:0 > 0 ? a:1 : ""
+  let l:config_input = {
+  \  "config_default": g:vim_ai_chat,
+  \  "config_extension": a:config,
+  \  "instruction": l:instruction,
+  \  "command_type": 'chat',
+  \}
+  execute "py3file " . s:config_py
+  execute "py3 make_config('l:config_input', 'l:config_output')"
+  let l:config = l:config_output['config']
+  let l:role_prompt = l:config_output['role_prompt']
+
   " l:is_selection used in Python script
   let l:is_selection = a:uses_range && a:firstline == line("'<") && a:lastline == line("'>")
   let l:selection = s:GetSelectionOrRange(l:is_selection, a:uses_range, a:firstline, a:lastline)
@@ -260,7 +291,6 @@ function! vim_ai#AIChatRun(uses_range, config, ...) range abort
 
     let l:prompt = ""
     if a:0 > 0 || a:uses_range
-      let l:instruction = a:0 > 0 ? a:1 : ""
       let l:prompt = s:MakePrompt(l:selection, l:instruction, l:config)
     endif
 

@@ -44,21 +44,36 @@ def load_api_key(config_token_file_path):
 
     return (api_key, org_id)
 
-def load_config_and_prompt(command_type):
-    prompt, role_options = parse_prompt_and_role(vim.eval("l:prompt"))
-    config = vim.eval("l:config")
-    config['options'] = {
-        **normalize_options(config['options']),
-        **normalize_options(role_options['options_default']),
-        **normalize_options(role_options['options_' + command_type]),
-    }
-    return prompt, config
+def strip_roles(prompt):
+    chunks = re.split(r'[ :]+', prompt)
+    roles = []
+    for chunk in chunks:
+        if not chunk.startswith("/"):
+            break
+        roles.append(chunk)
+    if not roles:
+        return prompt
+    last_role = roles[-1]
+    return prompt[prompt.index(last_role) + len(last_role):].strip()
 
-def normalize_options(options):
+def make_prompt(raw_prompt, role_prompt):
+    prompt = raw_prompt.strip()
+    prompt = strip_roles(prompt)
+
+    if not role_prompt:
+        return prompt
+
+    delim = '' if prompt.startswith(':') else ':\n'
+    prompt = role_prompt + delim + prompt
+
+    return prompt
+
+def make_config(config):
+    options = config['options']
     # initial prompt can be both a string and a list of strings, normalize it to list
     if 'initial_prompt' in options and isinstance(options['initial_prompt'], str):
         options['initial_prompt'] = options['initial_prompt'].split('\n')
-    return options
+    return config
 
 def make_openai_options(options):
     max_tokens = int(options['max_tokens'])
@@ -301,77 +316,6 @@ def enhance_roles_with_custom_function(roles):
             raise Exception(f"Role config function does not exist: {roles_config_function}")
         else:
             roles.update(vim.eval(roles_config_function + "()"))
-
-def load_role_config(role):
-    roles_config_path = os.path.expanduser(vim.eval("g:vim_ai_roles_config_file"))
-    if not os.path.exists(roles_config_path):
-        raise Exception(f"Role config file does not exist: {roles_config_path}")
-
-    roles = configparser.ConfigParser()
-    roles.read(roles_config_path)
-
-    enhance_roles_with_custom_function(roles)
-
-    if not role in roles:
-        raise Exception(f"Role `{role}` not found")
-
-    options = roles[f"{role}.options"] if f"{role}.options" in roles else {}
-    options_complete =roles[f"{role}.options-complete"] if f"{role}.options-complete" in roles else {}
-    options_chat = roles[f"{role}.options-chat"] if f"{role}.options-chat" in roles else {}
-
-    return {
-        'role': dict(roles[role]),
-        'options': {
-            'options_default': dict(options),
-            'options_complete': dict(options_complete),
-            'options_chat': dict(options_chat),
-        },
-    }
-
-empty_role_options = {
-    'options_default': {},
-    'options_complete': {},
-    'options_chat': {},
-}
-
-def parse_roles(prompt):
-    chunks = re.split(r'[ :]+', prompt)
-    roles = []
-    for chunk in chunks:
-        if not chunk.startswith("/"):
-            break
-        roles.append(chunk)
-    return [raw_role[1:] for raw_role in roles]
-
-def merge_role_configs(configs):
-    merged_options = empty_role_options
-    merged_role = {}
-    for config in configs:
-        options = config['options']
-        merged_options = {
-            'options_default': { **merged_options['options_default'], **options['options_default'] },
-            'options_complete': { **merged_options['options_complete'], **options['options_complete'] },
-            'options_chat': { **merged_options['options_chat'], **options['options_chat'] },
-        }
-        merged_role ={ **merged_role, **config['role'] }
-    return { 'role': merged_role, 'options': merged_options }
-
-def parse_prompt_and_role(raw_prompt):
-    prompt = raw_prompt.strip()
-    roles = parse_roles(prompt)
-    if not roles:
-        # does not require role
-        return (prompt, empty_role_options)
-
-    last_role = roles[-1]
-    prompt = prompt[prompt.index(last_role) + len(last_role):].strip()
-
-    role_configs = [load_role_config(role) for role in roles]
-    config = merge_role_configs(role_configs)
-    if 'prompt' in config['role'] and config['role']['prompt']:
-        delim = '' if prompt.startswith(':') else ':\n'
-        prompt = config['role']['prompt'] + delim + prompt
-    return (prompt, config['options'])
 
 def make_chat_text_chunks(messages, config_options):
     openai_options = make_openai_options(config_options)

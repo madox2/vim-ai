@@ -4,7 +4,8 @@ import vim
 plugin_root = vim.eval("s:plugin_root")
 vim.command(f"py3file {plugin_root}/py/utils.py")
 
-prompt, config = load_config_and_prompt('complete')
+prompt = make_prompt(vim.eval("l:prompt"), vim.eval("l:role_prompt"))
+config = make_config(vim.eval("l:config"))
 config_options = config['options']
 config_ui = config['ui']
 
