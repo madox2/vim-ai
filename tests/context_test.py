@@ -1,5 +1,5 @@
 import vim
-from config import make_config_and_prompt, make_prompt
+from context import make_ai_context, make_prompt
 
 default_config = {
   "options": {
@@ -25,21 +25,21 @@ default_config = {
 }
 
 def test_default_config():
-    actual_output = make_config_and_prompt({
+    actual_context = make_ai_context({
         'config_default': default_config,
         'config_extension': {},
         'user_instruction': 'translate to Slovak',
         'user_selection': 'Hello world!',
         'command_type': 'chat',
     })
-    expected_output = {
+    expected_context = {
         'config': default_config,
         'prompt': 'translate to Slovak:\nHello world!',
     }
-    assert expected_output == actual_output
+    assert expected_context == actual_context
 
 def test_param_config():
-    actual_config = make_config_and_prompt({
+    actual_config = make_ai_context({
         'config_default': default_config,
         'config_extension': {
             'options': {
@@ -54,58 +54,58 @@ def test_param_config():
     assert 'gpt-4o' == actual_config['options']['model']
 
 def test_role_config():
-    config = make_config_and_prompt({
+    context = make_ai_context({
         'config_default': default_config,
         'config_extension': {},
         'user_instruction': '/test-role-simple user instruction',
         'user_selection': 'selected text',
         'command_type': 'chat',
     })
-    actual_config = config['config']
-    actual_prompt = config['prompt']
+    actual_config = context['config']
+    actual_prompt = context['prompt']
     assert 'o1-preview' == actual_config['options']['model']
     assert 'simple role prompt:\nuser instruction:\nselected text' == actual_prompt
 
 def test_role_config_different_commands():
-    config  = make_config_and_prompt({
+    context  = make_ai_context({
         'config_default': default_config,
         'config_extension': {},
         'user_instruction': '/test-role hello',
         'user_selection': '',
         'command_type': 'chat',
     })
-    actual_config = config['config']
-    actual_prompt = config['prompt']
+    actual_config = context['config']
+    actual_prompt = context['prompt']
     assert 'model-common' == actual_config['options']['model']
     assert 'https://localhost/chat' == actual_config['options']['endpoint_url']
     assert '0' == actual_config['ui']['paste_mode']
     assert 'preset_tab' == actual_config['ui']['open_chat_command']
     assert 'hello' == actual_prompt
 
-    config = make_config_and_prompt({
+    context = make_ai_context({
         'config_default': default_config,
         'config_extension': {},
         'user_instruction': '/test-role hello',
         'user_selection': '',
         'command_type': 'complete',
     })
-    actual_config = config['config']
-    actual_prompt = config['prompt']
+    actual_config = context['config']
+    actual_prompt = context['prompt']
     assert 'model-common' == actual_config['options']['model']
     assert 'https://localhost/complete' == actual_config['options']['endpoint_url']
     assert '0' == actual_config['ui']['paste_mode']
     assert 'hello' == actual_prompt
 
 def test_multiple_role_configs():
-    config = make_config_and_prompt({
+    context = make_ai_context({
         'config_default': default_config,
         'config_extension': {},
         'user_instruction': '/test-role /test-role-simple hello',
         'user_selection': '',
         'command_type': 'chat',
     })
-    actual_config = config['config']
-    actual_prompt = config['prompt']
+    actual_config = context['config']
+    actual_prompt = context['prompt']
     assert 'o1-preview' == actual_config['options']['model']
     assert 'https://localhost/chat' == actual_config['options']['endpoint_url']
     assert 'simple role prompt:\nhello' == actual_prompt

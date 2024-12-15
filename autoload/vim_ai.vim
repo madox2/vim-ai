@@ -1,10 +1,6 @@
 call vim_ai_config#load()
 
 let s:plugin_root = expand('<sfile>:p:h:h')
-let s:complete_py = s:plugin_root . "/py/complete.py"
-let s:chat_py = s:plugin_root . "/py/chat.py"
-let s:roles_py = s:plugin_root . "/py/roles.py"
-let s:config_py = s:plugin_root . "/py/config.py"
 
 " remembers last command parameters to be used in AIRedoRun
 let s:last_is_selection = 0
@@ -15,6 +11,14 @@ let s:last_command = ""
 let s:last_config = {}
 
 let s:scratch_buffer_name = ">>> AI chat"
+
+function! s:ImportPythonModules()
+  for py_module in ['utils', 'context', 'chat', 'complete', 'roles']
+    if !py3eval("'" . py_module . "_py_imported' in globals()")
+      execute "py3file " . s:plugin_root . "/py/" . py_module . ".py"
+    endif
+  endfor
+endfunction
 
 function! s:StartsWith(longer, shorter) abort
   return a:longer[0:len(a:shorter)-1] ==# a:shorter
@@ -129,8 +133,8 @@ endfunction
 " - config       - function scoped vim_ai_complete config
 " - a:1          - optional instruction prompt
 function! vim_ai#AIRun(uses_range, config, ...) range abort
+  call s:ImportPythonModules()
   let l:instruction = a:0 > 0 ? a:1 : ""
-  " l:is_selection used in Python script
   let l:is_selection = a:uses_range && a:firstline == line("'<") && a:lastline == line("'>")
   let l:selection = s:GetSelectionOrRange(l:is_selection, a:uses_range, a:firstline, a:lastline)
 
@@ -139,12 +143,11 @@ function! vim_ai#AIRun(uses_range, config, ...) range abort
   \  "config_extension": a:config,
   \  "user_instruction": l:instruction,
   \  "user_selection": l:selection,
+  \  "is_selection": l:is_selection,
   \  "command_type": 'complete',
   \}
-  execute "py3file " . s:config_py
-  let l:config_output = py3eval("make_config_and_prompt(unwrap('l:config_input'))")
-  let l:config = l:config_output['config']
-  let l:prompt = l:config_output['prompt']
+  let l:context = py3eval("make_ai_context(unwrap('l:config_input'))")
+  let l:config = l:context['config']
 
   let s:last_command = "complete"
   let s:last_config = a:config
@@ -161,7 +164,7 @@ function! vim_ai#AIRun(uses_range, config, ...) range abort
     else
       execute "normal! " . a:lastline . "Go"
     endif
-    execute "py3file " . s:complete_py
+    py3 run_ai_completition(unwrap('l:context'))
     execute "normal! " . a:lastline . "G"
   finally
     call s:set_nopaste(l:config)
@@ -173,8 +176,8 @@ endfunction
 " - config       - function scoped vim_ai_edit config
 " - a:1          - optional instruction prompt
 function! vim_ai#AIEditRun(uses_range, config, ...) range abort
+  call s:ImportPythonModules()
   let l:instruction = a:0 > 0 ? a:1 : ""
-  " l:is_selection used in Python script
   let l:is_selection = a:uses_range && a:firstline == line("'<") && a:lastline == line("'>")
   let l:selection = s:GetSelectionOrRange(l:is_selection, a:uses_range, a:firstline, a:lastline)
 
@@ -183,12 +186,11 @@ function! vim_ai#AIEditRun(uses_range, config, ...) range abort
   \  "config_extension": a:config,
   \  "user_instruction": l:instruction,
   \  "user_selection": l:selection,
+  \  "is_selection": l:is_selection,
   \  "command_type": 'complete',
   \}
-  execute "py3file " . s:config_py
-  let l:config_output = py3eval("make_config_and_prompt(unwrap('l:config_input'))")
-  let l:config = l:config_output['config']
-  let l:prompt = l:config_output['prompt']
+  let l:context = py3eval("make_ai_context(unwrap('l:config_input'))")
+  let l:config = l:context['config']
 
   let s:last_command = "edit"
   let s:last_config = a:config
@@ -201,7 +203,7 @@ function! vim_ai#AIEditRun(uses_range, config, ...) range abort
     call s:set_paste(l:config)
     call s:SelectSelectionOrRange(l:is_selection, a:firstline, a:lastline)
     execute "normal! c"
-    execute "py3file " . s:complete_py
+    py3 run_ai_completition(unwrap('l:context'))
   finally
     call s:set_nopaste(l:config)
   endtry
@@ -246,8 +248,8 @@ endfunction
 " - config       - function scoped vim_ai_chat config
 " - a:1          - optional instruction prompt
 function! vim_ai#AIChatRun(uses_range, config, ...) range abort
+  call s:ImportPythonModules()
   let l:instruction = a:0 > 0 ? a:1 : ""
-  " l:is_selection used in Python script
   let l:is_selection = a:uses_range && a:firstline == line("'<") && a:lastline == line("'>")
   let l:selection = s:GetSelectionOrRange(l:is_selection, a:uses_range, a:firstline, a:lastline)
 
@@ -256,16 +258,12 @@ function! vim_ai#AIChatRun(uses_range, config, ...) range abort
   \  "config_extension": a:config,
   \  "user_instruction": l:instruction,
   \  "user_selection": l:selection,
+  \  "is_selection": l:is_selection,
   \  "command_type": 'chat',
   \}
-  execute "py3file " . s:config_py
-  let l:config_output = py3eval("make_config_and_prompt(unwrap('l:config_input'))")
-  let l:config = l:config_output['config']
-  let l:prompt = ""
-  if a:0 > 0 || a:uses_range
-    let l:prompt = l:config_output['prompt']
-  endif
-
+  let l:context = py3eval("make_ai_context(unwrap('l:config_input'))")
+  let l:config = l:context['config']
+  let l:context['prompt'] = a:0 > 0 || a:uses_range ? l:context['prompt'] : ''
 
   try
     call s:set_paste(l:config)
@@ -274,7 +272,7 @@ function! vim_ai#AIChatRun(uses_range, config, ...) range abort
     let s:last_command = "chat"
     let s:last_config = a:config
 
-    execute "py3file " . s:chat_py
+    py3 run_ai_chat(unwrap('l:context'))
   finally
     call s:set_nopaste(l:config)
   endtry
@@ -302,7 +300,8 @@ function! vim_ai#AIRedoRun() abort
 endfunction
 
 function! vim_ai#RoleCompletion(A,L,P) abort
-  execute "py3file " . s:roles_py
+  call s:ImportPythonModules()
+  let l:role_list = py3eval("load_ai_role_names()")
   call map(l:role_list, '"/" . v:val')
   return filter(l:role_list, 'v:val =~ "^' . a:A . '"')
 endfunction

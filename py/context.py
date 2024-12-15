@@ -3,8 +3,10 @@ import re
 import os
 import configparser
 
-def unwrap(input_var):
-    return vim.eval(input_var)
+if "PYTEST_VERSION" in os.environ:
+    from utils import *
+
+context_py_imported = True
 
 def merge_deep_recursive(target, source = {}):
     source = source.copy()
@@ -21,14 +23,6 @@ def merge_deep(objects):
     for o in objects:
         merge_deep_recursive(result, o)
     return result
-
-def enhance_roles_with_custom_function(roles):
-    if vim.eval("exists('g:vim_ai_roles_config_function')") == '1':
-        roles_config_function = vim.eval("g:vim_ai_roles_config_function")
-        if not vim.eval("exists('*" + roles_config_function + "')"):
-            raise Exception(f"Role config function does not exist: {roles_config_function}")
-        else:
-            roles.update(vim.eval(roles_config_function + "()"))
 
 def load_role_config(role):
     roles_config_path = os.path.expanduser(vim.eval("g:vim_ai_roles_config_file"))
@@ -113,7 +107,7 @@ def make_prompt(role_prompt, user_prompt, user_selection, selection_boundary):
     prompt = f"{role_prompt}{delimiter}{prompt}"
     return prompt
 
-def make_config_and_prompt(params):
+def make_ai_context(params):
     config_default = params['config_default']
     config_extension = params['config_extension']
     user_instruction = params['user_instruction']
