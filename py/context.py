@@ -92,7 +92,8 @@ def load_role_config(role):
 
     enhance_roles_with_custom_function(roles)
 
-    if not role in roles:
+    postfixes = ["", ".complete", ".edit", ".chat"]
+    if not any([f"{role}{postfix}" in roles for postfix in postfixes]):
         raise Exception(f"Role `{role}` not found")
 
     if is_deprecated_role_syntax(roles, role):

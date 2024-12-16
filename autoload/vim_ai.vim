@@ -299,9 +299,21 @@ function! vim_ai#AIRedoRun() abort
   endif
 endfunction
 
-function! vim_ai#RoleCompletion(A,L,P) abort
+function! s:RoleCompletion(A, command_type) abort
   call s:ImportPythonModules()
-  let l:role_list = py3eval("load_ai_role_names()")
+  let l:role_list = py3eval("load_ai_role_names(unwrap('a:command_type'))")
   call map(l:role_list, '"/" . v:val')
   return filter(l:role_list, 'v:val =~ "^' . a:A . '"')
+endfunction
+
+function! vim_ai#RoleCompletionComplete(A,L,P) abort
+  return s:RoleCompletion(a:A, 'complete')
+endfunction
+
+function! vim_ai#RoleCompletionEdit(A,L,P) abort
+  return s:RoleCompletion(a:A, 'edit')
+endfunction
+
+function! vim_ai#RoleCompletionChat(A,L,P) abort
+  return s:RoleCompletion(a:A, 'chat')
 endfunction

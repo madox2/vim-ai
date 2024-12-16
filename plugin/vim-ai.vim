@@ -4,8 +4,8 @@ if !has('python3')
   finish
 endif
 
-command! -range -nargs=? -complete=customlist,vim_ai#RoleCompletion AI <line1>,<line2>call vim_ai#AIRun(<range>, {}, <q-args>)
-command! -range -nargs=? -complete=customlist,vim_ai#RoleCompletion AIEdit <line1>,<line2>call vim_ai#AIEditRun(<range>, {}, <q-args>)
-command! -range -nargs=? -complete=customlist,vim_ai#RoleCompletion AIChat <line1>,<line2>call vim_ai#AIChatRun(<range>, {}, <q-args>)
+command! -range -nargs=? -complete=customlist,vim_ai#RoleCompletionComplete AI <line1>,<line2>call vim_ai#AIRun(<range>, {}, <q-args>)
+command! -range -nargs=? -complete=customlist,vim_ai#RoleCompletionEdit AIEdit <line1>,<line2>call vim_ai#AIEditRun(<range>, {}, <q-args>)
+command! -range -nargs=? -complete=customlist,vim_ai#RoleCompletionChat AIChat <line1>,<line2>call vim_ai#AIChatRun(<range>, {}, <q-args>)
 command! -nargs=? AINewChat call vim_ai#AINewChatRun(<f-args>)
 command! AIRedo call vim_ai#AIRedoRun()

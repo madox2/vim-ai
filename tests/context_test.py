@@ -115,6 +115,17 @@ def test_multiple_role_configs():
     assert 'https://localhost/chat' == actual_config['options']['endpoint_url']
     assert 'simple role prompt:\nhello' == actual_prompt
 
+def test_chat_only_role():
+    context = make_ai_context({
+        'config_default': default_config,
+        'config_extension': {},
+        'user_instruction': '/chat-only-role',
+        'user_selection': '',
+        'command_type': 'chat',
+    })
+    actual_config = context['config']
+    assert 'preset_tab' == actual_config['options']['open_chat_command']
+
 def test_user_prompt():
     assert 'fix grammar: helo word' == make_prompt( '', 'fix grammar: helo word', '', '')
     assert 'fix grammar:\nhelo word' == make_prompt( '', 'fix grammar', 'helo word', '')
