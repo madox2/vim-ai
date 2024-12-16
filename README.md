@@ -196,20 +196,14 @@ let g:vim_ai_roles_config_file = '/path/to/my/roles.ini'
 
 [grammar]
 prompt = fix spelling and grammar
-
-[grammar.options]
-temperature = 0.4
-
-[grammar]
-prompt = fix spelling and grammar
+config.options.temperature = 0.4
 
 [o1-mini]
-[o1-mini.options]
-stream = 0
-model = o1-mini
-max_completion_tokens = 25000
-temperature = 1
-initial_prompt =
+config.options.stream = 0
+config.options.model = o1-mini
+config.options.max_completion_tokens = 25000
+config.options.temperature = 1
+config.options.initial_prompt =
 ```
 
 Now you can select text and run it with command `:AIEdit /grammar`.
@@ -429,22 +423,19 @@ Then you set up a custom role that points to the OpenRouter endpoint:
 
 ```ini
 [gemini]
-[gemini.options]
-token_file_path = ~/.config/vim-ai-openrouter.token
-endpoint_url = https://openrouter.ai/api/v1/chat/completions
-model = google/gemini-exp-1121:free
+config.options.token_file_path = ~/.config/vim-ai-openrouter.token
+config.options.endpoint_url = https://openrouter.ai/api/v1/chat/completions
+config.options.model = google/gemini-exp-1121:free
 
 [llama]
-[llama.options]
-token_file_path = ~/.config/vim-ai-openrouter.token
-endpoint_url = https://openrouter.ai/api/v1/chat/completions
-model = meta-llama/llama-3.3-70b-instruct
+config.options.token_file_path = ~/.config/vim-ai-openrouter.token
+config.options.endpoint_url = https://openrouter.ai/api/v1/chat/completions
+config.options.model = meta-llama/llama-3.3-70b-instruct
 
 [claude]
-[claude.options]
-token_file_path = ~/.config/vim-ai-openrouter.token
-endpoint_url = https://openrouter.ai/api/v1/chat/completions
-model = anthropic/claude-3.5-haiku
+config.options.token_file_path = ~/.config/vim-ai-openrouter.token
+config.options.endpoint_url = https://openrouter.ai/api/v1/chat/completions
+config.options.model = anthropic/claude-3.5-haiku
 ```
 
 Now you can use the role:

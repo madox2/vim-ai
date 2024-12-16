@@ -198,10 +198,7 @@ Example of a role: >
 
     [grammar]
     prompt = fix spelling and grammar
-
-    [grammar.options]
-    temperature = 0.4
-
+    config.options.temperature = 0.4
 
 Now you can select text and run it with command `:AIEdit /grammar`.
 See roles-example.ini for more examples.

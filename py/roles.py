@@ -1,4 +1,8 @@
 import vim
+import os
+
+if "PYTEST_VERSION" in os.environ:
+    from utils import *
 
 roles_py_imported = True
 
