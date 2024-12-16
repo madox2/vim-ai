@@ -40,10 +40,12 @@ def load_role_config(role):
 
     options = roles.get(f"{role}.options", {})
     options_complete = roles.get(f"{role}.options-complete", {})
+    options_edit = roles.get(f"{role}.options-edit", {})
     options_chat = roles.get(f"{role}.options-chat", {})
 
     ui = roles.get(f"{role}.ui", {})
     ui_complete = roles.get(f"{role}.ui-complete", {})
+    ui_edit = roles.get(f"{role}.ui-edit", {})
     ui_chat = roles.get(f"{role}.ui-chat", {})
 
     return {
@@ -55,6 +57,10 @@ def load_role_config(role):
         'config_complete': {
             'options': dict(options_complete),
             'ui': dict(ui_complete),
+        },
+        'config_edit': {
+            'options': dict(options_edit),
+            'ui': dict(ui_edit),
         },
         'config_chat': {
             'options': dict(options_chat),

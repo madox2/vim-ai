@@ -67,34 +67,36 @@ def test_role_config():
     assert 'simple role prompt:\nuser instruction:\nselected text' == actual_prompt
 
 def test_role_config_different_commands():
-    context  = make_ai_context({
+    base = {
         'config_default': default_config,
         'config_extension': {},
         'user_instruction': '/test-role hello',
         'user_selection': '',
-        'command_type': 'chat',
-    })
+    }
+    context  = make_ai_context({ **base, 'command_type': 'chat' })
     actual_config = context['config']
     actual_prompt = context['prompt']
     assert 'model-common' == actual_config['options']['model']
-    assert 'https://localhost/chat' == actual_config['options']['endpoint_url']
     assert '0' == actual_config['ui']['paste_mode']
     assert 'preset_tab' == actual_config['ui']['open_chat_command']
     assert 'hello' == actual_prompt
+    assert 'https://localhost/chat' == actual_config['options']['endpoint_url']
 
-    context = make_ai_context({
-        'config_default': default_config,
-        'config_extension': {},
-        'user_instruction': '/test-role hello',
-        'user_selection': '',
-        'command_type': 'complete',
-    })
+    context  = make_ai_context({ **base, 'command_type': 'complete' })
     actual_config = context['config']
     actual_prompt = context['prompt']
     assert 'model-common' == actual_config['options']['model']
-    assert 'https://localhost/complete' == actual_config['options']['endpoint_url']
     assert '0' == actual_config['ui']['paste_mode']
     assert 'hello' == actual_prompt
+    assert 'https://localhost/complete' == actual_config['options']['endpoint_url']
+
+    context  = make_ai_context({ **base, 'command_type': 'edit' })
+    actual_config = context['config']
+    actual_prompt = context['prompt']
+    assert 'model-common' == actual_config['options']['model']
+    assert '0' == actual_config['ui']['paste_mode']
+    assert 'hello' == actual_prompt
+    assert 'https://localhost/edit' == actual_config['options']['endpoint_url']
 
 def test_multiple_role_configs():
     context = make_ai_context({
