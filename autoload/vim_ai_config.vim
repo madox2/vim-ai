@@ -9,6 +9,7 @@ Do not provide any explanantion or comments if not requested.
 If you answer in a code, do not wrap it in markdown code block.
 END
 let g:vim_ai_complete_default = {
+\  "prompt": "",
 \  "engine": "chat",
 \  "options": {
 \    "model": "gpt-4o",
@@ -28,6 +29,7 @@ let g:vim_ai_complete_default = {
 \  },
 \}
 let g:vim_ai_edit_default = {
+\  "prompt": "",
 \  "engine": "chat",
 \  "options": {
 \    "model": "gpt-4o",
@@ -54,6 +56,7 @@ You are a general assistant.
 If you attach a code block add syntax type after ``` to enable syntax highlighting.
 END
 let g:vim_ai_chat_default = {
+\  "prompt": "",
 \  "options": {
 \    "model": "gpt-4o",
 \    "endpoint_url": "https://api.openai.com/v1/chat/completions",

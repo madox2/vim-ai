@@ -39,31 +39,23 @@ def load_roles_with_deprecated_syntax(roles, role):
     return {
         'role_default': {
             'prompt': prompt,
-            'config': {
-                'options': dict(roles.get(f"{role}.options", {})),
-                'ui': dict(roles.get(f"{role}.ui", {})),
-            },
+            'options': dict(roles.get(f"{role}.options", {})),
+            'ui': dict(roles.get(f"{role}.ui", {})),
         },
         'role_complete': {
             'prompt': prompt,
-            'config': {
-                'options': dict(roles.get(f"{role}.options-complete", {})),
-                'ui': dict(roles.get(f"{role}.ui-complete", {})),
-            },
+            'options': dict(roles.get(f"{role}.options-complete", {})),
+            'ui': dict(roles.get(f"{role}.ui-complete", {})),
         },
         'role_edit': {
             'prompt': prompt,
-            'config': {
-                'options': dict(roles.get(f"{role}.options-edit", {})),
-                'ui': dict(roles.get(f"{role}.ui-edit", {})),
-            },
+            'options': dict(roles.get(f"{role}.options-edit", {})),
+            'ui': dict(roles.get(f"{role}.ui-edit", {})),
         },
         'role_chat': {
             'prompt': prompt,
-            'config': {
-                'options': dict(roles.get(f"{role}.options-chat", {})),
-                'ui': dict(roles.get(f"{role}.ui-chat", {})),
-            },
+            'options': dict(roles.get(f"{role}.options-chat", {})),
+            'ui': dict(roles.get(f"{role}.ui-chat", {})),
         },
     }
 
@@ -120,20 +112,18 @@ def parse_prompt_and_role_config(user_instruction, command_type):
     roles = parse_role_names(user_instruction)
     if not roles:
         # does not require role
-        return (user_instruction, '', {})
+        return (user_instruction, {})
 
     last_role = roles[-1]
     user_prompt = user_instruction[user_instruction.index(last_role) + len(last_role):].strip() # strip roles
 
     parsed_role = merge_deep([load_role_config(role) for role in roles])
-    role_default = parsed_role['role_default']
-    role_command = parsed_role['role_' + command_type]
-    config = merge_deep([role_default.get('config', {}), role_command.get('config', {})])
-    role_prompt = role_default.get('prompt') or role_command.get('prompt', '')
-    return user_prompt, role_prompt, config
+    config = merge_deep([parsed_role['role_default'], parsed_role['role_' + command_type]])
+    role_prompt = config.get('prompt', '')
+    return user_prompt, config
 
-def make_selection_prompt(user_selection, user_prompt, role_prompt, selection_boundary):
-    if not user_prompt and not role_prompt:
+def make_selection_prompt(user_selection, user_prompt, config_prompt, selection_boundary):
+    if not user_prompt and not config_prompt:
         return user_selection
     elif user_selection:
         if selection_boundary and selection_boundary not in user_selection:
@@ -142,15 +132,15 @@ def make_selection_prompt(user_selection, user_prompt, role_prompt, selection_bo
             return user_selection
     return ''
 
-def make_prompt(role_prompt, user_prompt, user_selection, selection_boundary):
+def make_prompt(config_prompt, user_prompt, user_selection, selection_boundary):
     user_prompt = user_prompt.strip()
     delimiter = ":\n" if user_prompt and user_selection else ""
-    user_selection = make_selection_prompt(user_selection, user_prompt, role_prompt, selection_boundary)
+    user_selection = make_selection_prompt(user_selection, user_prompt, config_prompt, selection_boundary)
     prompt = f"{user_prompt}{delimiter}{user_selection}"
-    if not role_prompt:
+    if not config_prompt:
         return prompt
     delimiter = '' if prompt.startswith(':') else ':\n'
-    prompt = f"{role_prompt}{delimiter}{prompt}"
+    prompt = f"{config_prompt}{delimiter}{prompt}"
     return prompt
 
 def make_ai_context(params):
@@ -160,10 +150,11 @@ def make_ai_context(params):
     user_selection = params['user_selection']
     command_type = params['command_type']
 
-    user_prompt, role_prompt, role_config = parse_prompt_and_role_config(user_instruction, command_type)
+    user_prompt, role_config = parse_prompt_and_role_config(user_instruction, command_type)
     final_config = merge_deep([config_default, config_extension, role_config])
     selection_boundary = final_config['options']['selection_boundary']
-    prompt = make_prompt(role_prompt, user_prompt, user_selection, selection_boundary)
+    config_prompt = final_config.get('prompt', '')
+    prompt = make_prompt(config_prompt, user_prompt, user_selection, selection_boundary)
 
     return {
         'config': final_config,

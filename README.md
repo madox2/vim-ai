@@ -196,14 +196,14 @@ let g:vim_ai_roles_config_file = '/path/to/my/roles.ini'
 
 [grammar]
 prompt = fix spelling and grammar
-config.options.temperature = 0.4
+options.temperature = 0.4
 
 [o1-mini]
-config.options.stream = 0
-config.options.model = o1-mini
-config.options.max_completion_tokens = 25000
-config.options.temperature = 1
-config.options.initial_prompt =
+options.stream = 0
+options.model = o1-mini
+options.max_completion_tokens = 25000
+options.temperature = 1
+options.initial_prompt =
 ```
 
 Now you can select text and run it with command `:AIEdit /grammar`.
@@ -290,6 +290,7 @@ If you answer in a code, do not wrap it in markdown code block.
 END
 
 " :AI
+" - prompt: optional prepended prompt
 " - engine: chat | complete - see how to configure complete engine in the section below
 " - options: openai config (see https://platform.openai.com/docs/api-reference/completions)
 " - options.initial_prompt: prompt prepended to every chat request (list of lines or string)
@@ -299,6 +300,7 @@ END
 " - options.selection_boundary: selection prompt wrapper (eliminates empty responses, see #20)
 " - ui.paste_mode: use paste mode (see more info in the Notes below)
 let g:vim_ai_complete = {
+\  "prompt": "",
 \  "engine": "chat",
 \  "options": {
 \    "model": "gpt-4o",
@@ -319,6 +321,7 @@ let g:vim_ai_complete = {
 \}
 
 " :AIEdit
+" - prompt: optional prepended prompt
 " - engine: chat | complete - see how to configure complete engine in the section below
 " - options: openai config (see https://platform.openai.com/docs/api-reference/completions)
 " - options.initial_prompt: prompt prepended to every chat request (list of lines or string)
@@ -328,6 +331,7 @@ let g:vim_ai_complete = {
 " - options.selection_boundary: selection prompt wrapper (eliminates empty responses, see #20)
 " - ui.paste_mode: use paste mode (see more info in the Notes below)
 let g:vim_ai_edit = {
+\  "prompt": "",
 \  "engine": "chat",
 \  "options": {
 \    "model": "gpt-4o",
@@ -356,6 +360,7 @@ If you attach a code block add syntax type after ``` to enable syntax highlighti
 END
 
 " :AIChat
+" - prompt: optional prepended prompt
 " - options: openai config (see https://platform.openai.com/docs/api-reference/chat)
 " - options.initial_prompt: prompt prepended to every chat request (list of lines or string)
 " - options.request_timeout: request timeout in seconds
@@ -367,6 +372,7 @@ END
 " - ui.scratch_buffer_keep_open: re-use scratch buffer within the vim session
 " - ui.paste_mode: use paste mode (see more info in the Notes below)
 let g:vim_ai_chat = {
+\  "prompt": "",
 \  "options": {
 \    "model": "gpt-4o",
 \    "endpoint_url": "https://api.openai.com/v1/chat/completions",
@@ -423,19 +429,19 @@ Then you set up a custom role that points to the OpenRouter endpoint:
 
 ```ini
 [gemini]
-config.options.token_file_path = ~/.config/vim-ai-openrouter.token
-config.options.endpoint_url = https://openrouter.ai/api/v1/chat/completions
-config.options.model = google/gemini-exp-1121:free
+options.token_file_path = ~/.config/vim-ai-openrouter.token
+options.endpoint_url = https://openrouter.ai/api/v1/chat/completions
+options.model = google/gemini-exp-1121:free
 
 [llama]
-config.options.token_file_path = ~/.config/vim-ai-openrouter.token
-config.options.endpoint_url = https://openrouter.ai/api/v1/chat/completions
-config.options.model = meta-llama/llama-3.3-70b-instruct
+options.token_file_path = ~/.config/vim-ai-openrouter.token
+options.endpoint_url = https://openrouter.ai/api/v1/chat/completions
+options.model = meta-llama/llama-3.3-70b-instruct
 
 [claude]
-config.options.token_file_path = ~/.config/vim-ai-openrouter.token
-config.options.endpoint_url = https://openrouter.ai/api/v1/chat/completions
-config.options.model = anthropic/claude-3.5-haiku
+options.token_file_path = ~/.config/vim-ai-openrouter.token
+options.endpoint_url = https://openrouter.ai/api/v1/chat/completions
+options.model = anthropic/claude-3.5-haiku
 ```
 
 Now you can use the role:
