@@ -15,6 +15,8 @@ import configparser
 
 utils_py_imported = True
 
+DEFAULT_ROLE_NAME = 'default'
+
 def is_ai_debugging():
     return vim.eval("g:vim_ai_debug") == "1"
 

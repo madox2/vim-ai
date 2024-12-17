@@ -16,4 +16,6 @@ def load_ai_role_names(command_type):
         if len(parts) == 1 or parts[-1] == command_type:
             role_names.add(parts[0])
 
+    role_names = [name for name in role_names if name != DEFAULT_ROLE_NAME]
+
     return list(role_names)

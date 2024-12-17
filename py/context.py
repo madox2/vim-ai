@@ -105,15 +105,15 @@ def parse_role_names(prompt):
 def parse_prompt_and_role_config(user_instruction, command_type):
     user_instruction = user_instruction.strip()
     roles = parse_role_names(user_instruction)
-    if not roles:
-        # does not require role
-        return (user_instruction, {})
 
-    last_role = roles[-1]
+    last_role = roles[-1] if roles else ''
     user_prompt = user_instruction[user_instruction.index(last_role) + len(last_role):].strip() # strip roles
-
-    parsed_role = merge_deep([load_role_config(role) for role in roles])
-    config = merge_deep([parsed_role['role_default'], parsed_role['role_' + command_type]])
+    role_results = [load_role_config(role) for role in [DEFAULT_ROLE_NAME] + roles]
+    parsed_role = merge_deep(role_results)
+    config = merge_deep([
+        parsed_role.get('role_default', {}),
+        parsed_role.get('role_' + command_type, {}),
+    ])
     role_prompt = config.get('prompt', '')
     return user_prompt, config
 

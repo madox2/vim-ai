@@ -105,6 +105,35 @@ To use an AI command, type the command followed by an instruction prompt. You ca
 
 If you are interested in more tips or would like to level up your Vim with more commands like [`:GitCommitMessage`](https://github.com/madox2/vim-ai/wiki/Custom-commands#suggest-a-git-commit-message) - suggesting a git commit message, visit the [Community Wiki](https://github.com/madox2/vim-ai/wiki).
 
+## Roles
+
+In the context of this plugin, a role means a re-usable AI instruction and/or configuration. Roles are defined in the configuration `.ini` file. For example by defining a `grammar` and `o1-mini` role:
+
+```vim
+let g:vim_ai_roles_config_file = '/path/to/my/roles.ini'
+```
+
+```ini
+# /path/to/my/roles.ini
+
+[grammar]
+prompt = fix spelling and grammar
+options.temperature = 0.4
+
+[o1-mini]
+options.stream = 0
+options.model = o1-mini
+options.max_completion_tokens = 25000
+options.temperature = 1
+options.initial_prompt =
+```
+
+Now you can select text and run it with command `:AIEdit /grammar`.
+
+You can also combine roles `:AI /o1-mini /grammar helo world!`
+
+See [roles-example.ini](./roles-example.ini) for more examples.
+
 ## Reference
 
 In the documentation below,  `<selection>` denotes a visual selection or any other range, `{instruction}` an instruction prompt, `{role}` a [custom role](#roles) and `?` symbol an optional parameter.
@@ -179,56 +208,6 @@ Supported chat roles are **`>>> system`**, **`>>> user`**, **`>>> include`** and
 Use this immediately after `AI`/`AIEdit`/`AIChat` command in order to re-try or get an alternative completion.
 Note that the randomness of responses heavily depends on the [`temperature`](https://platform.openai.com/docs/api-reference/completions/create#completions/create-temperature) parameter.
 
-## Roles
-
-In the context of this plugin, a role means a re-usable AI instruction and/or configuration. Roles are defined in the configuration `.ini` file. For example by defining a `grammar` and `o1-mini` role:
-
-```vim
-let g:vim_ai_roles_config_file = '/path/to/my/roles.ini'
-```
-
-```ini
-# /path/to/my/roles.ini
-
-[grammar]
-prompt = fix spelling and grammar
-options.temperature = 0.4
-
-[o1-mini]
-options.stream = 0
-options.model = o1-mini
-options.max_completion_tokens = 25000
-options.temperature = 1
-options.initial_prompt =
-```
-
-Now you can select text and run it with command `:AIEdit /grammar`.
-
-You can also combine roles `:AI /o1-mini /grammar helo world!`
-
-See [roles-example.ini](./roles-example.ini) for more examples.
-
-## Key bindings
-
-This plugin does not set any key binding. Create your own bindings in the `.vimrc` to trigger AI commands, for example:
-
-```vim
-" complete text on the current line or in visual selection
-nnoremap <leader>a :AI<CR>
-xnoremap <leader>a :AI<CR>
-
-" edit text with a custom prompt
-xnoremap <leader>s :AIEdit fix grammar and spelling<CR>
-nnoremap <leader>s :AIEdit fix grammar and spelling<CR>
-
-" trigger chat
-xnoremap <leader>c :AIChat<CR>
-nnoremap <leader>c :AIChat<CR>
-
-" redo last AI command
-nnoremap <leader>r :AIRedo<CR>
-```
-
 ## Configuration
 
 Each command is configured with a corresponding configuration variable.
@@ -246,14 +225,15 @@ let g:vim_ai_chat = {
 \}
 ```
 
-Once the above is set, you can modify options directly during the vim session:
+Alternatively you can use special `default` role:
 
 ```vim
-let g:vim_ai_chat['options']['model'] = 'o1-preview'
-let g:vim_ai_chat['options']['stream'] = 0
-let g:vim_ai_chat['options']['temperature'] = 1
-let g:vim_ai_chat['options']['max_completion_tokens'] = 25000
-let g:vim_ai_chat['options']['initial_prompt'] = ''
+[default]
+options.model = o1-preview
+options.stream = 0
+options.temperature = 1
+options.max_completion_tokens = 25000
+options.initial_prompt =
 ```
 
 Or customize the options directly in the chat buffer:
@@ -479,6 +459,27 @@ let complete_engine_config = {
 
 let g:vim_ai_complete = complete_engine_config
 let g:vim_ai_edit = complete_engine_config
+```
+
+## Key bindings
+
+This plugin does not set any key binding. Create your own bindings in the `.vimrc` to trigger AI commands, for example:
+
+```vim
+" complete text on the current line or in visual selection
+nnoremap <leader>a :AI<CR>
+xnoremap <leader>a :AI<CR>
+
+" edit text with a custom prompt
+xnoremap <leader>s :AIEdit fix grammar and spelling<CR>
+nnoremap <leader>s :AIEdit fix grammar and spelling<CR>
+
+" trigger chat
+xnoremap <leader>c :AIChat<CR>
+nnoremap <leader>c :AIChat<CR>
+
+" redo last AI command
+nnoremap <leader>r :AIRedo<CR>
 ```
 
 ## Custom commands

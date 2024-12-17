@@ -32,8 +32,12 @@ def test_default_config():
         'user_selection': 'Hello world!',
         'command_type': 'chat',
     })
+    expected_options = {
+        **default_config['options'],
+        'token_file_path': '/custom/path/ai.token',
+    }
     expected_context = {
-        'config': default_config,
+        'config': { **default_config, 'options': expected_options },
         'prompt': 'translate to Slovak:\nHello world!',
     }
     assert expected_context == actual_context

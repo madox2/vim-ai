@@ -180,10 +180,11 @@ a selection of options: >
   \  },
   \}
 
-Or modify options directly during the vim session: >
+Alternatively you can use special `default` role: >
 
-  let g:vim_ai_chat['options']['model'] = 'gpt-4'
-  let g:vim_ai_chat['options']['temperature'] = 0.2
+  [default]
+  options.model=gpt-4
+  options.temperature=0.2
 
 You can also customize the options in the chat header: >
 
