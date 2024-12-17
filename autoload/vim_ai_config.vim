@@ -75,6 +75,7 @@ let g:vim_ai_chat_default = {
 \    "scratch_buffer_keep_open": 0,
 \    "populate_options": 0,
 \    "code_syntax_enabled": 1,
+\    "force_new_chat": 0,
 \    "paste_mode": 1,
 \  },
 \}

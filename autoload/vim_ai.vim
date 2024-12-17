@@ -210,6 +210,13 @@ function! vim_ai#AIEditRun(uses_range, config, ...) range abort
 endfunction
 
 function! s:ReuseOrCreateChatWindow(config)
+  let l:open_conf = a:config['ui']['open_chat_command']
+
+  if a:config['ui']['force_new_chat'] == '1'
+    call s:OpenChatWindow(l:open_conf, 1)
+    return
+  endif
+
   if &filetype != 'aichat'
     " reuse chat in active window or tab
     let l:chat_win_ids = win_findbuf(bufnr(s:scratch_buffer_name))
@@ -238,7 +245,6 @@ function! s:ReuseOrCreateChatWindow(config)
     endif
 
     " open new chat window if no active buffer found
-    let l:open_conf = a:config['ui']['open_chat_command']
     call s:OpenChatWindow(l:open_conf, 0)
   endif
 endfunction
@@ -280,10 +286,8 @@ endfunction
 
 " Start a new chat
 " a:1 - optional preset shorcut (below, right, tab)
-function! vim_ai#AINewChatRun(...) abort
-  let l:open_conf = a:0 > 0 ? "preset_" . a:1 : g:vim_ai_chat['ui']['open_chat_command']
-  call s:OpenChatWindow(l:open_conf, 1)
-  call vim_ai#AIChatRun(0, {})
+function! vim_ai#AINewChatDeprecatedRun(...)
+  echoerr ":AINew is deprecated, use pre-configured roles `/tab`, `/below`, `/right` instead (e.g. `:AIChat /right`)"
 endfunction
 
 " Repeat last AI command

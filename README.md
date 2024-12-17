@@ -86,18 +86,19 @@ To use an AI command, type the command followed by an instruction prompt. You ca
 ============= Utilities =============
 
 :AIRedo     repeat last AI command
-:AINewChat  open new chat
 
 :help vim-ai
 ```
 
 **Tip:** Press `Ctrl-c` anytime to cancel completion
 
-**Tip:** Setup your own [key bindings](#key-bindings) or use command shortcuts - `:AIE`, `:AIC`, `:AIR`
+**Tip:** Use command shortcuts - `:AIE`, `:AIC`, `:AIR` or setup your own [key bindings](#key-bindings)
 
-**Tip:** A [custom role](#roles) {role} can be passed to the above commands by an initial parameter /{role}, for example `:AIEdit /grammar`.
+**Tip:** Define and use [custom roles](#roles), e.g. `:AIEdit /grammar`.
 
-**Tip:** Combine commands with a range `:help range`, for example to select the whole buffer - `:%AIE fix grammar`
+**Tip:** Use pre-defined roles `/right`, `/below`, `/tab` to choose how chat is open, e.g. `:AIC /right`
+
+**Tip:** Combine commands with a range `:help range`, e.g. to select the whole buffer - `:%AIE fix grammar`
 
 If you are interested in more tips or would like to level up your Vim with more commands like [`:GitCommitMessage`](https://github.com/madox2/vim-ai/wiki/Custom-commands#suggest-a-git-commit-message) - suggesting a git commit message, visit the [Community Wiki](https://github.com/madox2/vim-ai/wiki).
 
@@ -167,14 +168,6 @@ Generate documentation for the following files
 Each file's contents will be added to an additional `user` role message with the files separated by `==> {path} <==`, where path is the path to the file. Globbing is expanded out via `glob.gob` and relative paths to the current working directory (as determined by `getcwd()`) will be resolved to absolute paths.
 
 Supported chat roles are **`>>> system`**, **`>>> user`**, **`>>> include`** and **`<<< assistant`**
-
-### `:AINewChat`
-
-`:AINewChat {preset shortname}?` - start a new conversation
-
-This command is used when you need to spawn a new chat in a specific way or in situation when `:AIChat` would normally continue conversation instead.
-
-As a parameter you put an open chat command preset shortcut - `below`, `tab` or `right`. For example: `:AINewChat right`.
 
 ### `:AIRedo`
 
@@ -367,9 +360,10 @@ END
 " - options.enable_auth: enable authorization using openai key
 " - options.token_file_path: override global token configuration
 " - options.selection_boundary: selection prompt wrapper (eliminates empty responses, see #20)
-" - ui.populate_options: put [chat-options] to the chat header
 " - ui.open_chat_command: preset (preset_below, preset_tab, preset_right) or a custom command
+" - ui.populate_options: put [chat-options] to the chat header
 " - ui.scratch_buffer_keep_open: re-use scratch buffer within the vim session
+" - ui.force_new_chat: force new chat window (used in chat opening roles e.g. `/tab`)
 " - ui.paste_mode: use paste mode (see more info in the Notes below)
 let g:vim_ai_chat = {
 \  "prompt": "",
@@ -387,10 +381,11 @@ let g:vim_ai_chat = {
 \    "initial_prompt": s:initial_chat_prompt,
 \  },
 \  "ui": {
-\    "code_syntax_enabled": 1,
-\    "populate_options": 0,
 \    "open_chat_command": "preset_below",
 \    "scratch_buffer_keep_open": 0,
+\    "populate_options": 0,
+\    "code_syntax_enabled": 1,
+\    "force_new_chat": 0,
 \    "paste_mode": 1,
 \  },
 \}
@@ -429,17 +424,17 @@ Then you set up a custom role that points to the OpenRouter endpoint:
 
 ```ini
 [gemini]
-options.token_file_path = ~/.config/vim-ai-openrouter.token
+options.token_file_path = ~/.config/openrouter.token
 options.endpoint_url = https://openrouter.ai/api/v1/chat/completions
 options.model = google/gemini-exp-1121:free
 
 [llama]
-options.token_file_path = ~/.config/vim-ai-openrouter.token
+options.token_file_path = ~/.config/openrouter.token
 options.endpoint_url = https://openrouter.ai/api/v1/chat/completions
 options.model = meta-llama/llama-3.3-70b-instruct
 
 [claude]
-options.token_file_path = ~/.config/vim-ai-openrouter.token
+options.token_file_path = ~/.config/openrouter.token
 options.endpoint_url = https://openrouter.ai/api/v1/chat/completions
 options.model = anthropic/claude-3.5-haiku
 ```

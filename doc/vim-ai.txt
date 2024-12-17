@@ -150,11 +150,6 @@ Globbing is expanded out via `glob.gob` and relative paths to the current
 working directory (as determined by `getcwd()`) will be resolved to absolute
 paths.
 
-                                                *:AINewChat*
-
-:AINewChat {preset shortname}?      spawn a new conversation with a given open
-                                    chat preset - below, tab or right.
-
                                                 *:AIRedo*
 
 :AIRedo                             repeat last AI command in order to re-try
