@@ -227,7 +227,7 @@ let g:vim_ai_chat = {
 
 Alternatively you can use special `default` role:
 
-```vim
+```ini
 [default]
 options.model = o1-preview
 options.stream = 0
