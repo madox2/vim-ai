@@ -77,15 +77,18 @@ git clone https://github.com/madox2/vim-ai.git ~/.local/share/nvim/site/pack/plu
 To use an AI command, type the command followed by an instruction prompt. You can also combine it with a visual selection. Here is a brief overview of available commands:
 
 ```
-========= Basic AI commands =========
+=========== Basic AI commands ============
 
-:AI         complete text
-:AIEdit     edit text
-:AIChat     continue or open new chat
+:AI              complete text
+:AIEdit          edit text
+:AIChat          continue or open new chat
 
-============= Utilities =============
+=============== Utilities ================
 
-:AIRedo     repeat last AI command
+:AIRedo          repeat last AI command
+:AIUtilRolesOpen open role config file
+:AIUtilDebugOn   turn on debug logging
+:AIUtilDebugOff  turn off debug logging
 
 :help vim-ai
 ```
@@ -400,6 +403,17 @@ let g:vim_ai_chat = {
 " - setting max tokens to 0 will exclude it from the OpenAI API request parameters, it is
 "   unclear/undocumented what it exactly does, but it seems to resolve issues when the model
 "   hits token limit, which respond with `OpenAI: HTTPError 400`
+
+
+" custom roles file location
+let g:vim_ai_roles_config_file = s:plugin_root . "/roles-example.ini"
+
+" custom token file location
+let g:vim_ai_token_file_path = "~/.config/openai.token"
+
+" debug settings
+let g:vim_ai_debug = 0
+let g:vim_ai_debug_log_file = "/tmp/vim_ai_debug.log"
 ```
 
 ### Using custom API

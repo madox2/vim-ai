@@ -155,6 +155,19 @@ paths.
 :AIRedo                             repeat last AI command in order to re-try
                                     or get an alternative completion.
 
+                                                *:AIUtilOpenRoles*
+
+:AIUtilOpenRoles                    open role configuration file
+
+                                                *:AIUtilDebugOn*
+
+:AIUtilDebugOn                      turn on debug logging
+
+                                                *:AIUtilDebugOff*
+
+:AIUtilDebugOff                     turn off debug logging
+
+
 CONFIGURATION                                   *vim-ai-config*
 
 To customize the default configuration, initialize the config variable with

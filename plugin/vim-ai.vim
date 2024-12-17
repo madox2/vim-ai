@@ -9,3 +9,6 @@ command! -range -nargs=? -complete=customlist,vim_ai#RoleCompletionEdit AIEdit <
 command! -range -nargs=? -complete=customlist,vim_ai#RoleCompletionChat AIChat <line1>,<line2>call vim_ai#AIChatRun(<range>, {}, <q-args>)
 command! -nargs=? AINewChat call vim_ai#AINewChatDeprecatedRun(<f-args>)
 command! AIRedo call vim_ai#AIRedoRun()
+command! AIUtilRolesOpen call vim_ai#AIUtilRolesOpen()
+command! AIUtilDebugOn call vim_ai#AIUtilSetDebug(1)
+command! AIUtilDebugOff call vim_ai#AIUtilSetDebug(0)
