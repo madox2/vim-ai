@@ -317,3 +317,14 @@ def make_chat_text_chunks(messages, config_options):
     map_chunk = map_chunk_stream if openai_options['stream'] else map_chunk_no_stream
 
     return map(map_chunk, response)
+
+def read_role_files():
+    plugin_root = vim.eval("s:plugin_root")
+    default_roles_config_path = str(os.path.join(plugin_root, "roles-default.ini"))
+    roles_config_path = os.path.expanduser(vim.eval("g:vim_ai_roles_config_file"))
+    if not os.path.exists(roles_config_path):
+        raise Exception(f"Role config file does not exist: {roles_config_path}")
+
+    roles = configparser.ConfigParser()
+    roles.read([default_roles_config_path, roles_config_path])
+    return roles

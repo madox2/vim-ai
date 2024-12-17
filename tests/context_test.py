@@ -126,6 +126,20 @@ def test_chat_only_role():
     actual_config = context['config']
     assert 'preset_tab' == actual_config['options']['open_chat_command']
 
+def test_default_roles():
+    base = {
+        'config_default': default_config,
+        'config_extension': {},
+        'user_instruction': '/chat-only-role',
+        'user_selection': '',
+        'command_type': 'chat',
+    }
+    context = make_ai_context({ **base, 'user_instruction': '/right hello world!' })
+    assert 'preset_right' == context['config']['ui']['open_chat_command']
+
+    context = make_ai_context({ **base, 'user_instruction': '/tab' })
+    assert 'preset_tab' == context['config']['ui']['open_chat_command']
+
 def test_user_prompt():
     assert 'fix grammar: helo word' == make_prompt( '', 'fix grammar: helo word', '', '')
     assert 'fix grammar:\nhelo word' == make_prompt( '', 'fix grammar', 'helo word', '')

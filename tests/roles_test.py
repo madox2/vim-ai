@@ -17,4 +17,8 @@ def test_role_chat_only():
         'chat-only-role',
         'deprecated-test-role-simple',
         'deprecated-test-role',
+        # default roles
+        'right',
+        'below',
+        'tab',
     }
