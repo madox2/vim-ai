@@ -27,6 +27,16 @@ In case you would like to experiment with Gemini, Claude or other models running
 A simple way is to use [OpenRouter](https://openrouter.ai) which has a fair pricing (and currently offers many models for [free](https://openrouter.ai/models?max_price=0)), or setup a proxy like [LiteLLM](https://github.com/BerriAI/litellm) locally.
 See this simple [guide](#example-create-custom-roles-to-interact-with-openrouter-models) on configuring custom OpenRouter roles.
 
+## Table of Contents
+
+- [Installation](#installation)
+- [Usage](#usage)
+- [Roles](#roles)
+- [Reference](#reference)
+- [Configuration](#configuration)
+- [Key bindings](#key-bindings)
+- [Custom commands](#custom-commands)
+
 ## Installation
 
 ### Prerequisites
