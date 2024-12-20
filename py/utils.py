@@ -12,6 +12,7 @@ from urllib.error import URLError
 from urllib.error import HTTPError
 import traceback
 import configparser
+import base64
 
 utils_py_imported = True
 
@@ -109,63 +110,84 @@ def render_text_chunks(chunks):
     if not full_text.strip():
         raise KnownError('Empty response received. Tip: You can try modifying the prompt and retry.')
 
+def encode_image(image_path):
+    """Encodes an image file to a base64 string."""
+    with open(image_path, "rb") as image_file:
+        return base64.b64encode(image_file.read()).decode('utf-8')
+
+
+def is_image_path(path):
+    ext = path.strip().split('.')[-1]
+    return ext in ['jpg', 'jpeg', 'png', 'gif']
+
+def parse_include_paths(path):
+    if not path:
+        return []
+    pwd = vim.eval('getcwd()')
+
+    path = os.path.expanduser(path)
+    if not os.path.isabs(path):
+        path = os.path.join(pwd, path)
+
+    expanded_paths = [path]
+    if '*' in path:
+        expanded_paths = glob.glob(path, recursive=True)
+
+    return [path for path in expanded_paths if not os.path.isdir(path)]
+
+def make_image_message(path):
+    ext = path.split('.')[-1]
+    base64_image = encode_image(path)
+    return { 'type': 'image_url', 'image_url': { 'url': f"data:image/{ext.replace('.', '')};base64,{base64_image}" } }
+
+def make_text_file_message(path):
+    try:
+        with open(path, 'r') as file:
+            file_content = file.read().strip()
+            return { 'type': 'text', 'text': f'==> {path} <==\n' + file_content.strip() }
+    except UnicodeDecodeError:
+        return { 'type': 'text', 'text': f'==> {path} <==\nBinary file, cannot display' }
 
 def parse_chat_messages(chat_content):
     lines = chat_content.splitlines()
     messages = []
+
+    current_type = ''
     for line in lines:
-        if line.startswith(">>> system"):
-            messages.append({"role": "system", "content": ""})
-            continue
-        if line.startswith(">>> user"):
-            messages.append({"role": "user", "content": ""})
-            continue
-        if line.startswith(">>> include"):
-            messages.append({"role": "include", "content": ""})
-            continue
-        if line.startswith("<<< assistant"):
-            messages.append({"role": "assistant", "content": ""})
-            continue
-        if not messages:
-            continue
-        messages[-1]["content"] += "\n" + line
+        match line:
+            case '>>> system':
+                messages.append({'role': 'system', 'content': [{ 'type': 'text', 'text': '' }]})
+                current_type = 'system'
+            case '<<< assistant':
+                messages.append({'role': 'assistant', 'content': [{ 'type': 'text', 'text': '' }]})
+                current_type = 'assistant'
+            case '>>> user':
+                if messages and messages[-1]['role'] == 'user':
+                    messages[-1]['content'].append({ 'type': 'text', 'text': '' })
+                else:
+                    messages.append({'role': 'user', 'content': [{ 'type': 'text', 'text': '' }]})
+                current_type = 'user'
+            case '>>> include':
+                if not messages or messages[-1]['role'] != 'user':
+                    messages.append({'role': 'user', 'content': []})
+                current_type = 'include'
+            case _:
+                if not messages:
+                    continue
+                match current_type:
+                    case 'assistant' | 'system' | 'user':
+                        messages[-1]['content'][-1]['text'] += '\n' + line
+                    case 'include':
+                        paths = parse_include_paths(line)
+                        for path in paths:
+                            content = make_image_message(path) if is_image_path(path) else make_text_file_message(path)
+                            messages[-1]['content'].append(content)
 
     for message in messages:
-        # strip newlines from the content as it causes empty responses
-        message["content"] = message["content"].strip()
-
-        if message["role"] == "include":
-            message["role"] = "user"
-            paths = message["content"].split("\n")
-            message["content"] = ""
-
-            pwd = vim.eval("getcwd()")
-            for i in range(len(paths)):
-                path = os.path.expanduser(paths[i])
-                if not os.path.isabs(path):
-                    path = os.path.join(pwd, path)
-
-                paths[i] = path
-
-                if '**' in path:
-                    paths[i] = None
-                    paths.extend(glob.glob(path, recursive=True))
-
-            for path in paths:
-                if path is None:
-                    continue
-
-                if os.path.isdir(path):
-                    continue
-
-                try:
-                    with open(path, "r") as file:
-                        file_content = file.read().strip()
-                        message["content"] += f"\n\n==> {path} <==\n" + file_content
-                except UnicodeDecodeError:
-                    message["content"] += "\n\n" + f"==> {path} <=="
-                    message["content"] += "\n" + "Binary file, cannot display"
-            message['content'] = message['content'].strip()
+        # strip newlines from the text content as it causes empty responses
+        for content in message['content']:
+            if content['type'] == 'text':
+                content['text'] = content['text'].strip()
 
     return messages
 

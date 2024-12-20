@@ -56,7 +56,8 @@ def run_ai_chat(context):
     messages = initial_messages + chat_messages
 
     try:
-        if messages[-1]["content"].strip():
+        last_content = messages[-1]["content"][-1]
+        if last_content['type'] != 'text' or last_content['text']:
             vim.command("normal! Go\n<<< assistant\n\n")
             vim.command("redraw")
 

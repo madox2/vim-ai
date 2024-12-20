@@ -13,6 +13,7 @@ To get an idea what is possible to do with AI commands see the [prompts](https:/
 - Edit selected text in-place with AI
 - Interactive conversation with ChatGPT
 - Custom roles
+- Vision capabilities (image to text)
 - Integrates with any OpenAI-compatible API
 
 ## How it works
@@ -194,7 +195,7 @@ You are a Clean Code expert, I have the following code, please refactor it in a 
 
 ```
 
-To include files in the chat a special `include` role is used:
+To include files in the chat a special `include` section is used:
 
 ```
 >>> user
@@ -207,9 +208,22 @@ Generate documentation for the following files
 /home/user/myproject/**/*.py
 ```
 
-Each file's contents will be added to an additional `user` role message with the files separated by `==> {path} <==`, where path is the path to the file. Globbing is expanded out via `glob.gob` and relative paths to the current working directory (as determined by `getcwd()`) will be resolved to absolute paths.
+Each file's contents will be added to an additional user message with `==> {path} <==` header, relative paths are resolved to the current working directory.
 
-Supported chat roles are **`>>> system`**, **`>>> user`**, **`>>> include`** and **`<<< assistant`**
+
+To use image vision capabilities (image to text) include an image file:
+
+```
+>>> user
+
+What object is on the image?
+
+>>> include
+
+~/myimage.jpg
+```
+
+Supported chat sections are **`>>> system`**, **`>>> user`**, **`>>> include`** and **`<<< assistant`**
 
 ### `:AIRedo`
 
