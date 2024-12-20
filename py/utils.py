@@ -131,7 +131,7 @@ def parse_include_paths(path):
 
     expanded_paths = [path]
     if '*' in path:
-        expanded_paths = glob.glob(path, recursive=True)
+        expanded_paths = sorted(glob.glob(path, recursive=True))
 
     return [path for path in expanded_paths if not os.path.isdir(path)]
 
