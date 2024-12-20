@@ -38,6 +38,12 @@ def load_api_key(config_token_file_path):
     except Exception:
         pass
 
+    load_api_token_expression = vim.eval("g:vim_ai_load_api_token")
+    if load_api_token_expression != "":
+        result = vim.eval("system(g:vim_ai_load_api_token)")
+        if result:
+            api_key_param_value = result.strip()
+
     if not api_key_param_value:
         raise KnownError("Missing OpenAI API key")
 
