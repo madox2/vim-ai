@@ -160,10 +160,12 @@ def parse_chat_messages(chat_content):
 
                 try:
                     with open(path, "r") as file:
-                        message["content"] += f"\n\n==> {path} <==\n" + file.read()
+                        file_content = file.read().strip()
+                        message["content"] += f"\n\n==> {path} <==\n" + file_content
                 except UnicodeDecodeError:
                     message["content"] += "\n\n" + f"==> {path} <=="
                     message["content"] += "\n" + "Binary file, cannot display"
+            message['content'] = message['content'].strip()
 
     return messages
 
