@@ -139,7 +139,7 @@ function! vim_ai#AIRun(uses_range, config, ...) range abort
   let l:selection = s:GetSelectionOrRange(l:is_selection, a:uses_range, a:firstline, a:lastline)
 
   let l:config_input = {
-  \  "config_default": g:vim_ai_edit,
+  \  "config_default": g:vim_ai_complete,
   \  "config_extension": a:config,
   \  "user_instruction": l:instruction,
   \  "user_selection": l:selection,
