@@ -250,7 +250,7 @@ def openai_request(url, data, options):
     )
 
     with urllib.request.urlopen(req, timeout=request_timeout) as response:
-        if not data['stream']:
+        if not data.get('stream', 0):
             yield json.loads(response.read().decode())
             return
         for line_bytes in response:
@@ -354,3 +354,8 @@ def read_role_files():
     roles = configparser.ConfigParser()
     roles.read([default_roles_config_path, roles_config_path])
     return roles
+
+def save_b64_to_file(path, b64_data):
+    f = open(path, "wb")
+    f.write(base64.b64decode(b64_data))
+    f.close()

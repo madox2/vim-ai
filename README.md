@@ -14,6 +14,7 @@ To get an idea what is possible to do with AI commands see the [prompts](https:/
 - Interactive conversation with ChatGPT
 - Custom roles
 - Vision capabilities (image to text)
+- Generate images
 - Integrates with any OpenAI-compatible API
 
 ## How it works
@@ -88,13 +89,14 @@ git clone https://github.com/madox2/vim-ai.git ~/.local/share/nvim/site/pack/plu
 To use an AI command, type the command followed by an instruction prompt. You can also combine it with a visual selection. Here is a brief overview of available commands:
 
 ```
-=========== Basic AI commands ============
+========== Basic AI commands ==========
 
-:AI              complete text
-:AIEdit          edit text
-:AIChat          continue or open new chat
+:AI       complete text
+:AIEdit   edit text
+:AIChat   continue or open new chat
+:AIImage  generate image
 
-=============== Utilities ================
+============== Utilities ==============
 
 :AIRedo          repeat last AI command
 :AIUtilRolesOpen open role config file
@@ -106,7 +108,7 @@ To use an AI command, type the command followed by an instruction prompt. You ca
 
 **Tip:** Press `Ctrl-c` anytime to cancel completion
 
-**Tip:** Use command shortcuts - `:AIE`, `:AIC`, `:AIR` or setup your own [key bindings](#key-bindings)
+**Tip:** Use command shortcuts - `:AIE`, `:AIC`, `:AIR`, `:AII` or setup your own [key bindings](#key-bindings)
 
 **Tip:** Define and use [custom roles](#roles), e.g. `:AIEdit /grammar`.
 
@@ -167,6 +169,16 @@ In the documentation below,  `<selection>` denotes a visual selection or any oth
 
 `<selection>? :AIEdit /{role} {instruction}?` - use role to edit
 
+### `:AIImage`
+
+`:AIImage {prompt}` - generate image with prompt
+
+`<selection> :AIImage` - generate image with seleciton
+
+`<selection>? :AI /{role} {instruction}?` - use role to generate
+
+[Pre-defined](./roles-default.ini) image roles: `/hd`, `/natural`
+
 ### `:AIChat`
 
 `:AIChat` - continue or start a new conversation.
@@ -176,6 +188,8 @@ In the documentation below,  `<selection>` denotes a visual selection or any oth
 `<selection>? :AIChat /{role} {instruction}?` - use role to complete
 
 When the AI finishes answering, you can continue the conversation by entering insert mode, adding your prompt, and then using the command `:AIChat` once again.
+
+[Pre-defined](./roles-default.ini) chat roles: `/right`, `/below`, `/tab`
 
 #### `.aichat` files
 
@@ -252,7 +266,7 @@ let g:vim_ai_chat = {
 Alternatively you can use special `default` role:
 
 ```ini
-[default]
+[default.chat]
 options.model = o1-preview
 options.stream = 0
 options.temperature = 1
@@ -397,17 +411,29 @@ let g:vim_ai_chat = {
 \  },
 \}
 
-" Notes:
-" ui.paste_mode
-" - if disabled code indentation will work but AI doesn't always respond with a code block
-"   therefore it could be messed up
-" - find out more in vim's help `:help paste`
-" options.max_tokens
-" - note that prompt + max_tokens must be less than model's token limit, see #42, #46
-" - setting max tokens to 0 will exclude it from the OpenAI API request parameters, it is
-"   unclear/undocumented what it exactly does, but it seems to resolve issues when the model
-"   hits token limit, which respond with `OpenAI: HTTPError 400`
-
+" :AIImage
+" - prompt: optional prepended prompt
+" - options: openai config (https://platform.openai.com/docs/api-reference/images/create)
+" - options.request_timeout: request timeout in seconds
+" - options.enable_auth: enable authorization using openai key
+" - options.token_file_path: override global token configuration
+" - options.download_dir: path to image download directory, `cwd` if not defined
+let g:vim_ai_image_default = {
+\  "prompt": "",
+\  "options": {
+\    "model": "dall-e-3",
+\    "endpoint_url": "https://api.openai.com/v1/images/generations",
+\    "quality": "standard",
+\    "size": "1024x1024",
+\    "style": "vivid",
+\    "request_timeout": 20,
+\    "enable_auth": 1,
+\    "token_file_path": "",
+\  },
+\  "ui": {
+\    "download_dir": "",
+\  },
+\}
 
 " custom roles file location
 let g:vim_ai_roles_config_file = s:plugin_root . "/roles-example.ini"
@@ -418,6 +444,17 @@ let g:vim_ai_token_file_path = "~/.config/openai.token"
 " debug settings
 let g:vim_ai_debug = 0
 let g:vim_ai_debug_log_file = "/tmp/vim_ai_debug.log"
+
+" Notes:
+" ui.paste_mode
+" - if disabled code indentation will work but AI doesn't always respond with a code block
+"   therefore it could be messed up
+" - find out more in vim's help `:help paste`
+" options.max_tokens
+" - note that prompt + max_tokens must be less than model's token limit, see #42, #46
+" - setting max tokens to 0 will exclude it from the OpenAI API request parameters, it is
+"   unclear/undocumented what it exactly does, but it seems to resolve issues when the model
+"   hits token limit, which respond with `OpenAI: HTTPError 400`
 ```
 
 ### Using custom API

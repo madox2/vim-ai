@@ -24,6 +24,23 @@ default_config = {
   },
 }
 
+default_image_config = {
+  "prompt": "",
+  "options": {
+    "model": "dall-e-3",
+    "endpoint_url": "https://api.openai.com/v1/images/generations",
+    "quality": "standard",
+    "size": "1024x1024",
+    "style": "vivid",
+    "request_timeout": "20",
+    "enable_auth": "1",
+    "token_file_path": "",
+  },
+  "ui": {
+    "paste_mode": "1",
+  },
+}
+
 def test_default_config():
     actual_context = make_ai_context({
         'config_default': default_config,
@@ -129,6 +146,25 @@ def test_chat_only_role():
     })
     actual_config = context['config']
     assert 'preset_tab' == actual_config['options']['open_chat_command']
+
+def test_image_role():
+    actual_context = make_ai_context({
+        'config_default': default_image_config,
+        'config_extension': {},
+        'user_instruction': '/hd-image picture of the moon',
+        'user_selection': '',
+        'command_type': 'image',
+    })
+    expected_options = {
+        **default_image_config['options'],
+        'token_file_path': '/custom/path/ai.token',
+        'quality': 'hd',
+    }
+    expected_context = {
+        'config': { **default_image_config, 'options': expected_options },
+        'prompt': 'picture of the moon',
+    }
+    assert expected_context == actual_context
 
 def test_default_roles():
     base = {

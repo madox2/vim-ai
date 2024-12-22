@@ -48,6 +48,22 @@ let g:vim_ai_edit_default = {
 \    "paste_mode": 1,
 \  },
 \}
+let g:vim_ai_image_default = {
+\  "prompt": "",
+\  "options": {
+\    "model": "dall-e-3",
+\    "endpoint_url": "https://api.openai.com/v1/images/generations",
+\    "quality": "standard",
+\    "size": "1024x1024",
+\    "style": "vivid",
+\    "request_timeout": 20,
+\    "enable_auth": 1,
+\    "token_file_path": "",
+\  },
+\  "ui": {
+\    "download_dir": "",
+\  },
+\}
 
 let s:initial_chat_prompt =<< trim END
 >>> system
@@ -122,6 +138,7 @@ endfunction
 
 call s:MakeConfig("vim_ai_chat")
 call s:MakeConfig("vim_ai_complete")
+call s:MakeConfig("vim_ai_image")
 call s:MakeConfig("vim_ai_edit")
 
 function! vim_ai_config#load()

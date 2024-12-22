@@ -79,7 +79,7 @@ def load_role_config(role):
 
     enhance_roles_with_custom_function(roles)
 
-    postfixes = ["", ".complete", ".edit", ".chat"]
+    postfixes = ["", ".complete", ".edit", ".chat", ".image"]
     if not any([f"{role}{postfix}" in roles for postfix in postfixes]):
         raise Exception(f"Role `{role}` not found")
 
@@ -91,6 +91,7 @@ def load_role_config(role):
         'role_complete': parse_role_section(roles.get(f"{role}.complete", {})),
         'role_edit': parse_role_section(roles.get(f"{role}.edit", {})),
         'role_chat': parse_role_section(roles.get(f"{role}.chat", {})),
+        'role_image': parse_role_section(roles.get(f"{role}.image", {})),
     }
 
 def parse_role_names(prompt):
@@ -147,7 +148,7 @@ def make_ai_context(params):
 
     user_prompt, role_config = parse_prompt_and_role_config(user_instruction, command_type)
     final_config = merge_deep([config_default, config_extension, role_config])
-    selection_boundary = final_config['options']['selection_boundary']
+    selection_boundary = final_config['options'].get('selection_boundary', '')
     config_prompt = final_config.get('prompt', '')
     prompt = make_prompt(config_prompt, user_prompt, user_selection, selection_boundary)
 

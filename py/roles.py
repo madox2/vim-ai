@@ -13,8 +13,13 @@ def load_ai_role_names(command_type):
     role_names = set()
     for name in roles.sections():
         parts = name.split('.')
-        if len(parts) == 1 or parts[-1] == command_type:
-            role_names.add(parts[0])
+        if command_type == 'image':
+            # special case - image type have to be explicitely defined
+            if len(parts) > 1 and parts[-1] == command_type:
+                role_names.add(parts[0])
+        else:
+            if len(parts) == 1 or parts[-1] == command_type:
+                role_names.add(parts[0])
 
     role_names = [name for name in role_names if name != DEFAULT_ROLE_NAME]
 

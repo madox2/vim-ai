@@ -13,7 +13,7 @@ let s:last_config = {}
 let s:scratch_buffer_name = ">>> AI chat"
 
 function! s:ImportPythonModules()
-  for py_module in ['utils', 'context', 'chat', 'complete', 'roles']
+  for py_module in ['utils', 'context', 'chat', 'complete', 'roles', 'image']
     if !py3eval("'" . py_module . "_py_imported' in globals()")
       execute "py3file " . s:plugin_root . "/py/" . py_module . ".py"
     endif
@@ -209,6 +209,37 @@ function! vim_ai#AIEditRun(uses_range, config, ...) range abort
   endtry
 endfunction
 
+" Generate image
+" - uses_range   - truty if range passed
+" - config       - function scoped vim_ai_image config
+" - a:1          - optional instruction prompt
+function! vim_ai#AIImageRun(uses_range, config, ...) range abort
+  call s:ImportPythonModules()
+  let l:instruction = a:0 > 0 ? a:1 : ""
+  let l:is_selection = a:uses_range && a:firstline == line("'<") && a:lastline == line("'>")
+  let l:selection = s:GetSelectionOrRange(l:is_selection, a:uses_range, a:firstline, a:lastline)
+
+  let l:config_input = {
+  \  "config_default": g:vim_ai_image,
+  \  "config_extension": a:config,
+  \  "user_instruction": l:instruction,
+  \  "user_selection": l:selection,
+  \  "is_selection": l:is_selection,
+  \  "command_type": 'image',
+  \}
+  let l:context = py3eval("make_ai_context(unwrap('l:config_input'))")
+  let l:config = l:context['config']
+
+  let s:last_command = "image"
+  let s:last_config = a:config
+  let s:last_instruction = l:instruction
+  let s:last_is_selection = l:is_selection
+  let s:last_firstline = a:firstline
+  let s:last_lastline = a:lastline
+
+  py3 run_ai_image(unwrap('l:context'))
+endfunction
+
 function! s:ReuseOrCreateChatWindow(config)
   let l:open_conf = a:config['ui']['open_chat_command']
 
@@ -292,11 +323,15 @@ endfunction
 
 " Repeat last AI command
 function! vim_ai#AIRedoRun() abort
-  undo
+  if s:last_command !=# "image"
+    undo
+  endif
   if s:last_command ==# "complete"
     exe s:last_firstline.",".s:last_lastline . "call vim_ai#AIRun(s:last_is_selection, s:last_config, s:last_instruction)"
   elseif s:last_command ==# "edit"
     exe s:last_firstline.",".s:last_lastline . "call vim_ai#AIEditRun(s:last_is_selection, s:last_config, s:last_instruction)"
+  elseif s:last_command ==# "image"
+    exe s:last_firstline.",".s:last_lastline . "call vim_ai#AIImageRun(s:last_is_selection, s:last_config, s:last_instruction)"
   elseif s:last_command ==# "chat"
     " chat does not need prompt, all information are in the buffer already
     call vim_ai#AIChatRun(0, s:last_config)
@@ -312,6 +347,10 @@ endfunction
 
 function! vim_ai#RoleCompletionComplete(A,L,P) abort
   return s:RoleCompletion(a:A, 'complete')
+endfunction
+
+function! vim_ai#RoleCompletionImage(A,L,P) abort
+  return s:RoleCompletion(a:A, 'image')
 endfunction
 
 function! vim_ai#RoleCompletionEdit(A,L,P) abort
