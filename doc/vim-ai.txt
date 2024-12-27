@@ -15,22 +15,34 @@ https://github.com/madox2/vim-ai
 
                                                 *:AI*
 
-:AI                                 complete the text on the current line
 :AI {prompt}                        complete the prompt
 <selection> :AI                     complete the selection
 <selection> :AI {instruction}       complete the selection using the instruction
 
 Options: >
-  let g:vim_ai_complete = {
-  \  "engine": "complete",
+  let s:initial_complete_prompt =<< trim END
+  >>> system
+
+  You are a general assistant.
+  Answer shortly, consisely and only what you are asked.
+  Do not provide any explanantion or comments if not requested.
+  If you answer in a code, do not wrap it in markdown code block.
+  END
+
+  let g:vim_ai_complete_default = {
+  \  "engine": "chat",
   \  "options": {
-  \    "model": "gpt-3.5-turbo-instruct",
-  \    "endpoint_url": "https://api.openai.com/v1/completions",
-  \    "max_tokens": 1000,
+  \    "model": "gpt-4o",
+  \    "endpoint_url": "https://api.openai.com/v1/chat/completions",
+  \    "max_tokens": 0,
+  \    "max_completion_tokens": 0,
   \    "temperature": 0.1,
   \    "request_timeout": 20,
+  \    "stream": 1,
   \    "enable_auth": 1,
+  \    "token_file_path": "",
   \    "selection_boundary": "#####",
+  \    "initial_prompt": s:initial_complete_prompt,
   \  },
   \  "ui": {
   \    "paste_mode": 1,
@@ -47,16 +59,29 @@ https://platform.openai.com/docs/api-reference/completions
                                     the instruction
 
 Options: >
-  let g:vim_ai_edit = {
-  \  "engine": "complete",
+  let s:initial_complete_prompt =<< trim END
+  >>> system
+
+  You are a general assistant.
+  Answer shortly, consisely and only what you are asked.
+  Do not provide any explanantion or comments if not requested.
+  If you answer in a code, do not wrap it in markdown code block.
+  END
+
+  let g:vim_ai_edit_default = {
+  \  "engine": "chat",
   \  "options": {
-  \    "model": "gpt-3.5-turbo-instruct",
-  \    "endpoint_url": "https://api.openai.com/v1/completions",
-  \    "max_tokens": 1000,
+  \    "model": "gpt-4o",
+  \    "endpoint_url": "https://api.openai.com/v1/chat/completions",
+  \    "max_tokens": 0,
+  \    "max_completion_tokens": 0,
   \    "temperature": 0.1,
   \    "request_timeout": 20,
+  \    "stream": 1,
   \    "enable_auth": 1,
+  \    "token_file_path": "",
   \    "selection_boundary": "#####",
+  \    "initial_prompt": s:initial_complete_prompt,
   \  },
   \  "ui": {
   \    "paste_mode": 1,
@@ -84,11 +109,14 @@ Options: >
   \  "options": {
   \    "model": "gpt-4o",
   \    "max_tokens": 0,
+  \    "max_completion_tokens": 0,
   \    "endpoint_url": "https://api.openai.com/v1/chat/completions",
   \    "temperature": 1,
   \    "request_timeout": 20,
+  \    "stream": 1,
   \    "enable_auth": 1,
-  \    "selection_boundary": "#####",
+  \    "token_file_path": "",
+  \    "selection_boundary": "",
   \    "initial_prompt": s:initial_chat_prompt,
   \  },
   \  "ui": {
@@ -122,15 +150,49 @@ Globbing is expanded out via `glob.gob` and relative paths to the current
 working directory (as determined by `getcwd()`) will be resolved to absolute
 paths.
 
-                                                *:AINewChat*
+                                                *:AIImage*
 
-:AINewChat {preset shortname}?      spawn a new conversation with a given open
-                                    chat preset - below, tab or right.
+<selection>? :AIImage {instruction}? generate image given the selection or
+                                     the instruction
+
+Options: >
+  let g:vim_ai_image_default = {
+  \  "prompt": "",
+  \  "options": {
+  \    "model": "dall-e-3",
+  \    "endpoint_url": "https://api.openai.com/v1/images/generations",
+  \    "quality": "standard",
+  \    "size": "1024x1024",
+  \    "style": "vivid",
+  \    "request_timeout": 20,
+  \    "enable_auth": 1,
+  \    "token_file_path": "",
+  \  },
+  \  "ui": {
+  \    "download_dir": "",
+  \  },
+  \}
+
+Check OpenAI docs for more information:
+https://platform.openai.com/docs/api-reference/images/create
 
                                                 *:AIRedo*
 
 :AIRedo                             repeat last AI command in order to re-try
                                     or get an alternative completion.
+
+                                                *:AIUtilOpenRoles*
+
+:AIUtilOpenRoles                    open role configuration file
+
+                                                *:AIUtilDebugOn*
+
+:AIUtilDebugOn                      turn on debug logging
+
+                                                *:AIUtilDebugOff*
+
+:AIUtilDebugOff                     turn off debug logging
+
 
 CONFIGURATION                                   *vim-ai-config*
 
@@ -144,10 +206,11 @@ a selection of options: >
   \  },
   \}
 
-Or modify options directly during the vim session: >
+Alternatively you can use special `default` role: >
 
-  let g:vim_ai_chat['options']['model'] = 'gpt-4'
-  let g:vim_ai_chat['options']['temperature'] = 0.2
+  [default.chat]
+  options.model=gpt-4
+  options.temperature=0.2
 
 You can also customize the options in the chat header: >
 
@@ -170,10 +233,9 @@ Example of a role: >
 
     [grammar]
     prompt = fix spelling and grammar
+    options.temperature = 0.4
 
-    [grammar.options]
-    temperature = 0.4
-
+Now you can select text and run it with command `:AIEdit /grammar`.
 See roles-example.ini for more examples.
 
 The roles in g:vim_ai_roles_config_file are converted to a Vim dictionary whose

@@ -4,19 +4,12 @@ if !has('python3')
   finish
 endif
 
-" detect if a visual selection is pending: https://stackoverflow.com/a/20133772
-let g:vim_ai_is_selection_pending = 0
-augroup vim_ai
-  autocmd!
-    autocmd CursorMoved *
-          \ let g:vim_ai_is_selection_pending = mode() =~# "^[vV\<C-v>]"
-augroup END
-
-command! -range   -nargs=? -complete=customlist,vim_ai#RoleCompletion AI        <line1>,<line2>call vim_ai#AIRun({}, <q-args>)
-command! -range   -nargs=? -complete=customlist,vim_ai#RoleCompletion AIEdit    <line1>,<line2>call vim_ai#AIEditRun({}, <q-args>)
-" Whereas AI and AIEdit default to passing the current line as range
-" AIChat defaults to passing nothing which is achieved by -range=0 and passing
-" <count> as described at https://stackoverflow.com/a/20133772
-command! -range=0 -nargs=? -complete=customlist,vim_ai#RoleCompletion AIChat    <line1>,<line2>call vim_ai#AIChatRun(<count>, {}, <q-args>)
-command! -nargs=?                                                     AINewChat                call vim_ai#AINewChatRun(<f-args>)
-command!                                                              AIRedo                   call vim_ai#AIRedoRun()
+command! -range -nargs=? -complete=customlist,vim_ai#RoleCompletionComplete AI <line1>,<line2>call vim_ai#AIRun(<range>, {}, <q-args>)
+command! -range -nargs=? -complete=customlist,vim_ai#RoleCompletionEdit AIEdit <line1>,<line2>call vim_ai#AIEditRun(<range>, {}, <q-args>)
+command! -range -nargs=? -complete=customlist,vim_ai#RoleCompletionChat AIChat <line1>,<line2>call vim_ai#AIChatRun(<range>, {}, <q-args>)
+command! -range -nargs=? -complete=customlist,vim_ai#RoleCompletionImage AIImage <line1>,<line2>call vim_ai#AIImageRun(<range>, {}, <q-args>)
+command! -nargs=? AINewChat call vim_ai#AINewChatDeprecatedRun(<f-args>)
+command! AIRedo call vim_ai#AIRedoRun()
+command! AIUtilRolesOpen call vim_ai#AIUtilRolesOpen()
+command! AIUtilDebugOn call vim_ai#AIUtilSetDebug(1)
+command! AIUtilDebugOff call vim_ai#AIUtilSetDebug(0)
