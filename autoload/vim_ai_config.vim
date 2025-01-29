@@ -26,7 +26,11 @@ let g:vim_ai_complete_default = {
 \  },
 \  "ui": {
 \    "paste_mode": 1,
-\  },
+\  },                  
+\  "provider": {       
+\    "name": "openai.complete", 
+\    "class": "OpenAIComplete" 
+\  }                   
 \}
 let g:vim_ai_edit_default = {
 \  "prompt": "",
@@ -94,6 +98,10 @@ let g:vim_ai_chat_default = {
 \    "force_new_chat": 0,
 \    "paste_mode": 1,
 \  },
+\  "provider": {
+\    "name": "openai.complete",
+\    "class": "OpenAIChat"
+\ }
 \}
 
 if !exists("g:vim_ai_open_chat_presets")
