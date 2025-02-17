@@ -29,7 +29,7 @@ Options: >
   If you answer in a code, do not wrap it in markdown code block.
   END
 
-  let g:vim_ai_complete_default = {
+  let g:vim_ai_complete = {
   \  "engine": "chat",
   \  "options": {
   \    "model": "gpt-4o",
@@ -68,7 +68,7 @@ Options: >
   If you answer in a code, do not wrap it in markdown code block.
   END
 
-  let g:vim_ai_edit_default = {
+  let g:vim_ai_edit = {
   \  "engine": "chat",
   \  "options": {
   \    "model": "gpt-4o",
@@ -156,7 +156,7 @@ paths.
                                      the instruction
 
 Options: >
-  let g:vim_ai_image_default = {
+  let g:vim_ai_image = {
   \  "prompt": "",
   \  "options": {
   \    "model": "dall-e-3",

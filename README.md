@@ -418,7 +418,7 @@ let g:vim_ai_chat = {
 " - options.enable_auth: enable authorization using openai key
 " - options.token_file_path: override global token configuration
 " - options.download_dir: path to image download directory, `cwd` if not defined
-let g:vim_ai_image_default = {
+let g:vim_ai_image = {
 \  "prompt": "",
 \  "options": {
 \    "model": "dall-e-3",
