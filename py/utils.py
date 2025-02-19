@@ -359,3 +359,23 @@ def save_b64_to_file(path, b64_data):
     f = open(path, "wb")
     f.write(base64.b64decode(b64_data))
     f.close()
+
+def load_provider(provider):
+    provider_name, provider_module = provider["name"].split(".")
+    if provider_name != "openai":
+        provider_path = os.path.join(f"{plugin_root}",
+                                     "..",
+                                     f"vim-ai-{provider_name}",
+                                     "py",
+                                     f"{provider_module}.py")
+    else:
+        return openai_request
+    vim.command(f"py3file {provider_path}")
+    try:
+        provider_class = globals()[provider["class"]]
+    except KeyError as error:
+        printDebug("[load-provider] provider: {}", error)
+        raise KeyError(error.message, "provider not found")
+    return provider_class
+
+

@@ -63,8 +63,10 @@ def run_ai_chat(context):
 
             print('Answering...')
             vim.command("redraw")
+            provider_class = load_provider(config['provider'])
+            provider = provider_class(config)
+            text_chunks = provider.request(messages)
 
-            text_chunks = make_chat_text_chunks(messages, options)
             render_text_chunks(text_chunks)
 
             vim.command("normal! a\n\n>>> user\n\n")
