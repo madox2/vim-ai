@@ -7,9 +7,9 @@ image_py_imported = True
 def make_openai_image_options(options):
     return {
         'model': options['model'],
-        'quality': 'standard',
-        'size': '1024x1024',
-        'style': 'vivid',
+        'quality': options['quality'],
+        'size': options['size'],
+        'style': options['style'],
         'response_format': 'b64_json',
     }
 

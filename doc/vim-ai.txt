@@ -29,7 +29,7 @@ Options: >
   If you answer in a code, do not wrap it in markdown code block.
   END
 
-  let g:vim_ai_complete_default = {
+  let g:vim_ai_complete = {
   \  "engine": "chat",
   \  "options": {
   \    "model": "gpt-4o",
@@ -68,7 +68,7 @@ Options: >
   If you answer in a code, do not wrap it in markdown code block.
   END
 
-  let g:vim_ai_edit_default = {
+  let g:vim_ai_edit = {
   \  "engine": "chat",
   \  "options": {
   \    "model": "gpt-4o",
@@ -156,7 +156,7 @@ paths.
                                      the instruction
 
 Options: >
-  let g:vim_ai_image_default = {
+  let g:vim_ai_image = {
   \  "prompt": "",
   \  "options": {
   \    "model": "dall-e-3",
@@ -268,6 +268,7 @@ To create custom commands, call `AIRun`, `AIEditRun` and `AIChatRun` functions: 
 
   " custom command suggesting git commit message, takes no arguments
   function! AIPromptCommitMessageFn()
+    let l:range = 0
     let l:diff = system('git diff --staged')
     let l:prompt = "generate a short commit message from the diff below:\n" . l:diff
     let l:config = {
@@ -278,7 +279,7 @@ To create custom commands, call `AIRun`, `AIEditRun` and `AIChatRun` functions: 
     \    "temperature": 1,
     \  },
     \}
-    call vim_ai#AIRun(l:config, l:prompt)
+    call vim_ai#AIRun(l:range, l:config, l:prompt)
   endfunction
   command! AIPromptCommitMessage call AIPromptCommitMessageFn(range)
 
