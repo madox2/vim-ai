@@ -89,7 +89,7 @@ def need_insert_before_cursor():
         raise ValueError("Unexpected getpos value, it should be a list with two elements")
     return pos[1] == "1" # determines if visual selection starts on the first window column
 
-def render_text_chunks(chunks):
+def render_text_chunks(chunks, append_to_eol=False):
     generating_text = False
     full_text = ''
     insert_before_cursor = need_insert_before_cursor()
@@ -99,7 +99,9 @@ def render_text_chunks(chunks):
         if not text:
             continue
         generating_text = True
-        if insert_before_cursor:
+        if append_to_eol:
+            vim.command("normal! A" + text)
+        elif insert_before_cursor:
             vim.command("normal! i" + text)
             insert_before_cursor = False
         else:
