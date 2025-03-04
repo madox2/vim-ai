@@ -156,10 +156,12 @@ def parse_chat_messages(chat_content):
     for line in lines:
         match line:
             case '>>> system':
-                messages.append({'role': 'system', 'content': [{ 'type': 'text', 'text': '' }]})
+                messages.append({'role': 'system', 'content': ''})
                 current_type = 'system'
+            case '<<< thinking':
+                current_type = 'thinking'
             case '<<< assistant':
-                messages.append({'role': 'assistant', 'content': [{ 'type': 'text', 'text': '' }]})
+                messages.append({'role': 'assistant', 'content': ''})
                 current_type = 'assistant'
             case '>>> user':
                 if messages and messages[-1]['role'] == 'user':
@@ -175,7 +177,9 @@ def parse_chat_messages(chat_content):
                 if not messages:
                     continue
                 match current_type:
-                    case 'assistant' | 'system' | 'user':
+                    case 'system' | 'assistant':
+                        messages[-1]['content'] += '\n' + line
+                    case 'user':
                         messages[-1]['content'][-1]['text'] += '\n' + line
                     case 'include':
                         paths = parse_include_paths(line)
@@ -185,6 +189,10 @@ def parse_chat_messages(chat_content):
 
     for message in messages:
         # strip newlines from the text content as it causes empty responses
+
+        if isinstance(message['content'], str):
+            message['content'] = message['content'].strip()
+            continue
         for content in message['content']:
             if content['type'] == 'text':
                 content['text'] = content['text'].strip()
@@ -334,11 +342,19 @@ def make_chat_text_chunks(messages, config_options):
 
     def map_chunk_no_stream(resp):
         print_debug("[engine-chat] response: {}", resp)
-        return _choices(resp)[0].get('message', {}).get('content', '')
+        message = _choices(resp)[0].get('message', {})
+        reasoning_content = message.get('reasoning_content', '')
+        content = message.get('content', '')
+        return {"content": content, "thinking": reasoning_content}
 
     def map_chunk_stream(resp):
         print_debug("[engine-chat] response: {}", resp)
-        return _choices(resp)[0].get('delta', {}).get('content', '')
+        delta = _choices(resp)[0].get('delta', {})
+        if reasoning_content := delta.get('reasoning_content'):
+            return {"thinking": reasoning_content}
+        if content := delta.get('content'):
+            return {"content": content}
+        return {"content": ""}
 
     map_chunk = map_chunk_stream if openai_options['stream'] else map_chunk_no_stream
 
