@@ -144,6 +144,7 @@ def make_text_file_message(path):
     try:
         with open(path, 'r') as file:
             file_content = file.read().strip()
+            path = os.path.relpath(path)
             return { 'type': 'text', 'text': f'==> {path} <==\n' + file_content.strip() }
     except UnicodeDecodeError:
         return { 'type': 'text', 'text': f'==> {path} <==\nBinary file, cannot display' }
