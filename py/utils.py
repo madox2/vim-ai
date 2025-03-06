@@ -338,8 +338,9 @@ def make_chat_text_chunks(messages, config_options):
 
     def map_chunk_stream(resp):
         print_debug("[engine-chat] response: {}", resp)
-        return _choices(resp)[0].get('delta', {}).get('content', '')
-
+        delta = _choices(resp)[0].get('delta', {})
+        return delta.get('reasoning_content') or delta.get('content', '')
+ 
     map_chunk = map_chunk_stream if openai_options['stream'] else map_chunk_no_stream
 
     return map(map_chunk, response)
