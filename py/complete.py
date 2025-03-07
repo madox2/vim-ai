@@ -34,7 +34,10 @@ def run_ai_completition(context):
         chat_content = f"{initial_prompt}\n\n>>> user\n\n{prompt}".strip()
         messages = parse_chat_messages(chat_content)
         print_debug("[engine-chat] text:\n" + chat_content)
-        return make_chat_text_chunks(messages, config_options)
+        return filter(
+            lambda c: c,
+            map(lambda c: c.get("content"), make_chat_text_chunks(messages, config_options)),
+        )
 
     engines = {"chat": chat_engine, "complete": complete_engine}
 
