@@ -65,7 +65,7 @@ def run_ai_chat(context):
             vim.command("redraw")
 
             text_chunks = make_chat_text_chunks(messages, options)
-            render_text_chunks(text_chunks)
+            render_text_chunks(text_chunks, append_to_eol=True)
 
             vim.command("normal! a\n\n>>> user\n\n")
             vim.command("redraw")
