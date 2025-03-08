@@ -11,8 +11,19 @@ def run_ai_completition(context):
     engine = config['engine']
 
     def complete_engine(prompt):
-        openai_options = make_openai_options(config_options)
-        http_options = make_http_options(config_options)
+        # this engine is deprecated
+        openai_options = {
+            'model': config_options['model'],
+            'temperature': float(config_options['temperature']),
+            'stream': int(config_options['stream']) == 1,
+            'max_tokens': int(config_options['max_tokens']),
+        }
+        http_options = {
+            'request_timeout': float(config_options['request_timeout']),
+            'enable_auth': bool(int(config_options['enable_auth'])),
+            'token_file_path': config_options['token_file_path'],
+        }
+
         print_debug("[engine-complete] text:\n" + prompt)
 
         request = {

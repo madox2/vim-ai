@@ -1,13 +1,9 @@
 import vim
 import datetime
 import glob
-import sys
 import os
 import json
-import urllib.error
-import urllib.request
 import socket
-import re
 from urllib.error import URLError
 from urllib.error import HTTPError
 import traceback
@@ -58,27 +54,6 @@ def make_config(config):
     if 'initial_prompt' in options and isinstance(options['initial_prompt'], str):
         options['initial_prompt'] = options['initial_prompt'].split('\n')
     return config
-
-def make_openai_options(options):
-    max_tokens = int(options['max_tokens'])
-    max_completion_tokens = int(options['max_completion_tokens'])
-    result = {
-        'model': options['model'],
-        'temperature': float(options['temperature']),
-        'stream': int(options['stream']) == 1,
-    }
-    if max_tokens > 0:
-        result['max_tokens'] = max_tokens
-    if max_completion_tokens > 0:
-        result['max_completion_tokens'] = max_completion_tokens
-    return result
-
-def make_http_options(options):
-    return {
-        'request_timeout': float(options['request_timeout']),
-        'enable_auth': bool(int(options['enable_auth'])),
-        'token_file_path': options['token_file_path'],
-    }
 
 # when running AIEdit on selection and cursor ends on the first column, it needs to
 # be decided whether to append (a) or insert (i) to prevent missalignment.
@@ -226,44 +201,6 @@ def print_debug(text, *args):
         message = text.format(*args) if len(args) else text
         file.write(f"[{datetime.datetime.now()}] " + message + "\n")
 
-OPENAI_RESP_DATA_PREFIX = 'data: '
-OPENAI_RESP_DONE = '[DONE]'
-
-def openai_request(url, data, options):
-    enable_auth=options['enable_auth']
-    headers = {
-        "Content-Type": "application/json",
-        "User-Agent": "VimAI",
-    }
-    if enable_auth:
-        (OPENAI_API_KEY, OPENAI_ORG_ID) = load_api_key(options['token_file_path'])
-        headers['Authorization'] = f"Bearer {OPENAI_API_KEY}"
-
-        if OPENAI_ORG_ID is not None:
-            headers["OpenAI-Organization"] =  f"{OPENAI_ORG_ID}"
-
-    request_timeout=options['request_timeout']
-    req = urllib.request.Request(
-        url,
-        data=json.dumps({ **data }).encode("utf-8"),
-        headers=headers,
-        method="POST",
-    )
-
-    with urllib.request.urlopen(req, timeout=request_timeout) as response:
-        if not data.get('stream', 0):
-            yield json.loads(response.read().decode())
-            return
-        for line_bytes in response:
-            line = line_bytes.decode("utf-8", errors="replace")
-            if line.startswith(OPENAI_RESP_DATA_PREFIX):
-                line_data = line[len(OPENAI_RESP_DATA_PREFIX):-1]
-                if line_data.strip() == OPENAI_RESP_DONE:
-                    pass
-                else:
-                    openai_obj = json.loads(line_data)
-                    yield openai_obj
-
 def print_info_message(msg):
     escaped_msg = msg.replace("'", "`")
     vim.command("redraw")
@@ -312,39 +249,6 @@ def enhance_roles_with_custom_function(roles):
         else:
             roles.update(vim.eval(roles_config_function + "()"))
 
-def make_chat_text_chunks(messages, config_options):
-    openai_options = make_openai_options(config_options)
-    http_options = make_http_options(config_options)
-
-    request = {
-        'messages': messages,
-        **openai_options
-    }
-    print_debug("[engine-chat] request: {}", request)
-    url = config_options['endpoint_url']
-    response = openai_request(url, request, http_options)
-
-    def _choices(resp):
-        choices = resp.get('choices', [{}])
-
-        # NOTE choices may exist in the response, but be an empty list.
-        if not choices:
-            return [{}]
-
-        return choices
-
-    def map_chunk_no_stream(resp):
-        print_debug("[engine-chat] response: {}", resp)
-        return _choices(resp)[0].get('message', {}).get('content', '')
-
-    def map_chunk_stream(resp):
-        print_debug("[engine-chat] response: {}", resp)
-        return _choices(resp)[0].get('delta', {}).get('content', '')
-
-    map_chunk = map_chunk_stream if openai_options['stream'] else map_chunk_no_stream
-
-    return map(map_chunk, response)
-
 def read_role_files():
     plugin_root = vim.eval("s:plugin_root")
     default_roles_config_path = str(os.path.join(plugin_root, "roles-default.ini"))
@@ -384,5 +288,3 @@ def load_provider(provider):
         printDebug("[load-provider] provider: {}", error)
         raise KeyError(error.message, "provider not found")
     return provider_class
-
-

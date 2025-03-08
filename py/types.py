@@ -1,6 +1,9 @@
 from collections.abc import Sequence, Mapping, Iterator
 from typing import TypedDict, Literal, Union, List, Protocol
 
+types_py_imported = True
+
+# TODO: prefix types with AI
 class TextContent(TypedDict):
     type: Literal['text']
     text: str
@@ -23,7 +26,7 @@ class ResponseChunk(TypedDict):
 # TODO: how to properly extend this class
 # TODO: how to provide helper functions (like logging, raising errors), maybe extending a base class
 class AIProvider(Protocol):
-    def __init__(self, config: Mapping[str, str]) -> None:
+    def __init__(self, options: Mapping[str, str]) -> None:
         pass
 
     def request(self, messages: Sequence[Message]) -> Iterator[ResponseChunk]:
