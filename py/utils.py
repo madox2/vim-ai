@@ -142,6 +142,7 @@ def make_image_message(path):
 
 def make_text_file_message(path):
     try:
+        path = os.path.relpath(path)
         with open(path, 'r') as file:
             file_content = file.read().strip()
             return { 'type': 'text', 'text': f'==> {path} <==\n' + file_content.strip() }

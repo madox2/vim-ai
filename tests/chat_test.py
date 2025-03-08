@@ -2,6 +2,7 @@ from utils import parse_chat_messages
 import os
 
 curr_dir = os.path.dirname(__file__)
+relative_dir = 'tests'
 
 def strip_text(txt):
     txt = txt.strip()
@@ -165,7 +166,7 @@ def test_parse_include_single_file_message():
                 },
                 {
                     'type': 'text',
-                    'text': f'==> {curr_dir}/resources/test1.include.txt <==\nhello world',
+                    'text': f'==> {relative_dir}/resources/test1.include.txt <==\nhello world',
                 },
             ],
         },
@@ -212,11 +213,11 @@ def test_parse_include_multiple_files_message():
                 },
                 {
                     'type': 'text',
-                    'text': f'==> {curr_dir}/resources/test1.include.txt <==\nhello world',
+                    'text': f'==> {relative_dir}/resources/test1.include.txt <==\nhello world',
                 },
                 {
                     'type': 'text',
-                    'text': f'==> {curr_dir}/resources/test2.include.txt <==\nvim is awesome',
+                    'text': f'==> {relative_dir}/resources/test2.include.txt <==\nvim is awesome',
                 },
             ],
         },
@@ -243,11 +244,11 @@ def test_parse_include_glob_files_message():
                 },
                 {
                     'type': 'text',
-                    'text': f'==> {curr_dir}/resources/test1.include.txt <==\nhello world',
+                    'text': f'==> {relative_dir}/resources/test1.include.txt <==\nhello world',
                 },
                 {
                     'type': 'text',
-                    'text': f'==> {curr_dir}/resources/test2.include.txt <==\nvim is awesome',
+                    'text': f'==> {relative_dir}/resources/test2.include.txt <==\nvim is awesome',
                 },
             ],
         },
@@ -297,7 +298,7 @@ def test_parse_include_image_with_files_message():
             'content': [
                 {
                     'type': 'text',
-                    'text': f'==> {curr_dir}/resources/test1.include.txt <==\nhello world',
+                    'text': f'==> {relative_dir}/resources/test1.include.txt <==\nhello world',
                 },
                 {
                     'type': 'image_url',
@@ -307,7 +308,7 @@ def test_parse_include_image_with_files_message():
                 },
                 {
                     'type': 'text',
-                    'text': f'==> {curr_dir}/resources/test2.include.txt <==\nvim is awesome',
+                    'text': f'==> {relative_dir}/resources/test2.include.txt <==\nvim is awesome',
                 },
             ],
         },
@@ -327,11 +328,11 @@ def test_parse_include_unsupported_binary_file():
             'content': [
                 {
                     'type': 'text',
-                    'text': f'==> {curr_dir}/resources/binary_file.bin <==\nBinary file, cannot display',
+                    'text': f'==> {relative_dir}/resources/binary_file.bin <==\nBinary file, cannot display',
                 },
                 {
                     'type': 'text',
-                    'text': f'==> {curr_dir}/resources/test1.include.txt <==\nhello world',
+                    'text': f'==> {relative_dir}/resources/test1.include.txt <==\nhello world',
                 },
             ],
         },
