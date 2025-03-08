@@ -42,7 +42,10 @@ def run_ai_completition(context):
         if prompt:
             print('Completing...')
             vim.command("redraw")
-            text_chunks = engines[engine](prompt)
+            provider_class = load_provider(config['provider'])
+            provider = provider_class(config)
+            messages = parse_chat_messages(f">>> user\n\n{prompt}".strip())
+            text_chunks = provider.request(messages)
             render_text_chunks(text_chunks)
             clear_echo_message()
     except BaseException as error:
