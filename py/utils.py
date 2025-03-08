@@ -264,26 +264,15 @@ def save_b64_to_file(path, b64_data):
     f.write(base64.b64decode(b64_data))
     f.close()
 
-def load_provider(provider):
-    # TODO: better extension point (provider) interface
-    # TODO: make default openai work same way as extensions
-    plugin_root = vim.eval("s:plugin_root")
-    provider_name, provider_module = provider["name"].split(".")
-    if provider_name == "openai":
-        provider_path = os.path.join(f"{plugin_root}", "py/providers/openai.py")
-        vim.command(f"py3file {provider_path}")
-        provider_class = globals()['OpenAIProvider']
-        return provider_class
-    else:
-        provider_path = os.path.join(f"{plugin_root}",
-                                     "..",
-                                     f"vim-ai-{provider_name}",
-                                     "py",
-                                     f"{provider_module}.py")
-    vim.command(f"py3file {provider_path}")
+def load_provider(provider_name):
     try:
-        provider_class = globals()[provider["class"]]
+        providers = vim.eval("g:vim_ai_providers")
+        provider_config = providers[provider_name]
+        provider_path = provider_config['script_path']
+        provider_class_name = provider_config['class_name']
+        vim.command(f"py3file {provider_path}")
+        provider_class = globals()[provider_class_name]
     except KeyError as error:
-        printDebug("[load-provider] provider: {}", error)
-        raise KeyError(error.message, "provider not found")
+        print_debug("[load-provider] provider: {}", error)
+        raise error
     return provider_class

@@ -9,6 +9,7 @@ Do not provide any explanantion or comments if not requested.
 If you answer in a code, do not wrap it in markdown code block.
 END
 let g:vim_ai_complete_default = {
+\  "provider": "openai",
 \  "prompt": "",
 \  "engine": "chat",
 \  "options": {
@@ -27,12 +28,9 @@ let g:vim_ai_complete_default = {
 \  "ui": {
 \    "paste_mode": 1,
 \  },
-\  "provider": {
-\    "name": "openai.complete",
-\    "class": "OpenAIComplete"
-\  }
 \}
 let g:vim_ai_edit_default = {
+\  "provider": "openai",
 \  "prompt": "",
 \  "engine": "chat",
 \  "options": {
@@ -51,10 +49,6 @@ let g:vim_ai_edit_default = {
 \  "ui": {
 \    "paste_mode": 1,
 \  },
-\  "provider": {
-\    "name": "openai.complete",
-\    "class": "OpenAIComplete"
-\  }
 \}
 let g:vim_ai_image_default = {
 \  "prompt": "",
@@ -80,6 +74,7 @@ You are a general assistant.
 If you attach a code block add syntax type after ``` to enable syntax highlighting.
 END
 let g:vim_ai_chat_default = {
+\  "provider": "openai",
 \  "prompt": "",
 \  "options": {
 \    "model": "gpt-4o",
@@ -102,10 +97,6 @@ let g:vim_ai_chat_default = {
 \    "force_new_chat": 0,
 \    "paste_mode": 1,
 \  },
-\  "provider": {
-\    "name": "openai.complete",
-\    "class": "OpenAIChat"
-\ }
 \}
 
 if !exists("g:vim_ai_open_chat_presets")

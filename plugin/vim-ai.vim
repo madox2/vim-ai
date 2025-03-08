@@ -4,6 +4,13 @@ if !has('python3')
   finish
 endif
 
+let s:plugin_root = expand('<sfile>:p:h:h')
+
+cal vim_ai_provider#Register('openai', {
+\  'script_path': s:plugin_root . '/py/providers/openai.py',
+\  'class_name': 'OpenAIProvider',
+\})
+
 command! -range -nargs=? -complete=customlist,vim_ai#RoleCompletionComplete AI <line1>,<line2>call vim_ai#AIRun(<range>, {}, <q-args>)
 command! -range -nargs=? -complete=customlist,vim_ai#RoleCompletionEdit AIEdit <line1>,<line2>call vim_ai#AIEditRun(<range>, {}, <q-args>)
 command! -range -nargs=? -complete=customlist,vim_ai#RoleCompletionChat AIChat <line1>,<line2>call vim_ai#AIChatRun(<range>, {}, <q-args>)
