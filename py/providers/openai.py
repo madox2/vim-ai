@@ -3,16 +3,21 @@ import urllib.request
 import os
 
 if "VIMAI_DUMMY_IMPORT" in os.environ:
+    # TODO: figure out how to properly use imports/modules in vim, dev environment, pytest
     from py.types import Message, ResponseChunk, AIUtils, AIProvider
 
-# TODO: each provider should provide it's error handling
 # TODO: each provider should take care of it's default options
-# TODO: how to properly extend AIProvider from types.py
-class OpenAIProvider(AIProvider):
+class OpenAIProvider():
 
     def __init__(self, options: Mapping[str, str], utils: AIUtils) -> None:
         self.options = options
         self.utils = utils
+
+    def _protocol_type_check(self) -> None:
+        # dummy method, just to ensure type safety
+        utils: AIUtils
+        options: Mapping[str, str]
+        provider: AIProvider = OpenAIProvider(options, utils)
 
     def request(self, messages: Sequence[Message]) -> Iterator[ResponseChunk]:
         options = self.options
