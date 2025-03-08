@@ -87,8 +87,9 @@ def openai_request(url, data, options):
 
 # TODO: reuse helper functions that are duplicated in utils.py
 # TODO: each provider should provide it's error handling
+# TODO: each provider should take care of it's default options
 # TODO: how to properly extend AIProvider from types.py
-# TODO: handle api tokens
+# TODO: handle api keys
 class OpenAIProvider():
 
     def __init__(self, config: Mapping[str, str]) -> None:
