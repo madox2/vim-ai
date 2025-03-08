@@ -4,7 +4,7 @@ import os
 
 if "VIMAI_DUMMY_IMPORT" in os.environ:
     # TODO: figure out how to properly use imports/modules in vim, dev environment, pytest
-    from py.types import Message, ResponseChunk, AIUtils, AIProvider
+    from py.types import AIMessage, AIResponseChunk, AIUtils, AIProvider
 
 # TODO: each provider should take care of it's default options
 class OpenAIProvider():
@@ -19,7 +19,7 @@ class OpenAIProvider():
         options: Mapping[str, str]
         provider: AIProvider = OpenAIProvider(options, utils)
 
-    def request(self, messages: Sequence[Message]) -> Iterator[ResponseChunk]:
+    def request(self, messages: Sequence[AIMessage]) -> Iterator[AIResponseChunk]:
         options = self.options
         openai_options = self._make_openai_options(options)
         http_options = {
@@ -44,15 +44,15 @@ class OpenAIProvider():
 
             return choices
 
-        def map_chunk_no_stream(resp) -> ResponseChunk:
+        def map_chunk_no_stream(resp) -> AIResponseChunk:
             self.utils.print_debug("[engine-chat] response: {}", resp)
             content = _choices(resp)[0].get('message', {}).get('content', '')
-            return {'type': 'content', 'content': content}
+            return {'type': 'assistant', 'content': content}
 
-        def map_chunk_stream(resp) -> ResponseChunk:
+        def map_chunk_stream(resp) -> AIResponseChunk:
             self.utils.print_debug("[engine-chat] response: {}", resp)
             content = _choices(resp)[0].get('delta', {}).get('content', '')
-            return {'type': 'content', 'content': content}
+            return {'type': 'assistant', 'content': content}
 
         map_chunk = map_chunk_stream if openai_options['stream'] else map_chunk_no_stream
 
