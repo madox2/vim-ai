@@ -26,11 +26,11 @@ let g:vim_ai_complete_default = {
 \  },
 \  "ui": {
 \    "paste_mode": 1,
-\  },                  
-\  "provider": {       
-\    "name": "openai.complete", 
-\    "class": "OpenAIComplete" 
-\  }                   
+\  },
+\  "provider": {
+\    "name": "openai.complete",
+\    "class": "OpenAIComplete"
+\  }
 \}
 let g:vim_ai_edit_default = {
 \  "prompt": "",
@@ -51,6 +51,10 @@ let g:vim_ai_edit_default = {
 \  "ui": {
 \    "paste_mode": 1,
 \  },
+\  "provider": {
+\    "name": "openai.complete",
+\    "class": "OpenAIComplete"
+\  }
 \}
 let g:vim_ai_image_default = {
 \  "prompt": "",

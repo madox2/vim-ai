@@ -64,8 +64,11 @@ def run_ai_chat(context):
             print('Answering...')
             vim.command("redraw")
             provider_class = load_provider(config['provider'])
-            provider = provider_class(config)
-            text_chunks = provider.request(messages)
+            provider = provider_class(options)
+            response_chunks = provider.request(messages)
+
+            # TODO: for now supporting just `content` section, later will be added `thinking` section
+            text_chunks = map(lambda r: r['content'], response_chunks)
 
             render_text_chunks(text_chunks)
 

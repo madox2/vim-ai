@@ -362,15 +362,21 @@ def save_b64_to_file(path, b64_data):
     f.close()
 
 def load_provider(provider):
+    # TODO: better extension point (provider) interface
+    # TODO: make default openai work same way as extensions
+    plugin_root = vim.eval("s:plugin_root")
     provider_name, provider_module = provider["name"].split(".")
-    if provider_name != "openai":
+    if provider_name == "openai":
+        provider_path = os.path.join(f"{plugin_root}", "py/providers/openai.py")
+        vim.command(f"py3file {provider_path}")
+        provider_class = globals()['OpenAIProvider']
+        return provider_class
+    else:
         provider_path = os.path.join(f"{plugin_root}",
                                      "..",
                                      f"vim-ai-{provider_name}",
                                      "py",
                                      f"{provider_module}.py")
-    else:
-        return openai_request
     vim.command(f"py3file {provider_path}")
     try:
         provider_class = globals()[provider["class"]]
