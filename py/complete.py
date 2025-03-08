@@ -47,7 +47,7 @@ def run_ai_completition(context):
         print_debug("[engine-chat] text:\n" + chat_content)
 
         provider_class = load_provider(config['provider'])
-        provider = provider_class(config_options)
+        provider = provider_class(config_options, ai_provider_utils)
         response_chunks = provider.request(messages)
 
         # TODO: omit `thinking` section when supported

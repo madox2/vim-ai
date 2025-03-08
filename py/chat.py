@@ -64,7 +64,7 @@ def run_ai_chat(context):
             print('Answering...')
             vim.command("redraw")
             provider_class = load_provider(config['provider'])
-            provider = provider_class(options)
+            provider = provider_class(options, ai_provider_utils)
             response_chunks = provider.request(messages)
 
             # TODO: for now supporting just `content` section, later will be added `thinking` section

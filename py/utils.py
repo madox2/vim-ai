@@ -17,36 +17,42 @@ DEFAULT_ROLE_NAME = 'default'
 def is_ai_debugging():
     return vim.eval("g:vim_ai_debug") == "1"
 
+def print_debug(text, *args):
+    if not is_ai_debugging():
+        return
+    with open(vim.eval("g:vim_ai_debug_log_file"), "a") as file:
+        message = text.format(*args) if len(args) else text
+        file.write(f"[{datetime.datetime.now()}] " + message + "\n")
+
 class KnownError(Exception):
     pass
 
+class AIProviderUtils():
+    def print_debug(text, *args):
+        print_debug(text, *args)
+
+    def make_known_error(self, message: str):
+        return KnownError(message)
+
+    def load_api_key(self, env_variable_name: str, token_file_path: str):
+        # TODO: env variable should take a precendence
+        # token precedence: config file path, global file path, env variable
+        global_token_file_path = vim.eval("g:vim_ai_token_file_path")
+        api_key = os.getenv(env_variable_name)
+        try:
+            token_file_path = token_file_path or global_token_file_path
+            with open(os.path.expanduser(token_file_path), 'r') as file:
+                api_key = file.read()
+        except Exception:
+            pass
+        if not api_key:
+            raise KnownError("Missing API key")
+        return api_key
+
+ai_provider_utils = AIProviderUtils()
+
 def unwrap(input_var):
     return vim.eval(input_var)
-
-def load_api_key(config_token_file_path):
-    # token precedence: config file path, global file path, env variable
-    global_token_file_path = vim.eval("g:vim_ai_token_file_path")
-    api_key_param_value = os.getenv("OPENAI_API_KEY")
-    try:
-        token_file_path = config_token_file_path or global_token_file_path
-        with open(os.path.expanduser(token_file_path), 'r') as file:
-            api_key_param_value = file.read()
-    except Exception:
-        pass
-
-    if not api_key_param_value:
-        raise KnownError("Missing OpenAI API key")
-
-    # The text is in format of "<api key>,<org id>" and the
-    # <org id> part is optional
-    elements = api_key_param_value.strip().split(",")
-    api_key = elements[0].strip()
-    org_id = None
-
-    if len(elements) > 1:
-        org_id = elements[1].strip()
-
-    return (api_key, org_id)
 
 def make_config(config):
     options = config['options']
@@ -193,13 +199,6 @@ def parse_chat_header_options():
 def vim_break_undo_sequence():
     # breaks undo sequence (https://vi.stackexchange.com/a/29087)
     vim.command("let &ul=&ul")
-
-def print_debug(text, *args):
-    if not is_ai_debugging():
-        return
-    with open(vim.eval("g:vim_ai_debug_log_file"), "a") as file:
-        message = text.format(*args) if len(args) else text
-        file.write(f"[{datetime.datetime.now()}] " + message + "\n")
 
 def print_info_message(msg):
     escaped_msg = msg.replace("'", "`")

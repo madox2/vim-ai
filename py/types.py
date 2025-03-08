@@ -1,5 +1,5 @@
 from collections.abc import Sequence, Mapping, Iterator
-from typing import TypedDict, Literal, Union, List, Protocol
+from typing import TypedDict, Literal, Union, List, Protocol, Tuple, Any
 
 types_py_imported = True
 
@@ -19,16 +19,21 @@ class Message(TypedDict):
     content: List[MessageContent]
     type: str
 
+class AIUtils(Protocol):
+    def print_debug(self, text: str, *args: Any):
+        pass
+    def make_known_error(self, message: str):
+        pass
+    def load_api_key(self, env_variable: str, file_path: str):
+        pass
+
 class ResponseChunk(TypedDict):
     type: Literal['content', 'thinking']
     content: str
 
-# TODO: how to properly extend this class
-# TODO: how to provide helper functions (like logging, raising errors), maybe extending a base class
 class AIProvider(Protocol):
-    def __init__(self, options: Mapping[str, str]) -> None:
+    def __init__(self, options: Mapping[str, str], utils: AIUtils) -> None:
         pass
 
     def request(self, messages: Sequence[Message]) -> Iterator[ResponseChunk]:
         pass
-
