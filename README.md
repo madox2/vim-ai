@@ -305,7 +305,6 @@ END
 
 " :AI
 " - prompt: optional prepended prompt
-" - engine: chat | complete - see how to configure complete engine in the section below
 " - options: openai config (see https://platform.openai.com/docs/api-reference/completions)
 " - options.initial_prompt: prompt prepended to every chat request (list of lines or string)
 " - options.request_timeout: request timeout in seconds
@@ -315,7 +314,6 @@ END
 " - ui.paste_mode: use paste mode (see more info in the Notes below)
 let g:vim_ai_complete = {
 \  "prompt": "",
-\  "engine": "chat",
 \  "options": {
 \    "model": "gpt-4o",
 \    "endpoint_url": "https://api.openai.com/v1/chat/completions",
@@ -336,7 +334,6 @@ let g:vim_ai_complete = {
 
 " :AIEdit
 " - prompt: optional prepended prompt
-" - engine: chat | complete - see how to configure complete engine in the section below
 " - options: openai config (see https://platform.openai.com/docs/api-reference/completions)
 " - options.initial_prompt: prompt prepended to every chat request (list of lines or string)
 " - options.request_timeout: request timeout in seconds
@@ -346,7 +343,6 @@ let g:vim_ai_complete = {
 " - ui.paste_mode: use paste mode (see more info in the Notes below)
 let g:vim_ai_edit = {
 \  "prompt": "",
-\  "engine": "chat",
 \  "options": {
 \    "model": "gpt-4o",
 \    "endpoint_url": "https://api.openai.com/v1/chat/completions",
@@ -502,26 +498,6 @@ Now you can use the role:
 I was created by Google.
 ```
 
-
-### Using complete engine for completion and edits
-
-OpenAI has recently marked [Completions API](https://platform.openai.com/docs/api-reference/completions) as a legacy API.
-Therefore `:AI` and `:AIEdit` use chat models by default.
-However it is still possible to configure and use it with models like `gpt-3.5-turbo-instruct`.
-
-```vim
-let complete_engine_config = {
-\  "engine": "complete",
-\  "options": {
-\    "model": "gpt-3.5-turbo-instruct",
-\    "endpoint_url": "https://api.openai.com/v1/completions",
-\  },
-\}
-
-let g:vim_ai_complete = complete_engine_config
-let g:vim_ai_edit = complete_engine_config
-```
-
 ## Key bindings
 
 This plugin does not set any key binding. Create your own bindings in the `.vimrc` to trigger AI commands, for example:
@@ -556,7 +532,6 @@ function! GitCommitMessageFn()
   let l:diff = system('git --no-pager diff --staged')
   let l:prompt = "generate a short commit message from the diff below:\n" . l:diff
   let l:config = {
-  \  "engine": "chat",
   \  "options": {
   \    "model": "gpt-4o",
   \    "initial_prompt": ">>> system\nyou are a code assistant",

@@ -30,7 +30,6 @@ Options: >
   END
 
   let g:vim_ai_complete = {
-  \  "engine": "chat",
   \  "options": {
   \    "model": "gpt-4o",
   \    "endpoint_url": "https://api.openai.com/v1/chat/completions",
@@ -69,7 +68,6 @@ Options: >
   END
 
   let g:vim_ai_edit = {
-  \  "engine": "chat",
   \  "options": {
   \    "model": "gpt-4o",
   \    "endpoint_url": "https://api.openai.com/v1/chat/completions",
@@ -272,7 +270,6 @@ To create custom commands, call `AIRun`, `AIEditRun` and `AIChatRun` functions: 
     let l:diff = system('git diff --staged')
     let l:prompt = "generate a short commit message from the diff below:\n" . l:diff
     let l:config = {
-    \  "engine": "chat",
     \  "options": {
     \    "model": "gpt-4o",
     \    "initial_prompt": ">>> system\nyou are a code assistant",

@@ -1,7 +1,6 @@
 from context import make_ai_context, make_prompt
 
 default_config = {
-  "engine": "chat",
   "options": {
     "model": "gpt-4o",
     "endpoint_url": "https://api.openai.com/v1/chat/completions",
@@ -97,7 +96,6 @@ def test_role_config_different_commands():
     assert 'preset_tab' == actual_config['ui']['open_chat_command']
     assert 'hello' == actual_prompt
     assert 'https://localhost/chat' == actual_config['options']['endpoint_url']
-    assert 'chat' == actual_config['engine']
 
     context  = make_ai_context({ **base, 'command_type': 'complete' })
     actual_config = context['config']
@@ -106,7 +104,6 @@ def test_role_config_different_commands():
     assert '0' == actual_config['ui']['paste_mode']
     assert 'hello' == actual_prompt
     assert 'https://localhost/complete' == actual_config['options']['endpoint_url']
-    assert 'complete' == actual_config['engine']
 
     context  = make_ai_context({ **base, 'command_type': 'edit' })
     actual_config = context['config']
@@ -115,7 +112,6 @@ def test_role_config_different_commands():
     assert '0' == actual_config['ui']['paste_mode']
     assert 'hello' == actual_prompt
     assert 'https://localhost/edit' == actual_config['options']['endpoint_url']
-    assert 'complete' == actual_config['engine']
 
 def test_multiple_role_configs():
     context = make_ai_context({

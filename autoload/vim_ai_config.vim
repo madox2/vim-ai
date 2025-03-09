@@ -5,7 +5,6 @@ let s:plugin_root = expand('<sfile>:p:h:h')
 let g:vim_ai_complete_default = {
 \  "provider": "openai",
 \  "prompt": "",
-\  "engine": "chat",
 \  "options": {
 \    "selection_boundary": "#####",
 \  },
@@ -16,7 +15,6 @@ let g:vim_ai_complete_default = {
 let g:vim_ai_edit_default = {
 \  "provider": "openai",
 \  "prompt": "",
-\  "engine": "chat",
 \  "options": {
 \    "selection_boundary": "#####",
 \  },

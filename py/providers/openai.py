@@ -12,6 +12,7 @@ class OpenAIProvider():
 
     def __init__(self, command_type: AICommandType, raw_options: Mapping[str, str], utils: AIUtils) -> None:
         self.utils = utils
+        self.command_type = command_type
         raw_default_options = vim.eval(f"g:vim_ai_openai_{command_type}")
         self.options = self._parse_raw_options({**raw_default_options, **raw_options})
 
@@ -33,7 +34,7 @@ class OpenAIProvider():
             'messages': messages,
             **openai_options
         }
-        self.utils.print_debug("[engine-chat] request: {}", request)
+        self.utils.print_debug("[{}] request: {}", self.command_type, request)
         url = options['endpoint_url']
         response = self._openai_request(url, request, http_options)
 
@@ -47,12 +48,12 @@ class OpenAIProvider():
             return choices
 
         def map_chunk_no_stream(resp) -> AIResponseChunk:
-            self.utils.print_debug("[engine-chat] response: {}", resp)
+            self.utils.print_debug("[{}] response: {}", self.command_type, resp)
             content = _choices(resp)[0].get('message', {}).get('content', '')
             return {'type': 'assistant', 'content': content}
 
         def map_chunk_stream(resp) -> AIResponseChunk:
-            self.utils.print_debug("[engine-chat] response: {}", resp)
+            self.utils.print_debug("[{}] response: {}", self.command_type, resp)
             content = _choices(resp)[0].get('delta', {}).get('content', '')
             return {'type': 'assistant', 'content': content}
 

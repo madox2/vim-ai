@@ -51,7 +51,7 @@ def run_ai_chat(context):
     initial_messages = parse_chat_messages(initial_prompt)
 
     chat_content = vim.eval('trim(join(getline(1, "$"), "\n"))')
-    print_debug("[chat] text:\n" + chat_content)
+    print_debug(f"[{command_type}] text:\n" + chat_content)
     chat_messages = parse_chat_messages(chat_content)
 
     messages = initial_messages + chat_messages
@@ -78,4 +78,4 @@ def run_ai_chat(context):
             clear_echo_message()
     except BaseException as error:
         handle_completion_error(error)
-        print_debug("[chat] error: {}", traceback.format_exc())
+        print_debug("[{}] error: {}", command_type, traceback.format_exc())
