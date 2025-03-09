@@ -3,6 +3,7 @@ import vim
 chat_py_imported = True
 
 def run_ai_chat(context):
+    command_type = context['command_type']
     prompt = context['prompt']
     config = make_config(context['config'])
     config_options = config['options']
@@ -64,7 +65,7 @@ def run_ai_chat(context):
             print('Answering...')
             vim.command("redraw")
             provider_class = load_provider(config['provider'])
-            provider = provider_class(options, ai_provider_utils)
+            provider = provider_class(command_type, options, ai_provider_utils)
             response_chunks = provider.request(messages)
 
             # TODO: for now supporting just `content` section, later will be added `thinking` section

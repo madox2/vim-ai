@@ -1,30 +1,32 @@
 from collections.abc import Sequence, Mapping, Iterator
+from typing import Any
 import urllib.request
 import os
+import vim
 
 if "VIMAI_DUMMY_IMPORT" in os.environ:
     # TODO: figure out how to properly use imports/modules in vim, dev environment, pytest
-    from py.types import AIMessage, AIResponseChunk, AIUtils, AIProvider
+    from py.types import AIMessage, AIResponseChunk, AIUtils, AIProvider, AICommandType
 
-# TODO: each provider should take care of it's default options
 class OpenAIProvider():
 
-    def __init__(self, options: Mapping[str, str], utils: AIUtils) -> None:
-        self.options = options
+    def __init__(self, command_type: AICommandType, raw_options: Mapping[str, str], utils: AIUtils) -> None:
         self.utils = utils
+        raw_default_options = vim.eval(f"g:vim_ai_openai_{command_type}")
+        self.options = self._parse_raw_options({**raw_default_options, **raw_options})
 
     def _protocol_type_check(self) -> None:
         # dummy method, just to ensure type safety
         utils: AIUtils
-        options: Mapping[str, str]
-        provider: AIProvider = OpenAIProvider(options, utils)
+        options: Mapping[str, str] = {}
+        provider: AIProvider = OpenAIProvider('chat', options, utils)
 
     def request(self, messages: Sequence[AIMessage]) -> Iterator[AIResponseChunk]:
         options = self.options
         openai_options = self._make_openai_options(options)
         http_options = {
-            'request_timeout': float(options['request_timeout']),
-            'enable_auth': bool(int(options['enable_auth'])),
+            'request_timeout': options['request_timeout'],
+            'enable_auth': options['enable_auth'],
             'token_file_path': options['token_file_path'],
         }
         request = {
@@ -71,26 +73,29 @@ class OpenAIProvider():
 
         return (api_key, org_id)
 
+    def _parse_raw_options(self, raw_options: Mapping[str, Any]):
+        options = {**raw_options}
+        options['request_timeout'] = float(options['request_timeout'])
+        options['enable_auth'] = bool(int(options['enable_auth']))
+        options['max_tokens'] = int(options['max_tokens'])
+        options['max_completion_tokens'] = int(options['max_completion_tokens'])
+        options['temperature'] = float(options['temperature'])
+        options['stream'] = bool(int(options['stream']))
+        return options
+
     def _make_openai_options(self, options):
-        max_tokens = int(options['max_tokens'])
-        max_completion_tokens = int(options['max_completion_tokens'])
+        max_tokens = options['max_tokens']
+        max_completion_tokens = options['max_completion_tokens']
         result = {
             'model': options['model'],
-            'temperature': float(options['temperature']),
-            'stream': int(options['stream']) == 1,
+            'temperature': options['temperature'],
+            'stream': options['stream'],
         }
         if max_tokens > 0:
             result['max_tokens'] = max_tokens
         if max_completion_tokens > 0:
             result['max_completion_tokens'] = max_completion_tokens
         return result
-
-    def _make_http_options(self, options):
-        return {
-            'request_timeout': float(options['request_timeout']),
-            'enable_auth': bool(int(options['enable_auth'])),
-            'token_file_path': options['token_file_path'],
-        }
 
     def _openai_request(self, url, data, options):
         OPENAI_RESP_DATA_PREFIX = 'data: '

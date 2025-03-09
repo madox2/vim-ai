@@ -3,6 +3,7 @@ import vim
 complete_py_imported = True
 
 def run_ai_completition(context):
+    command_type = context['command_type']
     prompt = context['prompt']
     config = make_config(context['config'])
     config_options = config['options']
@@ -47,7 +48,7 @@ def run_ai_completition(context):
         print_debug("[engine-chat] text:\n" + chat_content)
 
         provider_class = load_provider(config['provider'])
-        provider = provider_class(config_options, ai_provider_utils)
+        provider = provider_class(command_type, config_options, ai_provider_utils)
         response_chunks = provider.request(messages)
 
         # TODO: omit `thinking` section when supported

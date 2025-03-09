@@ -155,4 +155,5 @@ def make_ai_context(params):
     return {
         'config': final_config,
         'prompt': prompt,
+        'command_type': command_type,
     }

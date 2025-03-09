@@ -6,11 +6,7 @@ default_config = {
     "model": "gpt-4o",
     "endpoint_url": "https://api.openai.com/v1/chat/completions",
     "max_tokens": "0",
-    "max_completion_tokens": "0",
     "temperature": "1",
-    "request_timeout": "20",
-    "stream": "1",
-    "enable_auth": "1",
     "token_file_path": "",
     "selection_boundary": "",
     "initial_prompt": "You are a general assistant.",
@@ -32,8 +28,6 @@ default_image_config = {
     "quality": "standard",
     "size": "1024x1024",
     "style": "vivid",
-    "request_timeout": "20",
-    "enable_auth": "1",
     "token_file_path": "",
   },
   "ui": {
@@ -56,6 +50,7 @@ def test_default_config():
     expected_context = {
         'config': { **default_config, 'options': expected_options },
         'prompt': 'translate to Slovak:\nHello world!',
+        'command_type': 'chat',
     }
     assert expected_context == actual_context
 
@@ -163,6 +158,7 @@ def test_image_role():
     expected_context = {
         'config': { **default_image_config, 'options': expected_options },
         'prompt': 'picture of the moon',
+        'command_type': 'image',
     }
     assert expected_context == actual_context
 

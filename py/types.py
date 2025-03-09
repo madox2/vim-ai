@@ -30,8 +30,10 @@ class AIResponseChunk(TypedDict):
     type: Literal['assistant', 'thinking']
     content: str
 
+AICommandType = Literal['chat', 'edit', 'complete'] # image not yet supported
+
 class AIProvider(Protocol):
-    def __init__(self, options: Mapping[str, str], utils: AIUtils) -> None:
+    def __init__(self, command_type: AICommandType, raw_options: Mapping[str, str], utils: AIUtils) -> None:
         pass
 
     def request(self, messages: Sequence[AIMessage]) -> Iterator[AIResponseChunk]:
