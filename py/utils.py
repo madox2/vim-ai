@@ -159,6 +159,8 @@ def parse_chat_messages(chat_content):
             case '>>> system':
                 messages.append({'role': 'system', 'content': [{ 'type': 'text', 'text': '' }]})
                 current_type = 'system'
+            case '<<< thinking':
+                current_type = 'thinking'
             case '<<< assistant':
                 messages.append({'role': 'assistant', 'content': [{ 'type': 'text', 'text': '' }]})
                 current_type = 'assistant'
@@ -316,34 +318,33 @@ def make_chat_text_chunks(messages, config_options):
     openai_options = make_openai_options(config_options)
     http_options = make_http_options(config_options)
 
+    def _flatten_content(messages):
+        """Some providers like api.deepseek.com & api.groq.com expect a flat 'content' field."""
+        for message in messages:
+            match message['role']:
+                case 'system' | 'assistant':
+                    message['content'] = '\n'.join(map(lambda c: c['text'], message['content']))
+        return messages
+
     request = {
-        'messages': messages,
+        'messages': _flatten_content(messages),
         **openai_options
     }
     print_debug("[engine-chat] request: {}", request)
     url = config_options['endpoint_url']
     response = openai_request(url, request, http_options)
+    _choice_key = 'delta' if openai_options['stream'] else 'message'
 
-    def _choices(resp):
-        choices = resp.get('choices', [{}])
+    def _get_delta(resp):
+        choices = resp.get('choices') or [{}]
+        return choices[0].get(_choice_key, {})
 
-        # NOTE choices may exist in the response, but be an empty list.
-        if not choices:
-            return [{}]
-
-        return choices
-
-    def map_chunk_no_stream(resp):
+    def _map_chunk(resp):
         print_debug("[engine-chat] response: {}", resp)
-        return _choices(resp)[0].get('message', {}).get('content', '')
+        delta = _get_delta(resp)
+        return {'thinking': delta.get('reasoning_content'), 'content': delta.get('content')}
 
-    def map_chunk_stream(resp):
-        print_debug("[engine-chat] response: {}", resp)
-        return _choices(resp)[0].get('delta', {}).get('content', '')
-
-    map_chunk = map_chunk_stream if openai_options['stream'] else map_chunk_no_stream
-
-    return map(map_chunk, response)
+    return map(_map_chunk, response)
 
 def read_role_files():
     plugin_root = vim.eval("s:plugin_root")
