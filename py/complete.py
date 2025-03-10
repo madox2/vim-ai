@@ -27,8 +27,10 @@ def run_ai_completition(context):
             provider = provider_class(command_type, config_options, ai_provider_utils)
             response_chunks = provider.request(messages)
 
-            # TODO: omit `thinking` section when supported
-            text_chunks = map(lambda r: r['content'], response_chunks)
+            text_chunks = map(
+                lambda c: c.get("content"),
+                filter(lambda c: c['type'] == 'assistant', response_chunks), # omit `thinking` section
+            )
 
             render_text_chunks(text_chunks)
 

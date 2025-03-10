@@ -140,6 +140,8 @@ def parse_chat_messages(chat_content):
             case '>>> system':
                 messages.append({'role': 'system', 'content': [{ 'type': 'text', 'text': '' }]})
                 current_type = 'system'
+            case '<<< thinking':
+                current_type = 'thinking'
             case '<<< assistant':
                 messages.append({'role': 'assistant', 'content': [{ 'type': 'text', 'text': '' }]})
                 current_type = 'assistant'

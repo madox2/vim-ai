@@ -30,36 +30,43 @@ class OpenAIProvider():
             'enable_auth': options['enable_auth'],
             'token_file_path': options['token_file_path'],
         }
+
+        def _flatten_content(messages):
+            # NOTE: Some providers like api.deepseek.com & api.groq.com expect a flat 'content' field.
+            for message in messages:
+                match message['role']:
+                    case 'system' | 'assistant':
+                        message['content'] = '\n'.join(map(lambda c: c['text'], message['content']))
+            return messages
+
         request = {
-            'messages': messages,
+            'messages': _flatten_content(messages),
             **openai_options
         }
         self.utils.print_debug("[{}] request: {}", self.command_type, request)
         url = options['endpoint_url']
         response = self._openai_request(url, request, http_options)
 
-        def _choices(resp):
-            choices = resp.get('choices', [{}])
+        _choice_key = 'delta' if openai_options['stream'] else 'message'
 
-            # NOTE choices may exist in the response, but be an empty list.
-            if not choices:
-                return [{}]
+        def _get_delta(resp):
+            choices = resp.get('choices') or [{}]
+            return choices[0].get(_choice_key, {})
 
-            return choices
-
-        def map_chunk_no_stream(resp) -> AIResponseChunk:
+        def _map_chunk(resp):
             self.utils.print_debug("[{}] response: {}", self.command_type, resp)
-            content = _choices(resp)[0].get('message', {}).get('content', '')
-            return {'type': 'assistant', 'content': content}
+            delta = _get_delta(resp)
+            if delta.get('reasoning_content'):
+                # NOTE: support for deepseek's reasoning_content
+                return {'type': 'thinking', 'content': delta.get('reasoning_content')}
+            if delta.get('content'):
+                return {'type': 'assistant', 'content': delta.get('content')}
+            return None # invalid chunk, this occured in deepseek models
 
-        def map_chunk_stream(resp) -> AIResponseChunk:
-            self.utils.print_debug("[{}] response: {}", self.command_type, resp)
-            content = _choices(resp)[0].get('delta', {}).get('content', '')
-            return {'type': 'assistant', 'content': content}
+        def _filter_valid_chunks(chunk):
+            return chunk is not None
 
-        map_chunk = map_chunk_stream if openai_options['stream'] else map_chunk_no_stream
-
-        return map(map_chunk, response)
+        return filter(_filter_valid_chunks, map(_map_chunk, response))
 
     def _load_api_key(self):
         raw_api_key = self.utils.load_api_key("OPENAI_API_KEY", self.options['token_file_path'])
