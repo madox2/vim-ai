@@ -1,12 +1,27 @@
 let s:plugin_root = expand('<sfile>:p:h:h')
 
-" NOTE: selection_boundary is currently handled outside of provider
+" NOTE: selection_boundary and initial_prompt is currently handled outside of provider
 
+let s:initial_complete_prompt =<< trim END
+>>> system
+
+You are a general assistant.
+Answer shortly, consisely and only what you are asked.
+Do not provide any explanantion or comments if not requested.
+If you answer in a code, do not wrap it in markdown code block.
+END
+let s:initial_chat_prompt =<< trim END
+>>> system
+
+You are a general assistant.
+If you attach a code block add syntax type after ``` to enable syntax highlighting.
+END
 let g:vim_ai_complete_default = {
 \  "provider": "openai",
 \  "prompt": "",
 \  "options": {
 \    "selection_boundary": "#####",
+\    "initial_prompt": s:initial_complete_prompt,
 \  },
 \  "ui": {
 \    "paste_mode": 1,
@@ -17,6 +32,7 @@ let g:vim_ai_edit_default = {
 \  "prompt": "",
 \  "options": {
 \    "selection_boundary": "#####",
+\    "initial_prompt": s:initial_complete_prompt,
 \  },
 \  "ui": {
 \    "paste_mode": 1,
@@ -27,6 +43,7 @@ let g:vim_ai_chat_default = {
 \  "prompt": "",
 \  "options": {
 \    "selection_boundary": "",
+\    "initial_prompt": s:initial_chat_prompt,
 \  },
 \  "ui": {
 \    "open_chat_command": "preset_below",
@@ -55,20 +72,6 @@ let g:vim_ai_image_default = {
 \}
 
 " openai provider options
-let s:initial_complete_prompt =<< trim END
->>> system
-
-You are a general assistant.
-Answer shortly, consisely and only what you are asked.
-Do not provide any explanantion or comments if not requested.
-If you answer in a code, do not wrap it in markdown code block.
-END
-let s:initial_chat_prompt =<< trim END
->>> system
-
-You are a general assistant.
-If you attach a code block add syntax type after ``` to enable syntax highlighting.
-END
 let g:vim_ai_openai_complete = {
 \  "model": "gpt-4o",
 \  "endpoint_url": "https://api.openai.com/v1/chat/completions",

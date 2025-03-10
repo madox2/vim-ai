@@ -28,7 +28,7 @@ class KnownError(Exception):
     pass
 
 class AIProviderUtils():
-    def print_debug(text, *args):
+    def print_debug(self, text, *args):
         print_debug(text, *args)
 
     def make_known_error(self, message: str):
