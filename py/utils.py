@@ -156,12 +156,12 @@ def parse_chat_messages(chat_content):
     for line in lines:
         match line:
             case '>>> system':
-                messages.append({'role': 'system', 'content': ''})
+                messages.append({'role': 'system', 'content': [{ 'type': 'text', 'text': '' }]})
                 current_type = 'system'
             case '<<< thinking':
                 current_type = 'thinking'
             case '<<< assistant':
-                messages.append({'role': 'assistant', 'content': ''})
+                messages.append({'role': 'assistant', 'content': [{ 'type': 'text', 'text': '' }]})
                 current_type = 'assistant'
             case '>>> user':
                 if messages and messages[-1]['role'] == 'user':
@@ -177,9 +177,7 @@ def parse_chat_messages(chat_content):
                 if not messages:
                     continue
                 match current_type:
-                    case 'system' | 'assistant':
-                        messages[-1]['content'] += '\n' + line
-                    case 'user':
+                    case 'assistant' | 'system' | 'user':
                         messages[-1]['content'][-1]['text'] += '\n' + line
                     case 'include':
                         paths = parse_include_paths(line)
@@ -189,10 +187,6 @@ def parse_chat_messages(chat_content):
 
     for message in messages:
         # strip newlines from the text content as it causes empty responses
-
-        if isinstance(message['content'], str):
-            message['content'] = message['content'].strip()
-            continue
         for content in message['content']:
             if content['type'] == 'text':
                 content['text'] = content['text'].strip()
@@ -323,42 +317,33 @@ def make_chat_text_chunks(messages, config_options):
     openai_options = make_openai_options(config_options)
     http_options = make_http_options(config_options)
 
+    def _flatten_content(messages):
+        """Some providers like api.deepseek.com & api.groq.com expect a flat 'content' field."""
+        for message in messages:
+            match message['role']:
+                case 'system' | 'assistant':
+                    message['content'] = '\n'.join(map(lambda c: c['text'], message['content']))
+        return messages
+
     request = {
-        'messages': messages,
+        'messages': _flatten_content(messages),
         **openai_options
     }
     print_debug("[engine-chat] request: {}", request)
     url = config_options['endpoint_url']
     response = openai_request(url, request, http_options)
+    _choice_key = 'delta' if openai_options['stream'] else 'message'
 
-    def _choices(resp):
-        choices = resp.get('choices', [{}])
+    def _get_delta(resp):
+        choices = resp.get('choices') or [{}]
+        return choices[0].get(_choice_key, {})
 
-        # NOTE choices may exist in the response, but be an empty list.
-        if not choices:
-            return [{}]
-
-        return choices
-
-    def map_chunk_no_stream(resp):
+    def _map_chunk(resp):
         print_debug("[engine-chat] response: {}", resp)
-        message = _choices(resp)[0].get('message', {})
-        reasoning_content = message.get('reasoning_content', '')
-        content = message.get('content', '')
-        return {"content": content, "thinking": reasoning_content}
+        delta = _get_delta(resp)
+        return {'thinking': delta.get('reasoning_content'), 'content': delta.get('content')}
 
-    def map_chunk_stream(resp):
-        print_debug("[engine-chat] response: {}", resp)
-        delta = _choices(resp)[0].get('delta', {})
-        if reasoning_content := delta.get('reasoning_content'):
-            return {"thinking": reasoning_content}
-        if content := delta.get('content'):
-            return {"content": content}
-        return {"content": ""}
-
-    map_chunk = map_chunk_stream if openai_options['stream'] else map_chunk_no_stream
-
-    return map(map_chunk, response)
+    return map(_map_chunk, response)
 
 def read_role_files():
     plugin_root = vim.eval("s:plugin_root")

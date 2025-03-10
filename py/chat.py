@@ -62,22 +62,23 @@ def run_ai_chat(context):
 
             print('Answering...')
 
-            first_thinking_chunk = True
-            first_content_chunk = True
+            def _chunks_to_sections(chunks):
+                first_thinking_chunk = True
+                first_content_chunk = True
+                for chunk in chunks:
+                    if chunk['thinking'] is not None:
+                        if first_thinking_chunk:
+                            first_thinking_chunk = False
+                            vim.command("normal! Go\n<<< thinking\n\n")
+                        yield chunk['thinking']
+                    if chunk['content'] is not None:
+                        if first_content_chunk:
+                            first_content_chunk = False
+                            vim.command("normal! Go\n<<< assistant\n\n")
+                        yield chunk['content']
 
-            text_chunks = make_chat_text_chunks(messages, options)
-            for chunk in text_chunks:
-                if text := chunk.get("thinking"):
-                    if first_thinking_chunk:
-                        first_thinking_chunk = False
-                        vim.command("normal! Go\n<<< thinking\n\n")
-                    vim.command("normal! A" + text)
-                if text := chunk.get("content"):
-                    if first_content_chunk:
-                        first_content_chunk = False
-                        vim.command("normal! Go\n<<< assistant\n\n")
-                    vim.command("normal! A" + text)
-                vim.command("redraw")
+            chunks = make_chat_text_chunks(messages, options)
+            render_text_chunks(_chunks_to_sections(chunks))
 
             vim.command("normal! a\n\n>>> user\n\n")
             vim.command("redraw")
