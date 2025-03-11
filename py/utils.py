@@ -94,7 +94,7 @@ def render_text_chunks(chunks):
     full_text = ''
     insert_before_cursor = need_insert_before_cursor()
     for text in chunks:
-        if not generating_text:
+        if not generating_text and text is not None:
             text = text.lstrip() # trim newlines from the beginning
         if not text:
             continue
