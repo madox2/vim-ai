@@ -240,6 +240,7 @@ def openai_request(url, data, options):
     if enable_auth:
         (OPENAI_API_KEY, OPENAI_ORG_ID) = load_api_key(options['token_file_path'])
         headers['Authorization'] = f"Bearer {OPENAI_API_KEY}"
+        headers['api-key'] = f"{OPENAI_API_KEY}"
 
         if OPENAI_ORG_ID is not None:
             headers["OpenAI-Organization"] =  f"{OPENAI_ORG_ID}"
