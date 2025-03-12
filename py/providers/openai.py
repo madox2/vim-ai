@@ -2,6 +2,7 @@ from collections.abc import Sequence, Mapping, Iterator
 from typing import Any
 import urllib.request
 import os
+import json
 import vim
 
 if "VIMAI_DUMMY_IMPORT" in os.environ:
@@ -43,7 +44,7 @@ class OpenAIProvider():
             'messages': _flatten_content(messages),
             **openai_options
         }
-        self.utils.print_debug("[{}] request: {}", self.command_type, request)
+        self.utils.print_debug("openai: [{}] request: {}", self.command_type, request)
         url = options['endpoint_url']
         response = self._openai_request(url, request, http_options)
 
@@ -54,7 +55,7 @@ class OpenAIProvider():
             return choices[0].get(_choice_key, {})
 
         def _map_chunk(resp):
-            self.utils.print_debug("[{}] response: {}", self.command_type, resp)
+            self.utils.print_debug("openai: [{}] response: {}", self.command_type, resp)
             delta = _get_delta(resp)
             if delta.get('reasoning_content'):
                 # NOTE: support for deepseek's reasoning_content
@@ -106,8 +107,8 @@ class OpenAIProvider():
         return result
 
     def _openai_request(self, url, data, options):
-        OPENAI_RESP_DATA_PREFIX = 'data: '
-        OPENAI_RESP_DONE = '[DONE]'
+        RESP_DATA_PREFIX = 'data: '
+        RESP_DONE = '[DONE]'
 
         enable_auth=options['enable_auth']
         headers = {
@@ -135,9 +136,9 @@ class OpenAIProvider():
                 return
             for line_bytes in response:
                 line = line_bytes.decode("utf-8", errors="replace")
-                if line.startswith(OPENAI_RESP_DATA_PREFIX):
-                    line_data = line[len(OPENAI_RESP_DATA_PREFIX):-1]
-                    if line_data.strip() == OPENAI_RESP_DONE:
+                if line.startswith(RESP_DATA_PREFIX):
+                    line_data = line[len(RESP_DATA_PREFIX):-1]
+                    if line_data.strip() == RESP_DONE:
                         pass
                     else:
                         openai_obj = json.loads(line_data)

@@ -16,7 +16,6 @@ AIMessageContent = Union[AITextContent, AIImageUrlContent]
 class AIMessage(TypedDict):
     role: Literal['system', 'user', 'assistant']
     content: List[AIMessageContent]
-    type: str
 
 class AIUtils(Protocol):
     def print_debug(self, text: str, *args: Any):
