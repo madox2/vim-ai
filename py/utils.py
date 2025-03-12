@@ -35,11 +35,12 @@ class AIProviderUtils():
         return KnownError(message)
 
     def load_api_key(self, env_variable_name: str, token_file_path: str):
-        # TODO: env variable should take a precendence
-        # token precedence: config file path, global file path, env variable
-        global_token_file_path = vim.eval("g:vim_ai_token_file_path")
+        # token precedence: env variable, config file path, global file path
         api_key = os.getenv(env_variable_name)
+        if api_key:
+            return api_key
         try:
+            global_token_file_path = vim.eval("g:vim_ai_token_file_path")
             token_file_path = token_file_path or global_token_file_path
             with open(os.path.expanduser(token_file_path), 'r') as file:
                 api_key = file.read()
