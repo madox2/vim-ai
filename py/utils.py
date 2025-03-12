@@ -217,7 +217,7 @@ def parse_error_message(error):
     except:
         pass
 
-def handle_completion_error(error):
+def handle_completion_error(provider, error):
     # nvim throws - pynvim.api.common.NvimError: Keyboard interrupt
     is_nvim_keyboard_interrupt = "Keyboard interrupt" in str(error)
     if isinstance(error, KeyboardInterrupt) or is_nvim_keyboard_interrupt:
@@ -225,7 +225,7 @@ def handle_completion_error(error):
     elif isinstance(error, HTTPError):
         status_code = error.getcode()
         error_message = parse_error_message(error)
-        msg = f"OpenAI: HTTPError {status_code}"
+        msg = f"{provider}: HTTPError {status_code}"
         if error_message:
             msg += f": {error_message}"
         print_info_message(msg)

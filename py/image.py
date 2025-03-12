@@ -46,5 +46,5 @@ def run_ai_image(context):
             clear_echo_message()
             print(f"Image: {path}")
     except BaseException as error:
-        handle_completion_error(error)
+        handle_completion_error('openai', error)
         print_debug("[image] error: {}", traceback.format_exc())

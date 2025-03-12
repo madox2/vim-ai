@@ -36,5 +36,5 @@ def run_ai_completition(context):
 
             clear_echo_message()
     except BaseException as error:
-        handle_completion_error(error)
+        handle_completion_error(config['provider'], error)
         print_debug("[{}] error: {}", command_type, traceback.format_exc())
