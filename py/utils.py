@@ -141,6 +141,7 @@ def parse_chat_messages(chat_content):
                 messages.append({'role': 'system', 'content': [{ 'type': 'text', 'text': '' }]})
                 current_type = 'system'
             case '<<< thinking':
+                # nothing to do here, thinking messages are omited
                 current_type = 'thinking'
             case '<<< assistant':
                 messages.append({'role': 'assistant', 'content': [{ 'type': 'text', 'text': '' }]})
