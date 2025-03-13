@@ -338,7 +338,7 @@ function! vim_ai#AIRedoRun() abort
   endif
 endfunction
 
-function! s:RoleCompletion(A, L, command_type) abort
+function! s:RoleCompletion(A, command_type) abort
   if a:A !~# '^/' | return [] | endif
   call s:ImportPythonModules()
   let l:role_list = py3eval("load_ai_role_names(unwrap('a:command_type'))")
@@ -347,19 +347,19 @@ function! s:RoleCompletion(A, L, command_type) abort
 endfunction
 
 function! vim_ai#RoleCompletionComplete(A,L,P) abort
-  return s:RoleCompletion(a:A, a:L, 'complete')
+  return s:RoleCompletion(a:A, 'complete')
 endfunction
 
 function! vim_ai#RoleCompletionImage(A,L,P) abort
-  return s:RoleCompletion(a:A, a:L, 'image')
+  return s:RoleCompletion(a:A, 'image')
 endfunction
 
 function! vim_ai#RoleCompletionEdit(A,L,P) abort
-  return s:RoleCompletion(a:A, a:L, 'edit')
+  return s:RoleCompletion(a:A, 'edit')
 endfunction
 
 function! vim_ai#RoleCompletionChat(A,L,P) abort
-  return s:RoleCompletion(a:A, a:L, 'chat')
+  return s:RoleCompletion(a:A, 'chat')
 endfunction
 
 function! vim_ai#AIUtilRolesOpen() abort
