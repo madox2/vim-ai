@@ -339,9 +339,7 @@ function! vim_ai#AIRedoRun() abort
 endfunction
 
 function! s:RoleCompletion(A, L, command_type) abort
-  if a:L !~# '/[[:upper:][:lower:][:digit:]-_]*$'
-    return []
-  endif
+  if a:A !~# '^/' | return [] | endif
   call s:ImportPythonModules()
   let l:role_list = py3eval("load_ai_role_names(unwrap('a:command_type'))")
   call map(l:role_list, '"/" . v:val')
