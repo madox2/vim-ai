@@ -187,7 +187,7 @@ function! vim_ai#AIEditRun(uses_range, config, ...) range abort
   \  "user_instruction": l:instruction,
   \  "user_selection": l:selection,
   \  "is_selection": l:is_selection,
-  \  "command_type": 'complete',
+  \  "command_type": 'edit',
   \}
   let l:context = py3eval("make_ai_context(unwrap('l:config_input'))")
   let l:config = l:context['config']
