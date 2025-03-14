@@ -56,7 +56,7 @@ let g:vim_ai_image_default = {
 \    "quality": "standard",
 \    "size": "1024x1024",
 \    "style": "vivid",
-\    "request_timeout": 20,
+\    "request_timeout": 40,
 \    "enable_auth": 1,
 \    "token_file_path": "",
 \  },
