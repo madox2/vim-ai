@@ -153,7 +153,7 @@ def make_ai_context(params):
     prompt = make_prompt(config_prompt, user_prompt, user_selection, selection_boundary)
 
     return {
+        'command_type': command_type,
         'config': final_config,
         'prompt': prompt,
-        'command_type': command_type,
     }

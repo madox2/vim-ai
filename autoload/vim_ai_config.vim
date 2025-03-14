@@ -98,7 +98,7 @@ let g:vim_ai_openai_image = {
 \  "quality": "standard",
 \  "size": "1024x1024",
 \  "style": "vivid",
-\  "request_timeout": 20,
+\  "request_timeout": 40,
 \  "enable_auth": 1,
 \  "token_file_path": "",
 \}

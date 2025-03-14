@@ -79,7 +79,7 @@ def run_ai_chat(context):
                         vim.command("normal! Go\n<<< assistant\n\n")
                     yield chunk['content']
 
-            render_text_chunks(_chunks_to_sections(response_chunks))
+            render_text_chunks(_chunks_to_sections(response_chunks), append_to_eol=True)
 
             vim.command("normal! a\n\n>>> user\n\n")
             vim.command("redraw")

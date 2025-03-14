@@ -32,7 +32,7 @@ def run_ai_completition(context):
                 filter(lambda c: c['type'] == 'assistant', response_chunks), # omit `thinking` section
             )
 
-            render_text_chunks(text_chunks)
+            render_text_chunks(text_chunks, append_to_eol=command_type == 'complete')
 
             clear_echo_message()
     except BaseException as error:
