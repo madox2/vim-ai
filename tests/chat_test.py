@@ -136,6 +136,55 @@ def test_parse_assistant_message():
         },
     ] == actual_messages
 
+def test_parse_omits_thinking_message():
+    chat_content = strip_text("""
+    >>> user
+
+    generate lorem ipsum
+
+    <<< thinking
+
+    thinking...
+
+    <<< assistant
+
+    bla bla bla
+
+    >>> user
+
+    again
+    """)
+    actual_messages = parse_chat_messages(chat_content)
+    assert [
+        {
+            'role': 'user',
+            'content': [
+                {
+                    'type': 'text',
+                    'text': 'generate lorem ipsum',
+                },
+            ],
+        },
+        {
+            'role': 'assistant',
+            'content': [
+                {
+                    'type': 'text',
+                    'text': 'bla bla bla',
+                },
+            ],
+        },
+        {
+            'role': 'user',
+            'content': [
+                {
+                    'type': 'text',
+                    'text': 'again',
+                },
+            ],
+        },
+    ] == actual_messages
+
 def test_parse_include_single_file_message():
     chat_content = strip_text(f"""
     >>> user

@@ -13,7 +13,7 @@ let s:last_config = {}
 let s:scratch_buffer_name = ">>> AI chat"
 
 function! s:ImportPythonModules()
-  for py_module in ['utils', 'context', 'chat', 'complete', 'roles', 'image']
+  for py_module in ['types', 'utils', 'context', 'chat', 'complete', 'roles', 'image']
     if !py3eval("'" . py_module . "_py_imported' in globals()")
       execute "py3file " . s:plugin_root . "/py/" . py_module . ".py"
     endif

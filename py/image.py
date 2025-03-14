@@ -4,15 +4,6 @@ import os
 
 image_py_imported = True
 
-def make_openai_image_options(options):
-    return {
-        'model': options['model'],
-        'quality': options['quality'],
-        'size': options['size'],
-        'style': options['style'],
-        'response_format': 'b64_json',
-    }
-
 def make_image_path(ui):
     download_dir = ui.get('download_dir', vim.eval('getcwd()'))
     timestamp = datetime.datetime.now(datetime.UTC).strftime("%Y%m%dT%H%M%SZ")
@@ -24,27 +15,25 @@ def run_ai_image(context):
     config = context['config']
     config_options = config['options']
     ui = config['ui']
+    command_type = context['command_type']
 
     try:
         if prompt:
             print('Generating...')
-            openai_options = make_openai_image_options(config_options)
-            http_options = make_http_options(config_options)
-            request = { 'prompt': prompt, **openai_options }
-
             print_debug("[image] text:\n" + prompt)
-            print_debug("[image] request: {}", request)
-            url = config_options['endpoint_url']
 
-            response, *_ = openai_request(url, request, http_options)
-            print_debug("[image] response: {}", { 'images_count': len(response['data']) })
+            provider_class = load_provider(config['provider'])
+            provider = provider_class(command_type, config_options, ai_provider_utils)
+            response_chunks = provider.request_image(prompt)
 
-            path = make_image_path(ui)
-            b64_data = response['data'][0]['b64_json']
-            save_b64_to_file(path, b64_data)
+            info_messages = []
+            for image in response_chunks:
+                path = make_image_path(ui)
+                save_b64_to_file(path, image['b64_data'])
+                info_messages.append(f"Image: {path}")
 
             clear_echo_message()
-            print(f"Image: {path}")
+            print("\n".join(info_messages))
     except BaseException as error:
-        handle_completion_error(error)
-        print_debug("[image] error: {}", traceback.format_exc())
+        handle_completion_error(config['provider'], error)
+        print_debug("[{}] error: {}", command_type, traceback.format_exc())
