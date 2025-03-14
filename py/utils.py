@@ -102,7 +102,7 @@ def render_text_chunks(chunks, append_to_eol=False):
         if insert_before_cursor:
             vim.command("normal! i" + text)
             insert_before_cursor = False
-        elif append_to_eol: # for cases when virtualedit=all is set, to avoid empty space
+        elif append_to_eol: # for cases when virtualedit=all is set, to avoid empty space, see #148
             vim.command("normal! A" + text)
         else:
             vim.command("normal! a" + text)

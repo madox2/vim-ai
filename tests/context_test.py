@@ -54,6 +54,7 @@ def test_default_config():
         'token_file_path': '/custom/path/ai.token',
     }
     expected_context = {
+        'command_type': 'chat',
         'config': { **default_config, 'options': expected_options },
         'prompt': 'translate to Slovak:\nHello world!',
     }
@@ -161,6 +162,7 @@ def test_image_role():
         'quality': 'hd',
     }
     expected_context = {
+        'command_type': 'image',
         'config': { **default_image_config, 'options': expected_options },
         'prompt': 'picture of the moon',
     }
