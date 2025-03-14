@@ -55,16 +55,9 @@ let g:vim_ai_chat_default = {
 \  },
 \}
 let g:vim_ai_image_default = {
+\  "provider": "openai",
 \  "prompt": "",
 \  "options": {
-\    "model": "dall-e-3",
-\    "endpoint_url": "https://api.openai.com/v1/images/generations",
-\    "quality": "standard",
-\    "size": "1024x1024",
-\    "style": "vivid",
-\    "request_timeout": 20,
-\    "enable_auth": 1,
-\    "token_file_path": "",
 \  },
 \  "ui": {
 \    "download_dir": "",
@@ -98,6 +91,16 @@ let g:vim_ai_openai_chat = {
 \  "token_file_path": "",
 \  "selection_boundary": "",
 \  "initial_prompt": s:initial_chat_prompt,
+\}
+let g:vim_ai_openai_image = {
+\  "model": "dall-e-3",
+\  "endpoint_url": "https://api.openai.com/v1/images/generations",
+\  "quality": "standard",
+\  "size": "1024x1024",
+\  "style": "vivid",
+\  "request_timeout": 20,
+\  "enable_auth": 1,
+\  "token_file_path": "",
 \}
 
 if !exists("g:vim_ai_open_chat_presets")

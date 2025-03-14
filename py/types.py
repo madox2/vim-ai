@@ -29,11 +29,17 @@ class AIResponseChunk(TypedDict):
     type: Literal['assistant', 'thinking']
     content: str
 
-AICommandType = Literal['chat', 'edit', 'complete'] # image not yet supported
+class AIImageResponseChunk(TypedDict):
+    b64_data: str
+
+AICommandType = Literal['chat', 'edit', 'complete', 'image']
 
 class AIProvider(Protocol):
     def __init__(self, command_type: AICommandType, raw_options: Mapping[str, str], utils: AIUtils) -> None:
         pass
 
     def request(self, messages: Sequence[AIMessage]) -> Iterator[AIResponseChunk]:
+        pass
+
+    def request_image(self, prompt: str) -> list[AIImageResponseChunk]:
         pass

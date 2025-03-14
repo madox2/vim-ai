@@ -7,7 +7,7 @@ import vim
 
 if "VIMAI_DUMMY_IMPORT" in os.environ:
     # TODO: figure out how to properly use imports/modules in vim, dev environment, pytest
-    from py.types import AIMessage, AIResponseChunk, AIUtils, AIProvider, AICommandType
+    from py.types import AIMessage, AIResponseChunk, AIUtils, AIProvider, AICommandType, AIImageResponseChunk
 
 class OpenAIProvider():
 
@@ -86,10 +86,11 @@ class OpenAIProvider():
         options = {**raw_options}
         options['request_timeout'] = float(options['request_timeout'])
         options['enable_auth'] = bool(int(options['enable_auth']))
-        options['max_tokens'] = int(options['max_tokens'])
-        options['max_completion_tokens'] = int(options['max_completion_tokens'])
-        options['temperature'] = float(options['temperature'])
-        options['stream'] = bool(int(options['stream']))
+        if self.command_type != 'image':
+            options['max_tokens'] = int(options['max_tokens'])
+            options['max_completion_tokens'] = int(options['max_completion_tokens'])
+            options['temperature'] = float(options['temperature'])
+            options['stream'] = bool(int(options['stream']))
         return options
 
     def _make_openai_options(self, options):
@@ -105,6 +106,28 @@ class OpenAIProvider():
         if max_completion_tokens > 0:
             result['max_completion_tokens'] = max_completion_tokens
         return result
+
+    def request_image(self, prompt: str) -> list[AIImageResponseChunk]:
+        options = self.options
+        http_options = {
+            'request_timeout': options['request_timeout'],
+            'enable_auth': options['enable_auth'],
+            'token_file_path': options['token_file_path'],
+        }
+        openai_options = {
+            'model': options['model'],
+            'quality': options['quality'],
+            'size': options['size'],
+            'style': options['style'],
+            'response_format': 'b64_json',
+        }
+        request = { 'prompt': prompt, **openai_options }
+        self.utils.print_debug("openai: [{}] request: {}", self.command_type, request)
+        url = options['endpoint_url']
+        response, *_ = self._openai_request(url, request, http_options)
+        self.utils.print_debug("openai: [{}] response: {}", self.command_type, { 'images_count': len(response['data']) })
+        b64_data = response['data'][0]['b64_json']
+        return [{ 'b64_data': b64_data }]
 
     def _openai_request(self, url, data, options):
         RESP_DATA_PREFIX = 'data: '
