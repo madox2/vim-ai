@@ -112,7 +112,7 @@ def render_text_chunks(chunks):
 
 def encode_image(image_path):
     """Encodes an image file to a base64 string."""
-    with open(image_path, "rb") as image_file:
+    with open(os.path.expanduser(image_path), "rb") as image_file:
         return base64.b64encode(image_file.read()).decode('utf-8')
 
 
@@ -123,17 +123,15 @@ def is_image_path(path):
 def parse_include_paths(path):
     if not path:
         return []
+
+    home_path = os.path.expanduser('~')
+
+    def _unexpand(path):
+        return path.replace(home_path, '~', 1) if path.startswith(home_path) else path
+
     pwd = vim.eval('getcwd()')
-
-    path = os.path.expanduser(path)
-    if not os.path.isabs(path):
-        path = os.path.join(pwd, path)
-
-    expanded_paths = [path]
-    if '*' in path:
-        expanded_paths = sorted(glob.glob(path, recursive=True))
-
-    return [path for path in expanded_paths if not os.path.isdir(path)]
+    paths = sorted(glob.glob(os.path.expanduser(path), recursive=True, root_dir=pwd))
+    return [_unexpand(path) for path in paths if not os.path.isdir(path)]
 
 def make_image_message(path):
     ext = path.split('.')[-1]
@@ -142,8 +140,7 @@ def make_image_message(path):
 
 def make_text_file_message(path):
     try:
-        path = os.path.relpath(path)
-        with open(path, 'r') as file:
+        with open(os.path.expanduser(path), 'r') as file:
             file_content = file.read().strip()
             return { 'type': 'text', 'text': f'==> {path} <==\n' + file_content.strip() }
     except UnicodeDecodeError:
