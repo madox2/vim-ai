@@ -30,6 +30,8 @@ Options: >
   END
 
   let g:vim_ai_complete = {
+  \  "provider": "openai",
+  \  "prompt": "",
   \  "options": {
   \    "model": "gpt-4o",
   \    "endpoint_url": "https://api.openai.com/v1/chat/completions",
@@ -68,6 +70,8 @@ Options: >
   END
 
   let g:vim_ai_edit = {
+  \  "provider": "openai",
+  \  "prompt": "",
   \  "options": {
   \    "model": "gpt-4o",
   \    "endpoint_url": "https://api.openai.com/v1/chat/completions",
@@ -104,6 +108,8 @@ Options: >
   END
 
   let g:vim_ai_chat = {
+  \  "provider": "openai",
+  \  "prompt": "",
   \  "options": {
   \    "model": "gpt-4o",
   \    "max_tokens": 0,
@@ -155,6 +161,7 @@ paths.
 
 Options: >
   let g:vim_ai_image = {
+  \  "provider": "openai",
   \  "prompt": "",
   \  "options": {
   \    "model": "dall-e-3",
@@ -162,7 +169,7 @@ Options: >
   \    "quality": "standard",
   \    "size": "1024x1024",
   \    "style": "vivid",
-  \    "request_timeout": 20,
+  \    "request_timeout": 40,
   \    "enable_auth": 1,
   \    "token_file_path": "",
   \  },
