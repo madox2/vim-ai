@@ -78,7 +78,7 @@ def run_ai_chat(context):
                         yield chunk['content']
 
             chunks = make_chat_text_chunks(messages, options)
-            render_text_chunks(_chunks_to_sections(chunks))
+            render_text_chunks(_chunks_to_sections(chunks), append_to_eol=True)
 
             vim.command("normal! a\n\n>>> user\n\n")
             vim.command("redraw")

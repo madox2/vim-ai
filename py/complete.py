@@ -4,6 +4,7 @@ complete_py_imported = True
 
 def run_ai_completition(context):
     prompt = context['prompt']
+    command_type = context['command_type']
     config = make_config(context['config'])
     config_options = config['options']
     config_ui = config['ui']
@@ -46,7 +47,7 @@ def run_ai_completition(context):
             print('Completing...')
             vim.command("redraw")
             text_chunks = engines[engine](prompt)
-            render_text_chunks(text_chunks)
+            render_text_chunks(text_chunks, append_to_eol=command_type == 'complete')
             clear_echo_message()
     except BaseException as error:
         handle_completion_error(error)
