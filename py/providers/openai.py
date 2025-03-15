@@ -28,7 +28,7 @@ class OpenAIProvider():
         openai_options = self._make_openai_options(options)
         http_options = {
             'request_timeout': options['request_timeout'],
-            'enable_auth': options['enable_auth'],
+            'auth_type': options['auth_type'],
             'token_file_path': options['token_file_path'],
         }
 
@@ -83,9 +83,12 @@ class OpenAIProvider():
         return (api_key, org_id)
 
     def _parse_raw_options(self, raw_options: Mapping[str, Any]):
+        if raw_options.get('enable_auth', 1) == "0":
+            # raise error for users who don't use default value of this obsolete option
+            raise self.utils.make_known_error("`enable_auth = 0` option is no longer supported. use `auth_type = none` instead")
+
         options = {**raw_options}
         options['request_timeout'] = float(options['request_timeout'])
-        options['enable_auth'] = bool(int(options['enable_auth']))
         if self.command_type != 'image':
             options['max_tokens'] = int(options['max_tokens'])
             options['max_completion_tokens'] = int(options['max_completion_tokens'])
@@ -111,7 +114,7 @@ class OpenAIProvider():
         options = self.options
         http_options = {
             'request_timeout': options['request_timeout'],
-            'enable_auth': options['enable_auth'],
+            'auth_type': options['auth_type'],
             'token_file_path': options['token_file_path'],
         }
         openai_options = {
@@ -133,17 +136,22 @@ class OpenAIProvider():
         RESP_DATA_PREFIX = 'data: '
         RESP_DONE = '[DONE]'
 
-        enable_auth=options['enable_auth']
+        auth_type = options['auth_type']
         headers = {
             "Content-Type": "application/json",
             "User-Agent": "VimAI",
         }
-        if enable_auth:
+
+        if auth_type == 'bearer':
             (OPENAI_API_KEY, OPENAI_ORG_ID) = self._load_api_key()
             headers['Authorization'] = f"Bearer {OPENAI_API_KEY}"
 
             if OPENAI_ORG_ID is not None:
                 headers["OpenAI-Organization"] =  f"{OPENAI_ORG_ID}"
+
+        if auth_type == 'api-key':
+            (OPENAI_API_KEY, _) = self._load_api_key()
+            headers['api-key'] = f"{OPENAI_API_KEY}"
 
         request_timeout=options['request_timeout']
         req = urllib.request.Request(

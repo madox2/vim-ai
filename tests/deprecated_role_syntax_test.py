@@ -9,7 +9,7 @@ default_config = {
     "temperature": "1",
     "request_timeout": "20",
     "stream": "1",
-    "enable_auth": "1",
+    "auth_type": "bearer",
     "token_file_path": "",
     "selection_boundary": "",
     "initial_prompt": "You are a general assistant.",

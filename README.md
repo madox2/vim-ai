@@ -326,7 +326,7 @@ END
 " - options: openai config (see https://platform.openai.com/docs/api-reference/completions)
 " - options.initial_prompt: prompt prepended to every chat request (list of lines or string)
 " - options.request_timeout: request timeout in seconds
-" - options.enable_auth: enable authorization using openai key
+" - options.auth_type: API authentication method (bearer, api-key, none)
 " - options.token_file_path: override global token configuration
 " - options.selection_boundary: selection prompt wrapper (eliminates empty responses, see #20)
 " - ui.paste_mode: use paste mode (see more info in the Notes below)
@@ -341,7 +341,7 @@ let g:vim_ai_complete = {
 \    "temperature": 0.1,
 \    "request_timeout": 20,
 \    "stream": 1,
-\    "enable_auth": 1,
+\    "auth_type": "bearer",
 \    "token_file_path": "",
 \    "selection_boundary": "#####",
 \    "initial_prompt": s:initial_complete_prompt,
@@ -357,7 +357,7 @@ let g:vim_ai_complete = {
 " - options: openai config (see https://platform.openai.com/docs/api-reference/completions)
 " - options.initial_prompt: prompt prepended to every chat request (list of lines or string)
 " - options.request_timeout: request timeout in seconds
-" - options.enable_auth: enable authorization using openai key
+" - options.auth_type: API authentication method (bearer, api-key, none)
 " - options.token_file_path: override global token configuration
 " - options.selection_boundary: selection prompt wrapper (eliminates empty responses, see #20)
 " - ui.paste_mode: use paste mode (see more info in the Notes below)
@@ -372,7 +372,7 @@ let g:vim_ai_edit = {
 \    "temperature": 0.1,
 \    "request_timeout": 20,
 \    "stream": 1,
-\    "enable_auth": 1,
+\    "auth_type": "bearer",
 \    "token_file_path": "",
 \    "selection_boundary": "#####",
 \    "initial_prompt": s:initial_complete_prompt,
@@ -396,7 +396,7 @@ END
 " - options: openai config (see https://platform.openai.com/docs/api-reference/chat)
 " - options.initial_prompt: prompt prepended to every chat request (list of lines or string)
 " - options.request_timeout: request timeout in seconds
-" - options.enable_auth: enable authorization using openai key
+" - options.auth_type: API authentication method (bearer, api-key, none)
 " - options.token_file_path: override global token configuration
 " - options.selection_boundary: selection prompt wrapper (eliminates empty responses, see #20)
 " - ui.open_chat_command: preset (preset_below, preset_tab, preset_right) or a custom command
@@ -415,7 +415,7 @@ let g:vim_ai_chat = {
 \    "temperature": 1,
 \    "request_timeout": 20,
 \    "stream": 1,
-\    "enable_auth": 1,
+\    "auth_type": "bearer",
 \    "token_file_path": "",
 \    "selection_boundary": "",
 \    "initial_prompt": s:initial_chat_prompt,
@@ -434,7 +434,7 @@ let g:vim_ai_chat = {
 " - prompt: optional prepended prompt
 " - options: openai config (https://platform.openai.com/docs/api-reference/images/create)
 " - options.request_timeout: request timeout in seconds
-" - options.enable_auth: enable authorization using openai key
+" - options.auth_type: API authentication method (bearer, api-key, none)
 " - options.token_file_path: override global token configuration
 " - options.download_dir: path to image download directory, `cwd` if not defined
 let g:vim_ai_image = {
@@ -447,7 +447,7 @@ let g:vim_ai_image = {
 \    "size": "1024x1024",
 \    "style": "vivid",
 \    "request_timeout": 40,
-\    "enable_auth": 1,
+\    "auth_type": "bearer",
 \    "token_file_path": "",
 \  },
 \  "ui": {
@@ -486,7 +486,7 @@ See some cool projects listed in [Custom APIs](https://github.com/madox2/vim-ai/
 let g:vim_ai_chat = {
 \  "options": {
 \    "endpoint_url": "http://localhost:8000/v1/chat/completions",
-\    "enable_auth": 0,
+\    "auth_type": "none",
 \  },
 \}
 ```

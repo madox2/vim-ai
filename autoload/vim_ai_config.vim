@@ -73,7 +73,7 @@ let g:vim_ai_openai_complete = {
 \  "temperature": 0.1,
 \  "request_timeout": 20,
 \  "stream": 1,
-\  "enable_auth": 1,
+\  "auth_type": "bearer",
 \  "token_file_path": "",
 \  "selection_boundary": "#####",
 \  "initial_prompt": s:initial_complete_prompt,
@@ -87,7 +87,7 @@ let g:vim_ai_openai_chat = {
 \  "temperature": 1,
 \  "request_timeout": 20,
 \  "stream": 1,
-\  "enable_auth": 1,
+\  "auth_type": "bearer",
 \  "token_file_path": "",
 \  "selection_boundary": "",
 \  "initial_prompt": s:initial_chat_prompt,
@@ -99,7 +99,7 @@ let g:vim_ai_openai_image = {
 \  "size": "1024x1024",
 \  "style": "vivid",
 \  "request_timeout": 40,
-\  "enable_auth": 1,
+\  "auth_type": "bearer",
 \  "token_file_path": "",
 \}
 
