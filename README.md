@@ -295,11 +295,11 @@ Or customize the options directly in the chat buffer:
 
 ```properties
 [chat-options]
-model=o1-preview
-stream=0
-temperature=1
-max_completion_tokens=25000
-initial_prompt=
+model = o1-preview
+stream = 0
+temperature = 1
+max_completion_tokens = 25000
+initial_prompt =
 
 >>> user
 
@@ -325,6 +325,7 @@ END
 " - prompt: optional prepended prompt
 " - options: openai config (see https://platform.openai.com/docs/api-reference/completions)
 " - options.initial_prompt: prompt prepended to every chat request (list of lines or string)
+" - options.temperature: use -1 to disable this parameter
 " - options.request_timeout: request timeout in seconds
 " - options.auth_type: API authentication method (bearer, api-key, none)
 " - options.token_file_path: override global token configuration
@@ -356,6 +357,7 @@ let g:vim_ai_complete = {
 " - prompt: optional prepended prompt
 " - options: openai config (see https://platform.openai.com/docs/api-reference/completions)
 " - options.initial_prompt: prompt prepended to every chat request (list of lines or string)
+" - options.temperature: use -1 to disable this parameter
 " - options.request_timeout: request timeout in seconds
 " - options.auth_type: API authentication method (bearer, api-key, none)
 " - options.token_file_path: override global token configuration
@@ -395,6 +397,7 @@ END
 " - prompt: optional prepended prompt
 " - options: openai config (see https://platform.openai.com/docs/api-reference/chat)
 " - options.initial_prompt: prompt prepended to every chat request (list of lines or string)
+" - options.temperature: use -1 to disable this parameter
 " - options.request_timeout: request timeout in seconds
 " - options.auth_type: API authentication method (bearer, api-key, none)
 " - options.token_file_path: override global token configuration

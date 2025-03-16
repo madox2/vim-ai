@@ -101,9 +101,11 @@ class OpenAIProvider():
         max_completion_tokens = options['max_completion_tokens']
         result = {
             'model': options['model'],
-            'temperature': options['temperature'],
             'stream': options['stream'],
         }
+        if options['temperature'] > -1:
+            result['temperature'] = options['temperature']
+
         if max_tokens > 0:
             result['max_tokens'] = max_tokens
         if max_completion_tokens > 0:
