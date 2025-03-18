@@ -4,6 +4,7 @@ import glob
 import os
 import json
 import socket
+import subprocess
 from urllib.error import URLError
 from urllib.error import HTTPError
 import traceback
@@ -133,6 +134,10 @@ def make_text_file_message(path):
     except UnicodeDecodeError:
         return { 'type': 'text', 'text': f'==> {path} <==\nBinary file, cannot display' }
 
+def make_exec_output_message(cmd, timeout=5):
+    ps = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, timeout=timeout)
+    return { 'type': 'text', 'text': f'==> {cmd} <==\n{ps.stdout}' }
+
 def parse_chat_messages(chat_content):
     lines = chat_content.splitlines()
     messages = []
@@ -159,6 +164,10 @@ def parse_chat_messages(chat_content):
                 if not messages or messages[-1]['role'] != 'user':
                     messages.append({'role': 'user', 'content': []})
                 current_type = 'include'
+            case '>>> exec':
+                if not messages or messages[-1]['role'] != 'user':
+                    messages.append({'role': 'user', 'content': []})
+                current_type = 'exec'
             case _:
                 if not messages:
                     continue
@@ -170,6 +179,10 @@ def parse_chat_messages(chat_content):
                         for path in paths:
                             content = make_image_message(path) if is_image_path(path) else make_text_file_message(path)
                             messages[-1]['content'].append(content)
+                    case 'exec':
+                        cmd = line.strip()
+                        if cmd:
+                            messages[-1]['content'].append(make_exec_output_message(cmd))
 
     for message in messages:
         # strip newlines from the text content as it causes empty responses
