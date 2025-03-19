@@ -179,14 +179,19 @@ def parse_chat_messages(chat_content):
 
     return messages
 
-def parse_chat_header_options():
+def parse_chat_header_config():
+    config = { 'provider': '', 'options': {}, 'ui': {} }
+    lines = vim.eval('getline(1, "$")')
+
+    is_derpecated_syntax = '[chat-options]' in lines
+    if is_derpecated_syntax:
+        raise KnownError('[chat-options] is deprecated, use new [chat] syntax')
+
     try:
-        options = {}
-        lines = vim.eval('getline(1, "$")')
-        contains_chat_options = '[chat-options]' in lines
+        contains_chat_options = '[chat]' in lines
         if contains_chat_options:
             # parse options that are defined in the chat header
-            options_index = lines.index('[chat-options]')
+            options_index = lines.index('[chat]')
             for line in lines[options_index + 1:]:
                 if line.startswith('#'):
                     # ignore comments
@@ -195,12 +200,16 @@ def parse_chat_header_options():
                     # stop at the end of the region
                     break
                 (key, value) = line.strip().split('=')
-                if key == 'initial_prompt':
-                    value = value.split('\\n')
-                options[key] = value
-        return options
+                if key == 'provider':
+                    config['provider'] = value
+                else:
+                    base, option_key = key.split('.')
+                    if option_key == 'initial_prompt':
+                        value = value.split('\\n')
+                    config[base][option_key] = value
+        return config
     except:
-        raise Exception("Invalid [chat-options]")
+        raise Exception("Invalid [chat] config")
 
 def vim_break_undo_sequence():
     # breaks undo sequence (https://vi.stackexchange.com/a/29087)

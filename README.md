@@ -122,6 +122,8 @@ To use an AI command, type the command followed by an instruction prompt. You ca
 
 **Tip:** Use pre-defined roles `/right`, `/below`, `/tab` to choose how chat is open, e.g. `:AIC /right`
 
+**Tip:** Use pre-defined role `/populate` to dump options to chat header, e.g. `:AIC /populate /gemini`
+
 **Tip:** Combine commands with a range `:help range`, e.g. to select the whole buffer - `:%AIE fix grammar`
 
 If you are interested in more tips or would like to level up your Vim with more commands like [`:GitCommitMessage`](https://github.com/madox2/vim-ai/wiki/Custom-commands#suggest-a-git-commit-message) - suggesting a git commit message, visit the [Community Wiki](https://github.com/madox2/vim-ai/wiki).
@@ -294,12 +296,12 @@ options.initial_prompt =
 Or customize the options directly in the chat buffer:
 
 ```properties
-[chat-options]
-model = o1-preview
-stream = 0
-temperature = 1
-max_completion_tokens = 25000
-initial_prompt =
+[chat]
+options.model = o1-preview
+options.stream = 0
+options.temperature = 1
+options.max_completion_tokens = 25000
+options.initial_prompt =
 
 >>> user
 
@@ -403,7 +405,7 @@ END
 " - options.token_file_path: override global token configuration
 " - options.selection_boundary: selection prompt wrapper (eliminates empty responses, see #20)
 " - ui.open_chat_command: preset (preset_below, preset_tab, preset_right) or a custom command
-" - ui.populate_options: put [chat-options] to the chat header
+" - ui.populate_options: dump [chat] config to the chat header
 " - ui.scratch_buffer_keep_open: re-use scratch buffer within the vim session
 " - ui.force_new_chat: force new chat window (used in chat opening roles e.g. `/tab`)
 " - ui.paste_mode: use paste mode (see more info in the Notes below)
