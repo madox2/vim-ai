@@ -1,8 +1,8 @@
 from utils import parse_chat_messages
 import os
 
-curr_dir = os.path.dirname(__file__)
-relative_dir = 'tests'
+dirname = os.path.dirname(__file__)
+root_dir = os.path.abspath(os.path.join(dirname, '..'))
 
 def strip_text(txt):
     txt = txt.strip()
@@ -193,7 +193,7 @@ def test_parse_include_single_file_message():
 
     >>> include
 
-    {curr_dir}/resources/test1.include.txt
+    {root_dir}/tests/resources/test1.include.txt
 
     <<< assistant
 
@@ -215,7 +215,7 @@ def test_parse_include_single_file_message():
                 },
                 {
                     'type': 'text',
-                    'text': f'==> {relative_dir}/resources/test1.include.txt <==\nhello world',
+                    'text': f'==> {root_dir}/tests/resources/test1.include.txt <==\nhello world',
                 },
             ],
         },
@@ -247,8 +247,8 @@ def test_parse_include_multiple_files_message():
 
     >>> include
 
-    {curr_dir}/resources/test1.include.txt
-    {curr_dir}/resources/test2.include.txt
+    {root_dir}/tests/resources/test1.include.txt
+    tests/resources/test2.include.txt
     """)
     messages = parse_chat_messages(chat_content)
     actual_messages = parse_chat_messages(chat_content)
@@ -262,11 +262,11 @@ def test_parse_include_multiple_files_message():
                 },
                 {
                     'type': 'text',
-                    'text': f'==> {relative_dir}/resources/test1.include.txt <==\nhello world',
+                    'text': f'==> {root_dir}/tests/resources/test1.include.txt <==\nhello world',
                 },
                 {
                     'type': 'text',
-                    'text': f'==> {relative_dir}/resources/test2.include.txt <==\nvim is awesome',
+                    'text': f'==> tests/resources/test2.include.txt <==\nvim is awesome',
                 },
             ],
         },
@@ -280,7 +280,7 @@ def test_parse_include_glob_files_message():
 
     >>> include
 
-    {curr_dir}/**/*.include.txt
+    {root_dir}/tests/**/*.include.txt
     """)
     actual_messages = parse_chat_messages(chat_content)
     assert [
@@ -293,11 +293,11 @@ def test_parse_include_glob_files_message():
                 },
                 {
                     'type': 'text',
-                    'text': f'==> {relative_dir}/resources/test1.include.txt <==\nhello world',
+                    'text': f'==> {root_dir}/tests/resources/test1.include.txt <==\nhello world',
                 },
                 {
                     'type': 'text',
-                    'text': f'==> {relative_dir}/resources/test2.include.txt <==\nvim is awesome',
+                    'text': f'==> {root_dir}/tests/resources/test2.include.txt <==\nvim is awesome',
                 },
             ],
         },
@@ -311,7 +311,7 @@ def test_parse_include_image_message():
 
     >>> include
 
-    {curr_dir}/**/*.jpg
+    {root_dir}/tests/**/*.jpg
     """)
     actual_messages = parse_chat_messages(chat_content)
     assert [
@@ -336,9 +336,9 @@ def test_parse_include_image_with_files_message():
     chat_content = strip_text(f"""
     >>> include
 
-    {curr_dir}/resources/test1.include.txt
-    {curr_dir}/resources/image_file.jpg
-    {curr_dir}/resources/test2.include.txt
+    {root_dir}/tests/resources/test1.include.txt
+    {root_dir}/tests/resources/image_file.jpg
+    {root_dir}/tests/resources/test2.include.txt
     """)
     actual_messages = parse_chat_messages(chat_content)
     assert [
@@ -347,7 +347,7 @@ def test_parse_include_image_with_files_message():
             'content': [
                 {
                     'type': 'text',
-                    'text': f'==> {relative_dir}/resources/test1.include.txt <==\nhello world',
+                    'text': f'==> {root_dir}/tests/resources/test1.include.txt <==\nhello world',
                 },
                 {
                     'type': 'image_url',
@@ -357,7 +357,7 @@ def test_parse_include_image_with_files_message():
                 },
                 {
                     'type': 'text',
-                    'text': f'==> {relative_dir}/resources/test2.include.txt <==\nvim is awesome',
+                    'text': f'==> {root_dir}/tests/resources/test2.include.txt <==\nvim is awesome',
                 },
             ],
         },
@@ -367,8 +367,8 @@ def test_parse_include_unsupported_binary_file():
     chat_content = strip_text(f"""
     >>> include
 
-    {curr_dir}/resources/binary_file.bin
-    {curr_dir}/resources/test1.include.txt
+    {root_dir}/tests/resources/binary_file.bin
+    {root_dir}/tests/resources/test1.include.txt
     """)
     actual_messages = parse_chat_messages(chat_content)
     assert [
@@ -377,11 +377,11 @@ def test_parse_include_unsupported_binary_file():
             'content': [
                 {
                     'type': 'text',
-                    'text': f'==> {relative_dir}/resources/binary_file.bin <==\nBinary file, cannot display',
+                    'text': f'==> {root_dir}/tests/resources/binary_file.bin <==\nBinary file, cannot display',
                 },
                 {
                     'type': 'text',
-                    'text': f'==> {relative_dir}/resources/test1.include.txt <==\nhello world',
+                    'text': f'==> {root_dir}/tests/resources/test1.include.txt <==\nhello world',
                 },
             ],
         },

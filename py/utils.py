@@ -110,8 +110,6 @@ def parse_include_paths(path):
     pwd = vim.eval('getcwd()')
 
     path = os.path.expanduser(path)
-    if not os.path.isabs(path):
-        path = os.path.join(pwd, path)
 
     expanded_paths = [path]
     if '*' in path:
@@ -126,7 +124,6 @@ def make_image_message(path):
 
 def make_text_file_message(path):
     try:
-        path = os.path.relpath(path)
         with open(path, 'r') as file:
             file_content = file.read().strip()
             return { 'type': 'text', 'text': f'==> {path} <==\n' + file_content.strip() }
