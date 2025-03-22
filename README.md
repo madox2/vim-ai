@@ -122,7 +122,7 @@ To use an AI command, type the command followed by an instruction prompt. You ca
 
 **Tip:** Use pre-defined roles `/right`, `/below`, `/tab` to choose how chat is open, e.g. `:AIC /right`
 
-**Tip:** Use pre-defined role `/populate` to dump options to chat header, e.g. `:AIC /populate /gemini`
+**Tip:** Use special role `/populate` to dump options to chat header, e.g. `:AIC /populate /gemini`
 
 **Tip:** Combine commands with a range `:help range`, e.g. to select the whole buffer - `:%AIE fix grammar`
 

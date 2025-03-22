@@ -22,9 +22,6 @@ def _populate_options(config):
             continue # do not show default values
         vim.command("normal! ioptions." + key + "=" + value + "\n")
 
-    # this is always 1 when populating, the only supported option in chat header
-    vim.command("normal! iui.populate_options=1\n")
-
 def run_ai_chat(context):
     command_type = context['command_type']
     prompt = context['prompt']
@@ -32,18 +29,16 @@ def run_ai_chat(context):
     config_options = config['options']
     roles = context['roles']
 
-    # populate_options in the chat header always takes precedence to ensure it populates once set
-    chat_populate_options = parse_chat_header_config()['ui'].get('populate_options', '')
-    populate_options = chat_populate_options or config['ui']['populate_options']
-    should_populate_config = populate_options == '1'
-
     def initialize_chat_window():
         lines = vim.eval('getline(1, "$")')
 
-        # re-populate only when there is a reason for it, empty :AIC should not trigger population
-        re_populate = len(roles) > 0 or not '[chat]' in lines
+        # if populate is set in config, populate once
+        # it shouldn't re-populate after chat header options are modified (#158)
+        populate = config['ui']['populate_options'] == '1' and not '[chat]' in lines
+        # when called special `populate` role, force chat header re-population
+        re_populate = 'populate' in roles
 
-        if re_populate or not should_populate_config:
+        if re_populate:
             if '[chat]' in lines:
                 line_num = lines.index('[chat]') + 1
                 vim.command("normal! " + str(line_num) + "gg")
@@ -55,7 +50,7 @@ def run_ai_chat(context):
             vim.command("normal! gg")
             vim.command("normal! O>>> user\n")
 
-        if re_populate and should_populate_config:
+        if populate or re_populate:
             vim.command("normal! gg")
             _populate_options(config)
 
