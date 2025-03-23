@@ -59,8 +59,8 @@ def run_ai_chat(context):
         vim_break_undo_sequence()
         vim.command("redraw")
 
-        last_role = re.match(r".*^>>> (\w+)", file_content, flags=re.DOTALL | re.MULTILINE)
-        if last_role and last_role.group(1) not in ('user', 'include', 'exec'):
+        last_role = re.match(r".*^(>>>|<<<) (\w+)", file_content, flags=re.DOTALL | re.MULTILINE)
+        if last_role and last_role.group(2) not in ('user', 'include', 'exec'):
             # last role is not a user role, most likely completion was cancelled before
             vim.command("normal! o")
             vim.command("normal! i\n>>> user\n\n")
