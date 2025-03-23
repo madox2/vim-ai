@@ -8,12 +8,13 @@ def run_ai_completition(context):
     config = make_config(context['config'])
     config_options = config['options']
     config_ui = config['ui']
+    roles = context['roles']
 
     try:
         if 'engine' in config and config['engine'] == 'complete':
             raise KnownError('complete engine is no longer supported')
 
-        if prompt:
+        if prompt or roles:
             print('Completing...')
             vim.command("redraw")
 
