@@ -256,7 +256,19 @@ What object is on the image?
 ~/myimage.jpg
 ```
 
-Supported chat sections are **`>>> system`**, **`>>> user`**, **`>>> include`** and **`<<< assistant`**
+Execute command and include stdout into the chat:
+
+```
+>>> user
+
+Suggest git commit message
+
+>>> exec
+
+git diff
+```
+
+Supported chat sections are **`>>> system`**, **`>>> user`**, **`>>> include`**, **`>>> exec`** and **`<<< assistant`**
 
 ### `:AIRedo`
 
