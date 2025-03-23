@@ -219,9 +219,9 @@ Alternatively you can use special `default` role: >
 
 You can also customize the options in the chat header: >
 
-  [chat-options]
-  model=gpt-4
-  temperature=0.2
+  [chat]
+  options.model=gpt-4
+  options.temperature=0.2
 
   >>> user
 

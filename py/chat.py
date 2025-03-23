@@ -2,29 +2,58 @@ import vim
 
 chat_py_imported = True
 
+def _populate_options(config):
+    default_config = make_config(vim.eval('g:vim_ai_chat_default'))
+
+    default_options = default_config['options']
+    options = config['options']
+
+    vim.command("normal! O[chat]")
+    vim.command("normal! o")
+    vim.command("normal! iprovider=" + config['provider'] + "\n")
+    for key, value in options.items():
+        default_value = default_options.get(key, '')
+        if key == 'initial_prompt':
+            value = "\\n".join(value)
+            if default_value:
+                default_value = "\\n".join(default_value)
+
+        if default_value == value:
+            continue # do not show default values
+        vim.command("normal! ioptions." + key + "=" + value + "\n")
+
 def run_ai_chat(context):
     command_type = context['command_type']
     prompt = context['prompt']
     config = make_config(context['config'])
     config_options = config['options']
-    config_ui = config['ui']
+    roles = context['roles']
 
     def initialize_chat_window():
         file_content = vim.eval('trim(join(getline(1, "$"), "\n"))')
         contains_user_prompt = re.search(r"^>>> (user|exec|include)", file_content, flags=re.MULTILINE)
+        lines = vim.eval('getline(1, "$")')
+
+        # if populate is set in config, populate once
+        # it shouldn't re-populate after chat header options are modified (#158)
+        populate = config['ui']['populate_options'] == '1' and not '[chat]' in lines
+        # when called special `populate` role, force chat header re-population
+        re_populate = 'populate' in roles
+
+        if re_populate:
+            if '[chat]' in lines:
+                line_num = lines.index('[chat]') + 1
+                vim.command("normal! " + str(line_num) + "gg")
+                vim.command("normal! d}dd")
+
         if not contains_user_prompt:
             # user role not found, put whole file content as an user prompt
             vim.command("normal! gg")
-            populates_options = config_ui['populate_options'] == '1'
-            if populates_options:
-                vim.command("normal! O[chat-options]")
-                vim.command("normal! o")
-                for key, value in config_options.items():
-                    if key == 'initial_prompt':
-                        value = "\\n".join(value)
-                    vim.command("normal! i" + key + "=" + value + "\n")
-            vim.command("normal! " + ("o" if populates_options else "O"))
-            vim.command("normal! i>>> user\n")
+            vim.command("normal! O>>> user\n")
+
+        if populate or re_populate:
+            vim.command("normal! gg")
+            _populate_options(config)
 
         vim.command("normal! G")
         vim_break_undo_sequence()
@@ -43,8 +72,9 @@ def run_ai_chat(context):
 
     initialize_chat_window()
 
-    chat_options = parse_chat_header_options()
-    options = {**config_options, **chat_options}
+    chat_config = parse_chat_header_config()
+    options = {**config_options, **chat_config['options']}
+    provider = chat_config['provider'] or config['provider']
 
     initial_prompt = '\n'.join(options.get('initial_prompt', []))
     initial_messages = parse_chat_messages(initial_prompt)
@@ -62,7 +92,7 @@ def run_ai_chat(context):
 
             print('Answering...')
             vim.command("redraw")
-            provider_class = load_provider(config['provider'])
+            provider_class = load_provider(provider)
             provider = provider_class(command_type, options, ai_provider_utils)
             response_chunks = provider.request(messages)
 
@@ -84,5 +114,5 @@ def run_ai_chat(context):
             vim.command("redraw")
             clear_echo_message()
     except BaseException as error:
-        handle_completion_error(config['provider'], error)
+        handle_completion_error(provider, error)
         print_debug("[{}] error: {}", command_type, traceback.format_exc())

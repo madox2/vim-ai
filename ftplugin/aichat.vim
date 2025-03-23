@@ -78,7 +78,7 @@ function! s:MarkdownHighlightChatOptions(force)
     else
       let include = '@' . toupper(filetype)
     endif
-    syntax region aichatOptions start="\[chat-options\]" end="^$" contains=@JPROPERTIES
+    syntax region aichatOptions start="\[chat\]" end="^$" contains=@JPROPERTIES
     let b:aichat_known_filetypes[filetype] = 1
   endif
 endfunction

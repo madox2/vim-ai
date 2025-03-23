@@ -51,6 +51,7 @@ def test_default_config():
         'config': { **default_config, 'options': expected_options },
         'prompt': 'translate to Slovak:\nHello world!',
         'command_type': 'chat',
+        'roles': [],
     }
     assert expected_context == actual_context
 
@@ -157,6 +158,7 @@ def test_image_role():
         'config': { **default_image_config, 'options': expected_options },
         'prompt': 'picture of the moon',
         'command_type': 'image',
+        'roles': ['hd-image'],
     }
     assert expected_context == actual_context
 
