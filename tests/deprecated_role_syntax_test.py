@@ -18,7 +18,6 @@ default_config = {
     "open_chat_command": "preset_below",
     "scratch_buffer_keep_open": "0",
     "populate_options": "0",
-    "code_syntax_enabled": "1",
     "paste_mode": "1",
   },
 }

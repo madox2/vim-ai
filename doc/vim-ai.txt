@@ -124,7 +124,6 @@ Options: >
   \    "initial_prompt": s:initial_chat_prompt,
   \  },
   \  "ui": {
-  \    "code_syntax_enabled": 1,
   \    "populate_options": 0,
   \    "open_chat_command": "preset_below",
   \    "scratch_buffer_keep_open": 0,

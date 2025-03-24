@@ -441,7 +441,6 @@ let g:vim_ai_chat = {
 \    "open_chat_command": "preset_below",
 \    "scratch_buffer_keep_open": 0,
 \    "populate_options": 0,
-\    "code_syntax_enabled": 1,
 \    "force_new_chat": 0,
 \    "paste_mode": 1,
 \  },
@@ -478,8 +477,9 @@ let g:vim_ai_roles_config_file = s:plugin_root . "/roles-example.ini"
 " custom token file location
 let g:vim_ai_token_file_path = "~/.config/openai.token"
 
-" full markdown highlighting in aichat files
-" note that highlighting may be corrupted when using the preservim/vim-markdown plugin.
+" enables/disables full markdown highlighting in aichat files
+" NOTE: code syntax highlighting works out of the box without this option enabled
+" NOTE: highlighting may be corrupted when using together with the `preservim/vim-markdown`
 g:vim_ai_chat_markdown = 0
 
 " debug settings
