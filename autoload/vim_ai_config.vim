@@ -1,50 +1,47 @@
 let s:plugin_root = expand('<sfile>:p:h:h')
 
-let g:vim_ai_complete_default = {
-\  "engine": "complete",
-\  "options": {
-\    "model": "gpt-3.5-turbo-instruct",
-\    "endpoint_url": "https://api.openai.com/v1/completions",
-\    "max_tokens": 1000,
-\    "temperature": 0.1,
-\    "request_timeout": 20,
-\    "enable_auth": 1,
-\    "selection_boundary": "#####",
-\  },
-\  "ui": {
-\    "paste_mode": 1,
-\  },
-\}
-let g:vim_ai_edit_default = {
-\  "engine": "complete",
-\  "options": {
-\    "model": "gpt-3.5-turbo-instruct",
-\    "endpoint_url": "https://api.openai.com/v1/completions",
-\    "max_tokens": 1000,
-\    "temperature": 0.1,
-\    "request_timeout": 20,
-\    "enable_auth": 1,
-\    "selection_boundary": "#####",
-\  },
-\  "ui": {
-\    "paste_mode": 1,
-\  },
-\}
+" NOTE: selection_boundary and initial_prompt is currently handled outside of provider
 
+let s:initial_complete_prompt =<< trim END
+>>> system
+
+You are a general assistant.
+Answer shortly, consisely and only what you are asked.
+Do not provide any explanantion or comments if not requested.
+If you answer in a code, do not wrap it in markdown code block.
+END
 let s:initial_chat_prompt =<< trim END
 >>> system
 
 You are a general assistant.
 If you attach a code block add syntax type after ``` to enable syntax highlighting.
 END
-let g:vim_ai_chat_default = {
+let g:vim_ai_complete_default = {
+\  "provider": "openai",
+\  "prompt": "",
 \  "options": {
-\    "model": "gpt-3.5-turbo",
-\    "endpoint_url": "https://api.openai.com/v1/chat/completions",
-\    "max_tokens": 1000,
-\    "temperature": 1,
-\    "request_timeout": 20,
-\    "enable_auth": 1,
+\    "selection_boundary": "#####",
+\    "initial_prompt": s:initial_complete_prompt,
+\  },
+\  "ui": {
+\    "paste_mode": 1,
+\  },
+\}
+let g:vim_ai_edit_default = {
+\  "provider": "openai",
+\  "prompt": "",
+\  "options": {
+\    "selection_boundary": "#####",
+\    "initial_prompt": s:initial_complete_prompt,
+\  },
+\  "ui": {
+\    "paste_mode": 1,
+\  },
+\}
+let g:vim_ai_chat_default = {
+\  "provider": "openai",
+\  "prompt": "",
+\  "options": {
 \    "selection_boundary": "",
 \    "initial_prompt": s:initial_chat_prompt,
 \  },
@@ -53,15 +50,64 @@ let g:vim_ai_chat_default = {
 \    "scratch_buffer_keep_open": 0,
 \    "populate_options": 0,
 \    "code_syntax_enabled": 1,
+\    "force_new_chat": 0,
 \    "paste_mode": 1,
 \  },
+\}
+let g:vim_ai_image_default = {
+\  "provider": "openai",
+\  "prompt": "",
+\  "options": {
+\  },
+\  "ui": {
+\    "download_dir": "",
+\  },
+\}
+
+" openai provider options
+let g:vim_ai_openai_complete = {
+\  "model": "gpt-4o",
+\  "endpoint_url": "https://api.openai.com/v1/chat/completions",
+\  "max_tokens": 0,
+\  "max_completion_tokens": 0,
+\  "temperature": 0.1,
+\  "request_timeout": 20,
+\  "stream": 1,
+\  "auth_type": "bearer",
+\  "token_file_path": "",
+\  "selection_boundary": "#####",
+\  "initial_prompt": s:initial_complete_prompt,
+\}
+let g:vim_ai_openai_edit = g:vim_ai_openai_complete
+let g:vim_ai_openai_chat = {
+\  "model": "gpt-4o",
+\  "endpoint_url": "https://api.openai.com/v1/chat/completions",
+\  "max_tokens": 0,
+\  "max_completion_tokens": 0,
+\  "temperature": 1,
+\  "request_timeout": 20,
+\  "stream": 1,
+\  "auth_type": "bearer",
+\  "token_file_path": "",
+\  "selection_boundary": "",
+\  "initial_prompt": s:initial_chat_prompt,
+\}
+let g:vim_ai_openai_image = {
+\  "model": "dall-e-3",
+\  "endpoint_url": "https://api.openai.com/v1/images/generations",
+\  "quality": "standard",
+\  "size": "1024x1024",
+\  "style": "vivid",
+\  "request_timeout": 40,
+\  "auth_type": "bearer",
+\  "token_file_path": "",
 \}
 
 if !exists("g:vim_ai_open_chat_presets")
   let g:vim_ai_open_chat_presets = {
-  \  "preset_below": "below new | call vim_ai#MakeScratchWindow()",
-  \  "preset_tab": "tabnew | call vim_ai#MakeScratchWindow()",
-  \  "preset_right": "rightbelow 55vnew | setlocal noequalalways | setlocal winfixwidth | call vim_ai#MakeScratchWindow()",
+  \  "preset_below": "below new",
+  \  "preset_tab": "tabnew",
+  \  "preset_right": "rightbelow 55vnew | setlocal noequalalways | setlocal winfixwidth",
   \}
 endif
 
@@ -99,6 +145,7 @@ endfunction
 
 call s:MakeConfig("vim_ai_chat")
 call s:MakeConfig("vim_ai_complete")
+call s:MakeConfig("vim_ai_image")
 call s:MakeConfig("vim_ai_edit")
 
 function! vim_ai_config#load()

@@ -1,92 +1,118 @@
 import vim
 
-# import utils
-plugin_root = vim.eval("s:plugin_root")
-vim.command(f"py3file {plugin_root}/py/utils.py")
+chat_py_imported = True
 
-prompt, role_options = parse_prompt_and_role(vim.eval("l:prompt"))
-config = normalize_config(vim.eval("l:config"))
-config_options = {
-    **config['options'],
-    **role_options['options_default'],
-    **role_options['options_chat'],
-}
-config_ui = config['ui']
+def _populate_options(config):
+    default_config = make_config(vim.eval('g:vim_ai_chat_default'))
 
-def initialize_chat_window():
-    lines = vim.eval('getline(1, "$")')
-    contains_user_prompt = '>>> user' in lines
-    if not contains_user_prompt:
-        # user role not found, put whole file content as an user prompt
-        vim.command("normal! gg")
-        populates_options = config_ui['populate_options'] == '1'
-        if populates_options:
-            vim.command("normal! O[chat-options]")
-            vim.command("normal! o")
-            for key, value in config_options.items():
-                if key == 'initial_prompt':
-                    value = "\\n".join(value)
-                vim.command("normal! i" + key + "=" + value + "\n")
-        vim.command("normal! " + ("o" if populates_options else "O"))
-        vim.command("normal! i>>> user\n")
+    default_options = default_config['options']
+    options = config['options']
 
-    vim.command("normal! G")
-    vim_break_undo_sequence()
-    vim.command("redraw")
+    vim.command("normal! O[chat]")
+    vim.command("normal! o")
+    vim.command("normal! iprovider=" + config['provider'] + "\n")
+    for key, value in options.items():
+        default_value = default_options.get(key, '')
+        if key == 'initial_prompt':
+            value = "\\n".join(value)
+            if default_value:
+                default_value = "\\n".join(default_value)
 
-    file_content = vim.eval('trim(join(getline(1, "$"), "\n"))')
-    role_lines = re.findall(r'(^>>> user|^>>> system|^<<< assistant).*', file_content, flags=re.MULTILINE)
-    if not role_lines[-1].startswith(">>> user"):
-        # last role is not user, most likely completion was cancelled before
-        vim.command("normal! o")
-        vim.command("normal! i\n>>> user\n\n")
+        if default_value == value:
+            continue # do not show default values
+        vim.command("normal! ioptions." + key + "=" + value + "\n")
 
-    if prompt:
-        vim.command("normal! i" + prompt)
+def run_ai_chat(context):
+    command_type = context['command_type']
+    prompt = context['prompt']
+    config = make_config(context['config'])
+    config_options = config['options']
+    roles = context['roles']
+
+    def initialize_chat_window():
+        file_content = vim.eval('trim(join(getline(1, "$"), "\n"))')
+        contains_user_prompt = re.search(r"^>>> (user|exec|include)", file_content, flags=re.MULTILINE)
+        lines = vim.eval('getline(1, "$")')
+
+        # if populate is set in config, populate once
+        # it shouldn't re-populate after chat header options are modified (#158)
+        populate = config['ui']['populate_options'] == '1' and not '[chat]' in lines
+        # when called special `populate` role, force chat header re-population
+        re_populate = 'populate' in roles
+
+        if re_populate:
+            if '[chat]' in lines:
+                line_num = lines.index('[chat]') + 1
+                vim.command("normal! " + str(line_num) + "gg")
+                vim.command("normal! d}dd")
+
+        if not contains_user_prompt:
+            # user role not found, put whole file content as an user prompt
+            vim.command("normal! gg")
+            vim.command("normal! O>>> user\n")
+
+        if populate or re_populate:
+            vim.command("normal! gg")
+            _populate_options(config)
+
+        vim.command("normal! G")
         vim_break_undo_sequence()
         vim.command("redraw")
 
-initialize_chat_window()
+        last_role = re.match(r".*^(>>>|<<<) (\w+)", file_content, flags=re.DOTALL | re.MULTILINE)
+        if last_role and last_role.group(2) not in ('user', 'include', 'exec'):
+            # last role is not a user role, most likely completion was cancelled before
+            vim.command("normal! o")
+            vim.command("normal! i\n>>> user\n\n")
 
-chat_options = parse_chat_header_options()
-options = {**config_options, **chat_options}
-openai_options = make_openai_options(options)
-http_options = make_http_options(options)
+        if prompt:
+            vim.command("normal! i" + prompt)
+            vim_break_undo_sequence()
+            vim.command("redraw")
 
-initial_prompt = '\n'.join(options.get('initial_prompt', []))
-initial_messages = parse_chat_messages(initial_prompt)
+    initialize_chat_window()
 
-chat_content = vim.eval('trim(join(getline(1, "$"), "\n"))')
-chat_messages = parse_chat_messages(chat_content)
-is_selection = vim.eval("l:is_selection")
+    chat_config = parse_chat_header_config()
+    options = {**config_options, **chat_config['options']}
+    provider = chat_config['provider'] or config['provider']
 
-messages = initial_messages + chat_messages
+    initial_prompt = '\n'.join(options.get('initial_prompt', []))
+    initial_messages = parse_chat_messages(initial_prompt)
 
-try:
-    if messages[-1]["content"].strip():
-        vim.command("normal! Go\n<<< assistant\n\n")
-        vim.command("redraw")
+    chat_content = vim.eval('trim(join(getline(1, "$"), "\n"))')
+    print_debug(f"[{command_type}] text:\n" + chat_content)
+    chat_messages = parse_chat_messages(chat_content)
 
-        print('Answering...')
-        vim.command("redraw")
+    messages = initial_messages + chat_messages
 
-        request = {
-            'stream': True,
-            'messages': messages,
-            **openai_options
-        }
-        printDebug("[chat] request: {}", request)
-        url = options['endpoint_url']
-        response = openai_request(url, request, http_options)
-        def map_chunk(resp):
-            printDebug("[chat] response: {}", resp)
-            return resp['choices'][0]['delta'].get('content', '')
-        text_chunks = map(map_chunk, response)
-        render_text_chunks(text_chunks, is_selection)
+    try:
+        last_content = messages[-1]["content"][-1]
+        if last_content['type'] != 'text' or last_content['text']:
+            vim.command("redraw")
 
-        vim.command("normal! a\n\n>>> user\n\n")
-        vim.command("redraw")
-        clear_echo_message()
-except BaseException as error:
-    handle_completion_error(error)
-    printDebug("[chat] error: {}", traceback.format_exc())
+            print('Answering...')
+            vim.command("redraw")
+            provider_class = load_provider(provider)
+            provider = provider_class(command_type, options, ai_provider_utils)
+            response_chunks = provider.request(messages)
+
+            def _chunks_to_sections(chunks):
+                first_thinking_chunk = True
+                first_content_chunk = True
+                for chunk in chunks:
+                    if chunk['type'] == 'thinking' and first_thinking_chunk:
+                        first_thinking_chunk = False
+                        vim.command("normal! Go\n<<< thinking\n\n")
+                    if chunk['type'] == 'assistant' and first_content_chunk:
+                        first_content_chunk = False
+                        vim.command("normal! Go\n<<< assistant\n\n")
+                    yield chunk['content']
+
+            render_text_chunks(_chunks_to_sections(response_chunks), append_to_eol=True)
+
+            vim.command("normal! a\n\n>>> user\n\n")
+            vim.command("redraw")
+            clear_echo_message()
+    except BaseException as error:
+        handle_completion_error(provider, error)
+        print_debug("[{}] error: {}", command_type, traceback.format_exc())

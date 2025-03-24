@@ -1,66 +1,41 @@
 import vim
 
-# import utils
-plugin_root = vim.eval("s:plugin_root")
-vim.command(f"py3file {plugin_root}/py/utils.py")
+complete_py_imported = True
 
-config = normalize_config(vim.eval("l:config"))
-engine = config['engine']
+def run_ai_completition(context):
+    command_type = context['command_type']
+    prompt = context['prompt']
+    config = make_config(context['config'])
+    config_options = config['options']
+    config_ui = config['ui']
+    roles = context['roles']
 
-prompt, role_options = parse_prompt_and_role(vim.eval("l:prompt"))
-config_options = {
-    **config['options'],
-    **role_options['options_default'],
-    **role_options['options_complete'],
-}
-openai_options = make_openai_options(config_options)
-http_options = make_http_options(config_options)
+    try:
+        if 'engine' in config and config['engine'] == 'complete':
+            raise KnownError('complete engine is no longer supported')
 
-is_selection = vim.eval("l:is_selection")
+        if prompt or roles:
+            print('Completing...')
+            vim.command("redraw")
 
-def complete_engine(prompt):
-    request = {
-        'stream': True,
-        'prompt': prompt,
-        **openai_options
-    }
-    printDebug("[engine-complete] request: {}", request)
-    url = config_options['endpoint_url']
-    response = openai_request(url, request, http_options)
-    def map_chunk(resp):
-        printDebug("[engine-complete] response: {}", resp)
-        return resp['choices'][0].get('text', '')
-    text_chunks = map(map_chunk, response)
-    return text_chunks
+            initial_prompt = config_options.get('initial_prompt', [])
+            initial_prompt = '\n'.join(initial_prompt)
+            chat_content = f"{initial_prompt}\n\n>>> user\n\n{prompt}".strip()
+            messages = parse_chat_messages(chat_content)
+            print_debug(f"[{command_type}] text:\n" + chat_content)
 
-def chat_engine(prompt):
-    initial_prompt = config_options.get('initial_prompt', [])
-    initial_prompt = '\n'.join(initial_prompt)
-    chat_content = f"{initial_prompt}\n\n>>> user\n\n{prompt}".strip()
-    messages = parse_chat_messages(chat_content)
-    request = {
-        'stream': True,
-        'messages': messages,
-        **openai_options
-    }
-    printDebug("[engine-chat] request: {}", request)
-    url = config_options['endpoint_url']
-    response = openai_request(url, request, http_options)
-    def map_chunk(resp):
-        printDebug("[engine-chat] response: {}", resp)
-        return resp['choices'][0]['delta'].get('content', '')
-    text_chunks = map(map_chunk, response)
-    return text_chunks
+            provider_class = load_provider(config['provider'])
+            provider = provider_class(command_type, config_options, ai_provider_utils)
+            response_chunks = provider.request(messages)
 
-engines = {"chat": chat_engine, "complete": complete_engine}
+            text_chunks = map(
+                lambda c: c.get("content"),
+                filter(lambda c: c['type'] == 'assistant', response_chunks), # omit `thinking` section
+            )
 
-try:
-    if prompt:
-        print('Completing...')
-        vim.command("redraw")
-        text_chunks = engines[engine](prompt)
-        render_text_chunks(text_chunks, is_selection)
-        clear_echo_message()
-except BaseException as error:
-    handle_completion_error(error)
-    printDebug("[complete] error: {}", traceback.format_exc())
+            render_text_chunks(text_chunks, append_to_eol=command_type == 'complete')
+
+            clear_echo_message()
+    except BaseException as error:
+        handle_completion_error(config['provider'], error)
+        print_debug("[{}] error: {}", command_type, traceback.format_exc())

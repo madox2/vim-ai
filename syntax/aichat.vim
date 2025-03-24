@@ -9,6 +9,8 @@ endif
 syntax match aichatRole ">>> system"
 syntax match aichatRole ">>> user"
 syntax match aichatRole ">>> include"
+syntax match aichatRole ">>> exec"
+syntax match aichatRole "<<< thinking"
 syntax match aichatRole "<<< assistant"
 
 highlight default link aichatRole Comment

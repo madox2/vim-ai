@@ -12,7 +12,11 @@ To get an idea what is possible to do with AI commands see the [prompts](https:/
 - Generate text or code, answer questions with AI
 - Edit selected text in-place with AI
 - Interactive conversation with ChatGPT
-- Supports custom roles and more
+- Custom roles
+- Vision capabilities (image to text)
+- Generate images
+- Integrates with any OpenAI-compatible API
+- AI provider plugins
 
 ## How it works
 
@@ -21,6 +25,27 @@ You will need to [setup](https://platform.openai.com/signup) an account and obta
 Usage of the API is not free, but the cost is reasonable and depends on how many tokens you use, in simple terms, how much text you send and receive (see [pricing](https://openai.com/pricing)).
 Note that the plugin does not send any of your code behind the scenes.
 You only share and pay for what you specifically select, for prompts and chat content.
+
+In case you would like to experiment with Gemini, Claude or other models running as a service or locally, you can use any OpenAI compatible proxy.
+A simple way is to use [OpenRouter](https://openrouter.ai) which has a fair pricing (and currently offers many models for [free](https://openrouter.ai/models?max_price=0)), or setup a proxy like [LiteLLM](https://github.com/BerriAI/litellm) locally.
+See this simple [guide](#example-create-custom-roles-to-interact-with-openrouter-models) on configuring custom OpenRouter roles.
+
+🚨 **Announcement** 🚨
+
+`vim-ai` can now be extended with custom provider plugins.
+However, there aren't many available yet, so developing new ones is welcome!
+For more, see the [providers](#providers) section.
+
+## Table of Contents
+
+- [Installation](#installation)
+- [Usage](#usage)
+- [Providers](#providers)
+- [Roles](#roles)
+- [Reference](#reference)
+- [Configuration](#configuration)
+- [Key bindings](#key-bindings)
+- [Custom commands](#custom-commands)
 
 ## Installation
 
@@ -72,37 +97,80 @@ git clone https://github.com/madox2/vim-ai.git ~/.local/share/nvim/site/pack/plu
 To use an AI command, type the command followed by an instruction prompt. You can also combine it with a visual selection. Here is a brief overview of available commands:
 
 ```
-========= Basic AI commands =========
+========== Basic AI commands ==========
 
-:AI         complete text
-:AIEdit     edit text
-:AIChat     continue or open new chat
+:AI       complete text
+:AIEdit   edit text
+:AIChat   continue or open new chat
+:AIImage  generate image
 
-============= Utilities =============
+============== Utilities ==============
 
-:AIRedo     repeat last AI command
-:AINewChat  open new chat
+:AIRedo          repeat last AI command
+:AIUtilRolesOpen open role config file
+:AIUtilDebugOn   turn on debug logging
+:AIUtilDebugOff  turn off debug logging
 
 :help vim-ai
 ```
 
 **Tip:** Press `Ctrl-c` anytime to cancel completion
 
-**Tip:** Setup your own [key bindings](#key-bindings) or use command shortcuts - `:AIE`, `:AIC`, `:AIR`
+**Tip:** Use command shortcuts - `:AIE`, `:AIC`, `:AIR`, `:AII` or setup your own [key bindings](#key-bindings)
 
-**Tip:** A [custom role](#roles) {role} can be passed to the above commands by an initial parameter /{role}, for example `:AIEdit /grammar`.
+**Tip:** Define and use [custom roles](#roles), e.g. `:AIEdit /grammar`.
 
-**Tip:** Combine commands with a range `:help range`, for example to select the whole buffer - `:%AIE fix grammar`
+**Tip:** Use pre-defined roles `/right`, `/below`, `/tab` to choose how chat is open, e.g. `:AIC /right`
+
+**Tip:** Use special role `/populate` to dump options to chat header, e.g. `:AIC /populate /gemini`
+
+**Tip:** Combine commands with a range `:help range`, e.g. to select the whole buffer - `:%AIE fix grammar`
 
 If you are interested in more tips or would like to level up your Vim with more commands like [`:GitCommitMessage`](https://github.com/madox2/vim-ai/wiki/Custom-commands#suggest-a-git-commit-message) - suggesting a git commit message, visit the [Community Wiki](https://github.com/madox2/vim-ai/wiki).
+
+## Providers
+
+This is the list of 3rd party provider plugins allowing to use different AI providers.
+
+- [google provider](https://github.com/madox2/vim-ai-provider-google) - Google's Gemini models
+
+In case you are interested in developing one, have a look at reference [google provider](https://github.com/madox2/vim-ai-provider-google).
+Do not forget to open PR updating this list.
+
+## Roles
+
+In the context of this plugin, a role means a re-usable AI instruction and/or configuration. Roles are defined in the configuration `.ini` file. For example by defining a `grammar` and `o1-mini` role:
+
+```vim
+let g:vim_ai_roles_config_file = '/path/to/my/roles.ini'
+```
+
+```ini
+# /path/to/my/roles.ini
+
+[grammar]
+prompt = fix spelling and grammar
+options.temperature = 0.4
+
+[o1-mini]
+options.stream = 0
+options.model = o1-mini
+options.max_completion_tokens = 25000
+options.temperature = 1
+options.initial_prompt =
+```
+
+Now you can select text and run it with command `:AIEdit /grammar`.
+
+You can also combine roles `:AI /o1-mini /grammar helo world!`
+
+See [roles-example.ini](./roles-example.ini) for more examples.
 
 ## Reference
 
 In the documentation below,  `<selection>` denotes a visual selection or any other range, `{instruction}` an instruction prompt, `{role}` a [custom role](#roles) and `?` symbol an optional parameter.
 
 ### `:AI`
-
-`:AI` - complete the text on the current line
 
 `:AI {prompt}` - complete the prompt
 
@@ -120,6 +188,16 @@ In the documentation below,  `<selection>` denotes a visual selection or any oth
 
 `<selection>? :AIEdit /{role} {instruction}?` - use role to edit
 
+### `:AIImage`
+
+`:AIImage {prompt}` - generate image with prompt
+
+`<selection> :AIImage` - generate image with seleciton
+
+`<selection>? :AI /{role} {instruction}?` - use role to generate
+
+[Pre-defined](./roles-default.ini) image roles: `/hd`, `/natural`
+
 ### `:AIChat`
 
 `:AIChat` - continue or start a new conversation.
@@ -129,6 +207,8 @@ In the documentation below,  `<selection>` denotes a visual selection or any oth
 `<selection>? :AIChat /{role} {instruction}?` - use role to complete
 
 When the AI finishes answering, you can continue the conversation by entering insert mode, adding your prompt, and then using the command `:AIChat` once again.
+
+[Pre-defined](./roles-default.ini) chat roles: `/right`, `/below`, `/tab`
 
 #### `.aichat` files
 
@@ -148,7 +228,7 @@ You are a Clean Code expert, I have the following code, please refactor it in a 
 
 ```
 
-To include files in the chat a special `include` role is used:
+To include files in the chat a special `include` section is used:
 
 ```
 >>> user
@@ -161,17 +241,34 @@ Generate documentation for the following files
 /home/user/myproject/**/*.py
 ```
 
-Each file's contents will be added to an additional `user` role message with the files separated by `==> {path} <==`, where path is the path to the file. Globbing is expanded out via `glob.gob` and relative paths to the current working directory (as determined by `getcwd()`) will be resolved to absolute paths.
+Each file's contents will be added to an additional user message with `==> {path} <==` header, relative paths are resolved to the current working directory.
 
-Supported chat roles are **`>>> system`**, **`>>> user`**, **`>>> include`** and **`<<< assistant`**
 
-### `:AINewChat`
+To use image vision capabilities (image to text) include an image file:
 
-`:AINewChat {preset shortname}?` - start a new conversation
+```
+>>> user
 
-This command is used when you need to spawn a new chat in a specific way or in situation when `:AIChat` would normally continue conversation instead.
+What object is on the image?
 
-As a parameter you put an open chat command preset shortcut - `below`, `tab` or `right`. For example: `:AINewChat right`.
+>>> include
+
+~/myimage.jpg
+```
+
+Execute command and include stdout into the chat:
+
+```
+>>> user
+
+Suggest git commit message
+
+>>> exec
+
+git diff
+```
+
+Supported chat sections are **`>>> system`**, **`>>> user`**, **`>>> include`**, **`>>> exec`** and **`<<< assistant`**
 
 ### `:AIRedo`
 
@@ -179,49 +276,6 @@ As a parameter you put an open chat command preset shortcut - `below`, `tab` or 
 
 Use this immediately after `AI`/`AIEdit`/`AIChat` command in order to re-try or get an alternative completion.
 Note that the randomness of responses heavily depends on the [`temperature`](https://platform.openai.com/docs/api-reference/completions/create#completions/create-temperature) parameter.
-
-## Roles
-
-In the context of this plugin, a role means a re-usable AI instruction and/or configuration. Roles are defined in the configuration `.ini` file. For example by defining a `grammar` role:
-
-```vim
-let g:vim_ai_roles_config_file = '/path/to/my/roles.ini'
-```
-
-```ini
-# /path/to/my/roles.ini
-
-[grammar]
-prompt = fix spelling and grammar
-
-[grammar.options]
-temperature = 0.4
-```
-
-Now you can select text and run it with command `:AIEdit /grammar`.
-
-See [roles-example.ini](./roles-example.ini) for more examples.
-
-## Key bindings
-
-This plugin does not set any key binding. Create your own bindings in the `.vimrc` to trigger AI commands, for example:
-
-```vim
-" complete text on the current line or in visual selection
-nnoremap <leader>a :AI<CR>
-xnoremap <leader>a :AI<CR>
-
-" edit text with a custom prompt
-xnoremap <leader>s :AIEdit fix grammar and spelling<CR>
-nnoremap <leader>s :AIEdit fix grammar and spelling<CR>
-
-" trigger chat
-xnoremap <leader>c :AIChat<CR>
-nnoremap <leader>c :AIChat<CR>
-
-" redo last AI command
-nnoremap <leader>r :AIRedo<CR>
-```
 
 ## Configuration
 
@@ -231,51 +285,81 @@ To customize the default configuration, initialize the config variable with a se
 ```vim
 let g:vim_ai_chat = {
 \  "options": {
-\    "model": "gpt-4",
-\    "temperature": 0.2,
+\    "model": "o1-preview",
+\    "stream": 0,
+\    "temperature": 1,
+\    "max_completion_tokens": 25000,
+\    "initial_prompt": "",
 \  },
 \}
 ```
 
-Once the above is set, you can modify options directly during the vim session:
+Alternatively you can use special `default` role:
 
-```vim
-let g:vim_ai_chat['options']['model'] = 'gpt-4'
-let g:vim_ai_chat['options']['temperature'] = 0.2
+```ini
+[default.chat]
+options.model = o1-preview
+options.stream = 0
+options.temperature = 1
+options.max_completion_tokens = 25000
+options.initial_prompt =
 ```
 
 Or customize the options directly in the chat buffer:
 
 ```properties
-[chat-options]
-model=gpt-4
-temperature=0.2
+[chat]
+options.model = o1-preview
+options.stream = 0
+options.temperature = 1
+options.max_completion_tokens = 25000
+options.initial_prompt =
 
 >>> user
 
 generate a paragraph of lorem ipsum
 ```
 
-Below are listed all available configuration options, along with their default values:
+Below are listed all available configuration options, along with their default values.
+Please note that there isn't any token limit imposed on chat model.
 
 ```vim
+" This prompt instructs model to be consise in order to be used inline in editor
+let s:initial_complete_prompt =<< trim END
+>>> system
+
+You are a general assistant.
+Answer shortly, consisely and only what you are asked.
+Do not provide any explanantion or comments if not requested.
+If you answer in a code, do not wrap it in markdown code block.
+END
+
 " :AI
-" - engine: complete | chat - see how to configure chat engine in the section below
+" - provider: AI provider
+" - prompt: optional prepended prompt
 " - options: openai config (see https://platform.openai.com/docs/api-reference/completions)
+" - options.initial_prompt: prompt prepended to every chat request (list of lines or string)
+" - options.temperature: use -1 to disable this parameter
 " - options.request_timeout: request timeout in seconds
-" - options.enable_auth: enable authorization using openai key
-" - options.selection_boundary: seleciton prompt wrapper (eliminates empty responses, see #20)
+" - options.auth_type: API authentication method (bearer, api-key, none)
+" - options.token_file_path: override global token configuration
+" - options.selection_boundary: selection prompt wrapper (eliminates empty responses, see #20)
 " - ui.paste_mode: use paste mode (see more info in the Notes below)
 let g:vim_ai_complete = {
-\  "engine": "complete",
+\  "provider": "openai",
+\  "prompt": "",
 \  "options": {
-\    "model": "gpt-3.5-turbo-instruct",
-\    "endpoint_url": "https://api.openai.com/v1/completions",
-\    "max_tokens": 1000,
+\    "model": "gpt-4o",
+\    "endpoint_url": "https://api.openai.com/v1/chat/completions",
+\    "max_tokens": 0,
+\    "max_completion_tokens": 0,
 \    "temperature": 0.1,
 \    "request_timeout": 20,
-\    "enable_auth": 1,
+\    "stream": 1,
+\    "auth_type": "bearer",
+\    "token_file_path": "",
 \    "selection_boundary": "#####",
+\    "initial_prompt": s:initial_complete_prompt,
 \  },
 \  "ui": {
 \    "paste_mode": 1,
@@ -283,22 +367,31 @@ let g:vim_ai_complete = {
 \}
 
 " :AIEdit
-" - engine: complete | chat - see how to configure chat engine in the section below
+" - provider: AI provider
+" - prompt: optional prepended prompt
 " - options: openai config (see https://platform.openai.com/docs/api-reference/completions)
+" - options.initial_prompt: prompt prepended to every chat request (list of lines or string)
+" - options.temperature: use -1 to disable this parameter
 " - options.request_timeout: request timeout in seconds
-" - options.enable_auth: enable authorization using openai key
-" - options.selection_boundary: seleciton prompt wrapper (eliminates empty responses, see #20)
+" - options.auth_type: API authentication method (bearer, api-key, none)
+" - options.token_file_path: override global token configuration
+" - options.selection_boundary: selection prompt wrapper (eliminates empty responses, see #20)
 " - ui.paste_mode: use paste mode (see more info in the Notes below)
 let g:vim_ai_edit = {
-\  "engine": "complete",
+\  "provider": "openai",
+\  "prompt": "",
 \  "options": {
-\    "model": "gpt-3.5-turbo-instruct",
-\    "endpoint_url": "https://api.openai.com/v1/completions",
-\    "max_tokens": 1000,
+\    "model": "gpt-4o",
+\    "endpoint_url": "https://api.openai.com/v1/chat/completions",
+\    "max_tokens": 0,
+\    "max_completion_tokens": 0,
 \    "temperature": 0.1,
 \    "request_timeout": 20,
-\    "enable_auth": 1,
+\    "stream": 1,
+\    "auth_type": "bearer",
+\    "token_file_path": "",
 \    "selection_boundary": "#####",
+\    "initial_prompt": s:initial_complete_prompt,
 \  },
 \  "ui": {
 \    "paste_mode": 1,
@@ -314,34 +407,80 @@ If you attach a code block add syntax type after ``` to enable syntax highlighti
 END
 
 " :AIChat
+" - provider: AI provider
+" - prompt: optional prepended prompt
 " - options: openai config (see https://platform.openai.com/docs/api-reference/chat)
 " - options.initial_prompt: prompt prepended to every chat request (list of lines or string)
+" - options.temperature: use -1 to disable this parameter
 " - options.request_timeout: request timeout in seconds
-" - options.enable_auth: enable authorization using openai key
-" - options.selection_boundary: seleciton prompt wrapper (eliminates empty responses, see #20)
-" - ui.populate_options: put [chat-options] to the chat header
+" - options.auth_type: API authentication method (bearer, api-key, none)
+" - options.token_file_path: override global token configuration
+" - options.selection_boundary: selection prompt wrapper (eliminates empty responses, see #20)
 " - ui.open_chat_command: preset (preset_below, preset_tab, preset_right) or a custom command
+" - ui.populate_options: dump [chat] config to the chat header
 " - ui.scratch_buffer_keep_open: re-use scratch buffer within the vim session
+" - ui.force_new_chat: force new chat window (used in chat opening roles e.g. `/tab`)
 " - ui.paste_mode: use paste mode (see more info in the Notes below)
 let g:vim_ai_chat = {
+\  "provider": "openai",
+\  "prompt": "",
 \  "options": {
-\    "model": "gpt-3.5-turbo",
+\    "model": "gpt-4o",
 \    "endpoint_url": "https://api.openai.com/v1/chat/completions",
-\    "max_tokens": 1000,
+\    "max_tokens": 0,
+\    "max_completion_tokens": 0,
 \    "temperature": 1,
 \    "request_timeout": 20,
-\    "enable_auth": 1,
+\    "stream": 1,
+\    "auth_type": "bearer",
+\    "token_file_path": "",
 \    "selection_boundary": "",
 \    "initial_prompt": s:initial_chat_prompt,
 \  },
 \  "ui": {
-\    "code_syntax_enabled": 1,
-\    "populate_options": 0,
 \    "open_chat_command": "preset_below",
 \    "scratch_buffer_keep_open": 0,
+\    "populate_options": 0,
+\    "code_syntax_enabled": 1,
+\    "force_new_chat": 0,
 \    "paste_mode": 1,
 \  },
 \}
+
+" :AIImage
+" - prompt: optional prepended prompt
+" - options: openai config (https://platform.openai.com/docs/api-reference/images/create)
+" - options.request_timeout: request timeout in seconds
+" - options.auth_type: API authentication method (bearer, api-key, none)
+" - options.token_file_path: override global token configuration
+" - options.download_dir: path to image download directory, `cwd` if not defined
+let g:vim_ai_image = {
+\  "provider": "openai",
+\  "prompt": "",
+\  "options": {
+\    "model": "dall-e-3",
+\    "endpoint_url": "https://api.openai.com/v1/images/generations",
+\    "quality": "standard",
+\    "size": "1024x1024",
+\    "style": "vivid",
+\    "request_timeout": 40,
+\    "auth_type": "bearer",
+\    "token_file_path": "",
+\  },
+\  "ui": {
+\    "download_dir": "",
+\  },
+\}
+
+" custom roles file location
+let g:vim_ai_roles_config_file = s:plugin_root . "/roles-example.ini"
+
+" custom token file location
+let g:vim_ai_token_file_path = "~/.config/openai.token"
+
+" debug settings
+let g:vim_ai_debug = 0
+let g:vim_ai_debug_log_file = "/tmp/vim_ai_debug.log"
 
 " Notes:
 " ui.paste_mode
@@ -364,44 +503,61 @@ See some cool projects listed in [Custom APIs](https://github.com/madox2/vim-ai/
 let g:vim_ai_chat = {
 \  "options": {
 \    "endpoint_url": "http://localhost:8000/v1/chat/completions",
-\    "enable_auth": 0,
+\    "auth_type": "none",
 \  },
 \}
 ```
 
-### Using chat engine for completion and edits
+#### Example: create custom roles to interact with OpenRouter models
 
-It is possible to configure chat models, such as `gpt-3.5-turbo`, to be used in `:AI` and `:AIEdit` commands.
-These models are cheaper, but currently less suitable for code editing/completion, as they respond with human-like text and commentary.
+First you need open an account on [OpenRouter](https://openrouter.ai/) website and create an api key.
+You can start with [free models](https://openrouter.ai/models?max_price=0) and add credits later if you wish.
+Then you set up a custom role that points to the OpenRouter endpoint:
 
-Depending on the use case, a good initial prompt can help to instruct the chat model to respond in the desired way:
+```ini
+[gemini]
+options.token_file_path = ~/.config/openrouter.token
+options.endpoint_url = https://openrouter.ai/api/v1/chat/completions
+options.model = google/gemini-exp-1121:free
+
+[llama]
+options.token_file_path = ~/.config/openrouter.token
+options.endpoint_url = https://openrouter.ai/api/v1/chat/completions
+options.model = meta-llama/llama-3.3-70b-instruct
+
+[claude]
+options.token_file_path = ~/.config/openrouter.token
+options.endpoint_url = https://openrouter.ai/api/v1/chat/completions
+options.model = anthropic/claude-3.5-haiku
+```
+
+Now you can use the role:
+
+```
+:AI /gemini who created you?
+
+I was created by Google.
+```
+
+## Key bindings
+
+This plugin does not set any key binding. Create your own bindings in the `.vimrc` to trigger AI commands, for example:
 
 ```vim
-let initial_prompt =<< trim END
->>> system
+" complete text on the current line or in visual selection
+nnoremap <leader>a :AI<CR>
+xnoremap <leader>a :AI<CR>
 
-You are going to play a role of a completion engine with following parameters:
-Task: Provide compact code/text completion, generation, transformation or explanation
-Topic: general programming and text editing
-Style: Plain result without any commentary, unless commentary is necessary
-Audience: Users of text editor and programmers that need to transform/generate text
-END
+" edit text with a custom prompt
+xnoremap <leader>s :AIEdit fix grammar and spelling<CR>
+nnoremap <leader>s :AIEdit fix grammar and spelling<CR>
 
-let chat_engine_config = {
-\  "engine": "chat",
-\  "options": {
-\    "model": "gpt-3.5-turbo",
-\    "endpoint_url": "https://api.openai.com/v1/chat/completions",
-\    "max_tokens": 1000,
-\    "temperature": 0.1,
-\    "request_timeout": 20,
-\    "selection_boundary": "",
-\    "initial_prompt": initial_prompt,
-\  },
-\}
+" trigger chat
+xnoremap <leader>c :AIChat<CR>
+nnoremap <leader>c :AIChat<CR>
 
-let g:vim_ai_complete = chat_engine_config
-let g:vim_ai_edit = chat_engine_config
+" redo last AI command
+nnoremap <leader>r :AIRedo<CR>
 ```
 
 ## Custom commands
@@ -413,19 +569,20 @@ To create a custom command, you can call `AIRun`, `AIEditRun` and `AIChatRun` fu
 ```vim
 " custom command suggesting git commit message, takes no arguments
 function! GitCommitMessageFn()
+  let l:range = 0
   let l:diff = system('git --no-pager diff --staged')
   let l:prompt = "generate a short commit message from the diff below:\n" . l:diff
   let l:config = {
-  \  "engine": "chat",
   \  "options": {
-  \    "model": "gpt-3.5-turbo",
+  \    "model": "gpt-4o",
   \    "initial_prompt": ">>> system\nyou are a code assistant",
   \    "temperature": 1,
   \  },
   \}
-  call vim_ai#AIRun(l:config, l:prompt)
+  call vim_ai#AIRun(l:range, l:config, l:prompt)
 endfunction
 command! GitCommitMessage call GitCommitMessageFn()
+
 
 " custom command that provides a code review for selected code block
 function! CodeReviewFn(range) range
@@ -437,7 +594,7 @@ function! CodeReviewFn(range) range
   \}
   exe a:firstline.",".a:lastline . "call vim_ai#AIChatRun(a:range, l:config, l:prompt)"
 endfunction
-command! -range=0 CodeReview <line1>,<line2>call CodeReviewFn(<count>)
+command! -range -nargs=? AICodeReview <line1>,<line2>call CodeReviewFn(<range>)
 ```
 
 ## Contributing
@@ -448,7 +605,7 @@ Contributions are welcome! Please feel free to open a pull request, report an is
 
 **Accuracy**: GPT is good at producing text and code that looks correct at first glance, but may be completely wrong. Be sure to thoroughly review, read and test all output generated by this plugin!
 
-**Privacy**: This plugin sends text to OpenAI when generating completions and edits. Therefore, do not use it on files containing sensitive information.
+**Privacy**: This plugin sends text to OpenAI (or other providers) when generating completions and edits. Therefore, do not use it on files containing sensitive information.
 
 ## License
 
