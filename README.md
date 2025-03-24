@@ -478,6 +478,10 @@ let g:vim_ai_roles_config_file = s:plugin_root . "/roles-example.ini"
 " custom token file location
 let g:vim_ai_token_file_path = "~/.config/openai.token"
 
+" full markdown highlighting in aichat files
+" note that highlighting may be corrupted when using the preservim/vim-markdown plugin.
+g:vim_ai_chat_markdown = 0
+
 " debug settings
 let g:vim_ai_debug = 0
 let g:vim_ai_debug_log_file = "/tmp/vim_ai_debug.log"

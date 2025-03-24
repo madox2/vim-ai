@@ -1,8 +1,12 @@
 :AI	vim-ai.txt	/*:AI*
 :AIChat	vim-ai.txt	/*:AIChat*
 :AIEdit	vim-ai.txt	/*:AIEdit*
-:AINewChat	vim-ai.txt	/*:AINewChat*
+:AIImage	vim-ai.txt	/*:AIImage*
 :AIRedo	vim-ai.txt	/*:AIRedo*
+:AIUtilDebugOff	vim-ai.txt	/*:AIUtilDebugOff*
+:AIUtilDebugOn	vim-ai.txt	/*:AIUtilDebugOn*
+:AIUtilOpenRoles	vim-ai.txt	/*:AIUtilOpenRoles*
+g:aichat_markdown	vim-ai.txt	/*g:aichat_markdown*
 vim-ai	vim-ai.txt	/*vim-ai*
 vim-ai-about	vim-ai.txt	/*vim-ai-about*
 vim-ai-commands	vim-ai.txt	/*vim-ai-commands*

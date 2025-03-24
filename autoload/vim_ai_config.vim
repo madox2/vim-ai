@@ -111,6 +111,10 @@ if !exists("g:vim_ai_open_chat_presets")
   \}
 endif
 
+if !exists("g:vim_ai_chat_markdown")
+  let g:vim_ai_chat_markdown = 0
+endif
+
 if !exists("g:vim_ai_debug")
   let g:vim_ai_debug = 0
 endif
