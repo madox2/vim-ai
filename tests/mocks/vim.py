@@ -12,6 +12,8 @@ def eval(cmd):
             return os.path.abspath(os.path.join(dirname, '../..'))
         case 'getcwd()':
             return os.path.abspath(os.path.join(dirname, '../..'))
+        case 'g:LoadToken()':
+            return 'fn.secret'
         case _:
             return None
 

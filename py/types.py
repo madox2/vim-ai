@@ -22,7 +22,7 @@ class AIUtils(Protocol):
         pass
     def make_known_error(self, message: str):
         pass
-    def load_api_key(self, env_variable: str, file_path: str):
+    def load_api_key(self, env_variable: str, token_file_path: str = "", token_load_fn: str = ""):
         pass
 
 class AIResponseChunk(TypedDict):

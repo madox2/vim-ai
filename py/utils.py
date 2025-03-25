@@ -28,6 +28,20 @@ def print_debug(text, *args):
 class KnownError(Exception):
     pass
 
+def load_token_from_env_variable(env_variable_name):
+    return os.getenv(env_variable_name).strip()
+
+def load_token_from_file_path(path):
+    if not path:
+        return None
+    with open(os.path.expanduser(path), 'r') as file:
+        return file.read().strip()
+
+def load_token_from_fn(expression):
+    if not expression:
+        return None
+    return vim.eval(expression).strip()
+
 class AIProviderUtils():
     def print_debug(self, text, *args):
         print_debug(text, *args)
@@ -35,21 +49,23 @@ class AIProviderUtils():
     def make_known_error(self, message: str):
         return KnownError(message)
 
-    def load_api_key(self, env_variable_name: str, token_file_path: str):
-        # token precedence: env variable, config file path, global file path
-        api_key = os.getenv(env_variable_name)
-        if api_key:
-            return api_key
-        try:
-            global_token_file_path = vim.eval("g:vim_ai_token_file_path")
-            token_file_path = token_file_path or global_token_file_path
-            with open(os.path.expanduser(token_file_path), 'r') as file:
-                api_key = file.read()
-        except Exception:
-            pass
-        if not api_key:
-            raise KnownError("Missing API key")
-        return api_key
+    def load_api_key(self, env_variable_name: str, token_file_path: str = "", token_load_fn: str = ""):
+        loaders = (
+            lambda: load_token_from_file_path(token_file_path),
+            lambda: load_token_from_fn(token_load_fn),
+            lambda: load_token_from_env_variable(env_variable_name),
+            lambda: load_token_from_file_path(vim.eval("g:vim_ai_token_file_path")),
+            lambda: load_token_from_fn(vim.eval("g:vim_ai_token_load_fn")),
+        )
+        for loader in loaders:
+            try:
+                api_key = loader()
+                if api_key:
+                    return api_key
+            except Exception:
+                pass
+
+        raise KnownError("Missing API key")
 
 ai_provider_utils = AIProviderUtils()
 

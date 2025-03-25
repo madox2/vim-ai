@@ -11,6 +11,7 @@ default_config = {
     "stream": "1",
     "auth_type": "bearer",
     "token_file_path": "",
+    "token_load_fn": "",
     "selection_boundary": "",
     "initial_prompt": "You are a general assistant.",
   },

@@ -343,6 +343,7 @@ END
 " - options.request_timeout: request timeout in seconds
 " - options.auth_type: API authentication method (bearer, api-key, none)
 " - options.token_file_path: override global token configuration
+" - options.token_load_fn: expression/vim function to load token
 " - options.selection_boundary: selection prompt wrapper (eliminates empty responses, see #20)
 " - ui.paste_mode: use paste mode (see more info in the Notes below)
 let g:vim_ai_complete = {
@@ -358,6 +359,7 @@ let g:vim_ai_complete = {
 \    "stream": 1,
 \    "auth_type": "bearer",
 \    "token_file_path": "",
+\    "token_load_fn": "",
 \    "selection_boundary": "#####",
 \    "initial_prompt": s:initial_complete_prompt,
 \  },
@@ -375,6 +377,7 @@ let g:vim_ai_complete = {
 " - options.request_timeout: request timeout in seconds
 " - options.auth_type: API authentication method (bearer, api-key, none)
 " - options.token_file_path: override global token configuration
+" - options.token_load_fn: expression/vim function to load token
 " - options.selection_boundary: selection prompt wrapper (eliminates empty responses, see #20)
 " - ui.paste_mode: use paste mode (see more info in the Notes below)
 let g:vim_ai_edit = {
@@ -390,6 +393,7 @@ let g:vim_ai_edit = {
 \    "stream": 1,
 \    "auth_type": "bearer",
 \    "token_file_path": "",
+\    "token_load_fn": "",
 \    "selection_boundary": "#####",
 \    "initial_prompt": s:initial_complete_prompt,
 \  },
@@ -415,6 +419,7 @@ END
 " - options.request_timeout: request timeout in seconds
 " - options.auth_type: API authentication method (bearer, api-key, none)
 " - options.token_file_path: override global token configuration
+" - options.token_load_fn: expression/vim function to load token
 " - options.selection_boundary: selection prompt wrapper (eliminates empty responses, see #20)
 " - ui.open_chat_command: preset (preset_below, preset_tab, preset_right) or a custom command
 " - ui.populate_options: dump [chat] config to the chat header
@@ -434,6 +439,7 @@ let g:vim_ai_chat = {
 \    "stream": 1,
 \    "auth_type": "bearer",
 \    "token_file_path": "",
+\    "token_load_fn": "",
 \    "selection_boundary": "",
 \    "initial_prompt": s:initial_chat_prompt,
 \  },
@@ -452,6 +458,7 @@ let g:vim_ai_chat = {
 " - options.request_timeout: request timeout in seconds
 " - options.auth_type: API authentication method (bearer, api-key, none)
 " - options.token_file_path: override global token configuration
+" - options.token_load_fn: expression/vim function to load token
 " - options.download_dir: path to image download directory, `cwd` if not defined
 let g:vim_ai_image = {
 \  "provider": "openai",
@@ -465,6 +472,7 @@ let g:vim_ai_image = {
 \    "request_timeout": 40,
 \    "auth_type": "bearer",
 \    "token_file_path": "",
+\    "token_load_fn": "",
 \  },
 \  "ui": {
 \    "download_dir": "",
@@ -476,6 +484,9 @@ let g:vim_ai_roles_config_file = s:plugin_root . "/roles-example.ini"
 
 " custom token file location
 let g:vim_ai_token_file_path = "~/.config/openai.token"
+
+" custom fn to load token, e.g. "g:GetAIToken()"
+let g:vim_ai_token_load_fn = ""
 
 " enables/disables full markdown highlighting in aichat files
 " NOTE: code syntax highlighting works out of the box without this option enabled

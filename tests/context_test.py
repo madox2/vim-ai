@@ -7,6 +7,7 @@ default_config = {
     "max_tokens": "0",
     "temperature": "1",
     "token_file_path": "",
+    "token_load_fn": "",
     "selection_boundary": "",
     "initial_prompt": "You are a general assistant.",
   },
@@ -27,6 +28,7 @@ default_image_config = {
     "size": "1024x1024",
     "style": "vivid",
     "token_file_path": "",
+    "token_load_fn": "",
   },
   "ui": {
     "paste_mode": "1",

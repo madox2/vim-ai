@@ -74,6 +74,7 @@ let g:vim_ai_openai_complete = {
 \  "stream": 1,
 \  "auth_type": "bearer",
 \  "token_file_path": "",
+\  "token_load_fn": "",
 \  "selection_boundary": "#####",
 \  "initial_prompt": s:initial_complete_prompt,
 \}
@@ -88,6 +89,7 @@ let g:vim_ai_openai_chat = {
 \  "stream": 1,
 \  "auth_type": "bearer",
 \  "token_file_path": "",
+\  "token_load_fn": "",
 \  "selection_boundary": "",
 \  "initial_prompt": s:initial_chat_prompt,
 \}
@@ -100,6 +102,7 @@ let g:vim_ai_openai_image = {
 \  "request_timeout": 40,
 \  "auth_type": "bearer",
 \  "token_file_path": "",
+\  "token_load_fn": "",
 \}
 
 if !exists("g:vim_ai_open_chat_presets")
@@ -123,6 +126,9 @@ if !exists("g:vim_ai_debug_log_file")
 endif
 if !exists("g:vim_ai_token_file_path")
   let g:vim_ai_token_file_path = "~/.config/openai.token"
+endif
+if !exists("g:vim_ai_token_load_fn")
+  let g:vim_ai_token_load_fn = ""
 endif
 if !exists("g:vim_ai_roles_config_file")
   let g:vim_ai_roles_config_file = s:plugin_root . "/roles-example.ini"

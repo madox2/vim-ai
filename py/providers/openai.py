@@ -30,6 +30,7 @@ class OpenAIProvider():
             'request_timeout': options['request_timeout'],
             'auth_type': options['auth_type'],
             'token_file_path': options['token_file_path'],
+            'token_load_fn': options['token_load_fn'],
         }
 
         def _flatten_content(messages):
@@ -70,7 +71,11 @@ class OpenAIProvider():
         return filter(_filter_valid_chunks, map(_map_chunk, response))
 
     def _load_api_key(self):
-        raw_api_key = self.utils.load_api_key("OPENAI_API_KEY", self.options['token_file_path'])
+        raw_api_key = self.utils.load_api_key(
+            "OPENAI_API_KEY",
+            token_file_path=self.options['token_file_path'],
+            token_load_fn=self.options['token_load_fn'],
+        )
         # The text is in format of "<api key>,<org id>" and the
         # <org id> part is optional
         elements = raw_api_key.strip().split(",")
@@ -118,6 +123,7 @@ class OpenAIProvider():
             'request_timeout': options['request_timeout'],
             'auth_type': options['auth_type'],
             'token_file_path': options['token_file_path'],
+            'token_load_fn': options['token_load_fn'],
         }
         openai_options = {
             'model': options['model'],
