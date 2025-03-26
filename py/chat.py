@@ -28,6 +28,7 @@ def run_ai_chat(context):
     config = make_config(context['config'])
     config_options = config['options']
     roles = context['roles']
+    started_from_chat = context['started_from_chat'] == '1'
 
     def initialize_chat_window():
         file_content = vim.eval('trim(join(getline(1, "$"), "\n"))')
@@ -87,7 +88,11 @@ def run_ai_chat(context):
 
     try:
         last_content = messages[-1]["content"][-1]
-        if last_content['type'] != 'text' or last_content['text']:
+
+        # if empty :AIC has been called outside of the chat, just init/switch to the chat but don't trigger the request (#147)
+        should_imediately_answer = prompt or started_from_chat
+        awaiting_response = last_content['type'] != 'text' or last_content['text']
+        if awaiting_response and should_imediately_answer:
             vim.command("redraw")
 
             print('Answering...')

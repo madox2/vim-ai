@@ -289,6 +289,7 @@ function! vim_ai#AIChatRun(uses_range, config, ...) range abort
   let l:instruction = a:0 > 0 ? a:1 : ""
   let l:is_selection = a:uses_range && a:firstline == line("'<") && a:lastline == line("'>")
   let l:selection = s:GetSelectionOrRange(l:is_selection, a:uses_range, a:firstline, a:lastline)
+  let l:started_from_chat = &filetype == 'aichat'
 
   let l:config_input = {
   \  "config_default": g:vim_ai_chat,
@@ -301,6 +302,7 @@ function! vim_ai#AIChatRun(uses_range, config, ...) range abort
   let l:context = py3eval("make_ai_context(unwrap('l:config_input'))")
   let l:config = l:context['config']
   let l:context['prompt'] = a:0 > 0 || a:uses_range ? l:context['prompt'] : ''
+  let l:context['started_from_chat'] = l:started_from_chat
 
   try
     call s:set_paste(l:config)
