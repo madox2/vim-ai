@@ -1,4 +1,6 @@
 from context import make_ai_context, make_prompt
+from unittest.mock import patch
+import vim
 
 default_config = {
   "options": {
@@ -192,3 +194,15 @@ def test_selection_prompt():
 def test_selection_boundary():
     assert 'fix grammar:\n###\nhelo word\n###' == make_prompt( '', 'fix grammar', 'helo word', '###')
     assert 'fix grammar:\n###\nhelo word\n###' == make_prompt( 'fix grammar', '', 'helo word', '###')
+
+def test_markdown_selection_boundary(mocker):
+    # add file type to markdown boundary
+    mocker.patch('vim.eval').return_value = "python"
+    assert 'fix grammar:\n```python\nhelo word\n```' == make_prompt( '', 'fix grammar', 'helo word', '```')
+
+    # do not add filetype if not appropriate
+    mocker.patch('vim.eval').return_value = "aichat"
+    assert 'fix grammar:\n```\nhelo word\n```' == make_prompt( '', 'fix grammar', 'helo word', '```')
+    mocker.patch('vim.eval').return_value = ""
+    assert 'fix grammar:\n```\nhelo word\n```' == make_prompt( '', 'fix grammar', 'helo word', '```')
+

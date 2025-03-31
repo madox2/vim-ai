@@ -507,7 +507,8 @@ let g:vim_ai_debug_log_file = "/tmp/vim_ai_debug.log"
 " - setting max tokens to 0 will exclude it from the OpenAI API request parameters, it is
 "   unclear/undocumented what it exactly does, but it seems to resolve issues when the model
 "   hits token limit, which respond with `OpenAI: HTTPError 400`
-```
+" options.selection_boundary
+" - setting ``` value behaves in markdown-like fasion - adds filetype to the boundary
 
 ### Using custom API
 

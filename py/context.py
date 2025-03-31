@@ -118,12 +118,21 @@ def parse_prompt_and_role_config(user_instruction, command_type):
     role_prompt = config.get('prompt', '')
     return user_prompt, config, roles
 
+def make_selection_boundary(user_selection, selection_boundary):
+    if selection_boundary != '```':
+        return selection_boundary, selection_boundary
+    filetype = vim.eval('&filetype')
+    if filetype and filetype != 'aichat':
+        return selection_boundary + filetype, selection_boundary
+    return selection_boundary, selection_boundary
+
 def make_selection_prompt(user_selection, user_prompt, config_prompt, selection_boundary):
     if not user_prompt and not config_prompt:
         return user_selection
     elif user_selection:
         if selection_boundary and selection_boundary not in user_selection:
-            return f"{selection_boundary}\n{user_selection}\n{selection_boundary}"
+            left_boundary, right_boundary = make_selection_boundary(user_selection, selection_boundary)
+            return f"{left_boundary}\n{user_selection}\n{right_boundary}"
         else:
             return user_selection
     return ''
