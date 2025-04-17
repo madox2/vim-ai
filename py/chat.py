@@ -67,8 +67,10 @@ def run_ai_chat(context):
             vim.command("normal! i\n>>> user\n\n")
 
         if prompt:
-            vim.command("normal! i" + prompt)
+            vim.command("normal! dd")
+            vim.current.buffer.append(prompt.splitlines())
             vim_break_undo_sequence()
+            vim.command("normal! G")
             vim.command("redraw")
 
     initialize_chat_window()
