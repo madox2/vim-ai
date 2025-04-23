@@ -61,6 +61,9 @@ class OpenAIProvider():
             if delta.get('reasoning_content'):
                 # NOTE: support for deepseek's reasoning_content
                 return {'type': 'thinking', 'content': delta.get('reasoning_content')}
+            if delta.get('reasoning'):
+                # NOTE: support for `reasoning` from openrouter
+                return {'type': 'thinking', 'content': delta.get('reasoning')}
             if delta.get('content'):
                 return {'type': 'assistant', 'content': delta.get('content')}
             return None # invalid chunk, this occured in deepseek models
