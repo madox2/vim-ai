@@ -25,9 +25,7 @@ class OpenAIProvider():
 
     def request(self, messages: Sequence[AIMessage]) -> Iterator[AIResponseChunk]:
         options = self.options
-        print(options)
         openai_options = self._make_openai_options(options)
-        print(openai_options)
         http_options = {
             'request_timeout': options['request_timeout'],
             'auth_type': options['auth_type'],
