@@ -114,7 +114,7 @@ class OpenAIProvider():
         if options['temperature'] > -1:
             result['temperature'] = options['temperature']
 
-        if ['web_search_options'] in options:
+        if 'web_search_options' in options:
             result['web_search_options'] = options['web_search_options']
 
         if max_tokens > 0:
