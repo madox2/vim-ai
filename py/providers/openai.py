@@ -114,6 +114,9 @@ class OpenAIProvider():
         if options['temperature'] > -1:
             result['temperature'] = options['temperature']
 
+        if ['user_location'] in options:
+            result['user_location'] = options['user_location']
+
         if max_tokens > 0:
             result['max_tokens'] = max_tokens
         if max_completion_tokens > 0:
