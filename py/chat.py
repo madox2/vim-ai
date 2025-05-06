@@ -1,4 +1,8 @@
 import vim
+import threading
+import time
+import copy
+import traceback
 
 chat_py_imported = True
 
@@ -29,6 +33,7 @@ def run_ai_chat(context):
     config_options = config['options']
     roles = context['roles']
     started_from_chat = context['started_from_chat'] == '1'
+    print_debug(f"#### BUFNR = {context['bufnr']}")
 
     def initialize_chat_window():
         file_content = vim.eval('trim(join(getline(1, "$"), "\n"))')
@@ -101,7 +106,15 @@ def run_ai_chat(context):
             vim.command("redraw")
             provider_class = load_provider(provider)
             provider = provider_class(command_type, options, ai_provider_utils)
-            response_chunks = provider.request(messages)
+            #------------------------------------------------------------------------------
+            # Here we have to cut
+
+            print_debug("### Starting thread")
+            ai_job_pool.newJob(context, messages, provider)
+            print_debug("### Thread started")
+            return
+            # response_chunks = provider.request(messages)
+            response_chunks = [{"type":"assistant", "content":"brekeke"}]
 
             def _chunks_to_sections(chunks):
                 first_thinking_chunk = True
@@ -123,3 +136,96 @@ def run_ai_chat(context):
     except BaseException as error:
         handle_completion_error(provider, error)
         print_debug("[{}] error: {}", command_type, traceback.format_exc())
+
+
+# TODO remove ugly quickhack
+def DEBUG(text, *args):
+    with open("/tmp/vim_ai_debug.log", "a") as file:
+        message = text.format(*args) if len(args) else text
+        file.write(f"[{datetime.datetime.now()}] " + message + "\n")
+
+
+# wraps the AI chat job, shall be unique to a buffer
+class AI_chat_job(threading.Thread):
+    def __init__(self, context, messages, provider):
+        threading.Thread.__init__(self)
+        self.lines = []
+        self.buffer = ""
+        self.previous_type = ""
+        self.messages = messages
+        self.context = context
+        self.provider = provider
+        self.done = False
+        self.lock = threading.Lock()
+
+    def run(self):
+        DEBUG("&&& AI_chat_job thread START")
+        try:
+            for chunk in self.provider.request(self.messages):
+                with self.lock:
+                    # For now, we only append whole lines to the buffer
+                    DEBUG("&&& Received chunk")
+                    DEBUG(f"&&& DATA: '{chunk["type"]}' => '{chunk["content"]}'")
+                    if self.previous_type != chunk["type"]:
+                        self.buffer += "\n<<< " + chunk["type"] + "\n\n"
+                        self.previous_type = chunk["type"]
+                    self.buffer += chunk["content"]
+                    if "\n" in self.buffer:
+                        parts = self.buffer.split("\n")
+                        self.lines.extend(parts[:-1])
+                        self.buffer = parts[-1]
+        except Exception as e:
+            self.lines.append("")
+            self.lines.append(f"<<< Error getting response: {str(e)}")
+            self.lines.append("")
+            self.lines.append("```python")
+            self.lines.extend(traceback.format_exc().split("\n"))
+            self.lines.append("```")
+        finally:
+            with self.lock:
+                self.lines.append(self.buffer)
+                self.done = True
+        DEBUG("&&& AI_chat_job thread DONE")
+
+    def pickup(self):
+        with self.lock:
+            lines = copy.deepcopy(self.lines)
+            self.lines = []
+        return lines
+
+    def isdone(self):
+        with self.lock:
+            done = self.done
+        return done
+
+class AI_chat_jobs_pool(object):
+    def __init__(self):
+        self.pool = {}
+
+    def newJob(self, context, messages, provider):
+        # TODO prevent running two at the same time
+        bufnr = context["bufnr"]
+        self.pool[bufnr] = AI_chat_job(context, messages, provider)
+        self.pool[bufnr].start()
+        return self.pool[bufnr]
+
+    # pickup lines from a job based on bufnr
+    def pickuplines(self, bufnr):
+        if bufnr in self.pool:
+            lines = self.pool[bufnr].pickup()
+            ret = []
+            for line in lines:
+                ret.append(line)
+            return ret
+        else:
+            return []
+
+    def isjobdone(self, bufnr):
+        if bufnr in self.pool:
+            if self.pool[bufnr].isdone():
+                clear_echo_message()
+                return 1
+        return 0
+
+
+ai_job_pool = AI_chat_jobs_pool()

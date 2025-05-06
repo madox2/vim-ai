@@ -303,6 +303,8 @@ function! vim_ai#AIChatRun(uses_range, config, ...) range abort
   let l:config = l:context['config']
   let l:context['prompt'] = a:0 > 0 || a:uses_range ? l:context['prompt'] : ''
   let l:context['started_from_chat'] = l:started_from_chat
+  let l:context['bufnr'] = bufnr()
+  let l:bufnr = bufnr()
 
   try
     call s:set_paste(l:config)
@@ -312,9 +314,40 @@ function! vim_ai#AIChatRun(uses_range, config, ...) range abort
     let s:last_config = a:config
 
     py3 run_ai_chat(unwrap('l:context'))
+    call appendbufline(l:bufnr, '$', "<<< thinking .")
+    call timer_start(1000, function('vim_ai#AIChatWatch', [l:bufnr, 0]))
   finally
     call s:set_nopaste(l:config)
   endtry
+endfunction
+
+
+function! vim_ai#AIChatWatch(bufnr, anim, timerid) abort
+  " inject new lines, first check if it is done to avoid data race, we do not
+  " mind if we run the timer one more time, but we want all the data
+  let l:done = py3eval("ai_job_pool.isjobdone(unwrap('a:bufnr'))")
+  let l:result = py3eval("ai_job_pool.pickuplines(unwrap('a:bufnr'))")
+  call deletebufline(a:bufnr, '$')
+  call appendbufline(a:bufnr, '$', l:result)
+
+  " if not done, queue timer
+  if l:done == 0
+    if a:anim == 0
+      call timer_start(1000, function('vim_ai#AIChatWatch', [a:bufnr, 1]))
+      call appendbufline(a:bufnr, '$', "<<< thinking ..")
+    else
+      call timer_start(1000, function('vim_ai#AIChatWatch', [a:bufnr, 0]))
+      call appendbufline(a:bufnr, '$', "<<< thinking ...")
+    endif
+  else
+    call appendbufline(a:bufnr, '$', ["", ">>> user", "", ""])
+  end
+
+  " if window is visible, scroll down
+  let winid = bufwinid(a:bufnr)
+  if winid != -1
+    call win_execute(winid, "normal! G")
+  endif
 endfunction
 
 " Start a new chat
