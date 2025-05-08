@@ -17,6 +17,7 @@ command! -range -nargs=? -complete=customlist,vim_ai#RoleCompletionChat AIChat <
 command! -range -nargs=? -complete=customlist,vim_ai#RoleCompletionImage AIImage <line1>,<line2>call vim_ai#AIImageRun(<range>, {}, <q-args>)
 command! -nargs=? AINewChat call vim_ai#AINewChatDeprecatedRun(<f-args>)
 command! AIRedo call vim_ai#AIRedoRun()
+command! AIStopChat call vim_ai#AIChatStopRun()
 command! AIUtilRolesOpen call vim_ai#AIUtilRolesOpen()
 command! AIUtilDebugOn call vim_ai#AIUtilSetDebug(1)
 command! AIUtilDebugOff call vim_ai#AIUtilSetDebug(0)

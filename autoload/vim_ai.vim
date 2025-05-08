@@ -321,6 +321,17 @@ function! vim_ai#AIChatRun(uses_range, config, ...) range abort
   endtry
 endfunction
 
+" Cancel current chat job
+function! vim_ai#AIChatStopRun() abort
+  if &filetype !=# 'aichat'
+    echoerr "Not in an AI chat buffer."
+    return
+  endif
+  let l:bufnr = bufnr('%')
+  call s:ImportPythonModules() " Ensure chat.py is loaded
+  py3 ai_job_pool.cancel_job(unwrap('l:bufnr'))
+endfunction
+
 
 function! vim_ai#AIChatWatch(bufnr, anim, timerid) abort
   " inject new lines, first check if it is done to avoid data race, we do not

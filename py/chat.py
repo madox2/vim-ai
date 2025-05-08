@@ -154,9 +154,10 @@ class AI_chat_job(threading.Thread):
         self.previous_type = ""
         self.messages = messages
         self.context = context
+        self.cancelled = False
         self.provider = provider
         self.done = False
-        self.lock = threading.Lock()
+        self.lock = threading.RLock()
 
     def run(self):
         DEBUG("&&& AI_chat_job thread START")
@@ -170,17 +171,23 @@ class AI_chat_job(threading.Thread):
                         self.buffer += "\n<<< " + chunk["type"] + "\n\n"
                         self.previous_type = chunk["type"]
                     self.buffer += chunk["content"]
+                    if self.cancelled:
+                        self.buffer += "\n\nCANCELLED by user"
+                        DEBUG("&&& AI_chat_job cancelled during provider request")
                     if "\n" in self.buffer:
                         parts = self.buffer.split("\n")
                         self.lines.extend(parts[:-1])
                         self.buffer = parts[-1]
+                    if self.cancelled:
+                        break # Exit the loop
         except Exception as e:
-            self.lines.append("")
-            self.lines.append(f"<<< Error getting response: {str(e)}")
-            self.lines.append("")
-            self.lines.append("```python")
-            self.lines.extend(traceback.format_exc().split("\n"))
-            self.lines.append("```")
+            with self.lock:
+                self.lines.append("")
+                self.lines.append(f"<<< Error getting response: {str(e)}")
+                self.lines.append("")
+                self.lines.append("```python")
+                self.lines.extend(traceback.format_exc().split("\n"))
+                self.lines.append("```")
         finally:
             with self.lock:
                 self.lines.append(self.buffer)
@@ -197,6 +204,11 @@ class AI_chat_job(threading.Thread):
         with self.lock:
             done = self.done
         return done
+
+    def cancel(self):
+        with self.lock:
+            DEBUG("&&& AI_chat_job cancel method called")
+            self.cancelled = True
 
 class AI_chat_jobs_pool(object):
     def __init__(self):
@@ -225,7 +237,22 @@ class AI_chat_jobs_pool(object):
             if self.pool[bufnr].isdone():
                 clear_echo_message()
                 return 1
-        return 0
+            return 0
+        else:
+            return 1
 
+    def cancel_job(self, bufnr):
+        DEBUG(f"Attempting to cancel job for bufnr {bufnr}")
+        if bufnr in self.pool:
+            job = self.pool[bufnr]
+            if not job.isdone():
+                job.cancel()
+                DEBUG(f"Cancellation signal sent to job for bufnr {bufnr}")
+                return True
+            else:
+                DEBUG(f"Job for bufnr {bufnr} is already done.")
+                return False
+        DEBUG(f"No active job found for bufnr {bufnr} to cancel.")
+        return False
 
 ai_job_pool = AI_chat_jobs_pool()
