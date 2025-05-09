@@ -33,7 +33,6 @@ def run_ai_chat(context):
     config_options = config['options']
     roles = context['roles']
     started_from_chat = context['started_from_chat'] == '1'
-    print_debug(f"#### BUFNR = {context['bufnr']}")
 
     def initialize_chat_window():
         file_content = vim.eval('trim(join(getline(1, "$"), "\n"))')
@@ -106,43 +105,12 @@ def run_ai_chat(context):
             vim.command("redraw")
             provider_class = load_provider(provider)
             provider = provider_class(command_type, options, ai_provider_utils)
-            #------------------------------------------------------------------------------
-            # Here we have to cut
 
-            print_debug("### Starting thread")
             ai_job_pool.newJob(context, messages, provider)
-            print_debug("### Thread started")
             return
-            # response_chunks = provider.request(messages)
-            response_chunks = [{"type":"assistant", "content":"brekeke"}]
-
-            def _chunks_to_sections(chunks):
-                first_thinking_chunk = True
-                first_content_chunk = True
-                for chunk in chunks:
-                    if chunk['type'] == 'thinking' and first_thinking_chunk:
-                        first_thinking_chunk = False
-                        vim.command("normal! Go\n<<< thinking\n\n")
-                    if chunk['type'] == 'assistant' and first_content_chunk:
-                        first_content_chunk = False
-                        vim.command("normal! Go\n<<< assistant\n\n")
-                    yield chunk['content']
-
-            render_text_chunks(_chunks_to_sections(response_chunks), append_to_eol=True)
-
-            vim.command("normal! a\n\n>>> user\n\n")
-            vim.command("redraw")
-            clear_echo_message()
     except BaseException as error:
         handle_completion_error(provider, error)
         print_debug("[{}] error: {}", command_type, traceback.format_exc())
-
-
-# TODO remove ugly quickhack
-def DEBUG(text, *args):
-    with open("/tmp/vim_ai_debug.log", "a") as file:
-        message = text.format(*args) if len(args) else text
-        file.write(f"[{datetime.datetime.now()}] " + message + "\n")
 
 
 # wraps the AI chat job, shall be unique to a buffer
@@ -160,20 +128,19 @@ class AI_chat_job(threading.Thread):
         self.lock = threading.RLock()
 
     def run(self):
-        DEBUG("&&& AI_chat_job thread START")
+        print_debug_threaded("AI_chat_job thread STARTED")
         try:
             for chunk in self.provider.request(self.messages):
                 with self.lock:
                     # For now, we only append whole lines to the buffer
-                    DEBUG("&&& Received chunk")
-                    DEBUG(f"&&& DATA: '{chunk["type"]}' => '{chunk["content"]}'")
+                    print_debug_threaded(f"Received chunk: '{chunk["type"]}' => '{chunk["content"]}'")
                     if self.previous_type != chunk["type"]:
                         self.buffer += "\n<<< " + chunk["type"] + "\n\n"
                         self.previous_type = chunk["type"]
                     self.buffer += chunk["content"]
                     if self.cancelled:
                         self.buffer += "\n\nCANCELLED by user"
-                        DEBUG("&&& AI_chat_job cancelled during provider request")
+                        print_debug_threaded("AI_chat_job cancelled during provider request")
                     if "\n" in self.buffer:
                         parts = self.buffer.split("\n")
                         self.lines.extend(parts[:-1])
@@ -192,7 +159,7 @@ class AI_chat_job(threading.Thread):
             with self.lock:
                 self.lines.append(self.buffer)
                 self.done = True
-        DEBUG("&&& AI_chat_job thread DONE")
+        print_debug_threaded("AI_chat_job thread DONE")
 
     def pickup(self):
         with self.lock:
@@ -207,7 +174,6 @@ class AI_chat_job(threading.Thread):
 
     def cancel(self):
         with self.lock:
-            DEBUG("&&& AI_chat_job cancel method called")
             self.cancelled = True
 
 class AI_chat_jobs_pool(object):
@@ -217,6 +183,7 @@ class AI_chat_jobs_pool(object):
     def newJob(self, context, messages, provider):
         # TODO prevent running two at the same time
         bufnr = context["bufnr"]
+        update_debug_variables()
         self.pool[bufnr] = AI_chat_job(context, messages, provider)
         self.pool[bufnr].start()
         return self.pool[bufnr]
@@ -242,17 +209,17 @@ class AI_chat_jobs_pool(object):
             return 1
 
     def cancel_job(self, bufnr):
-        DEBUG(f"Attempting to cancel job for bufnr {bufnr}")
+        print_debug_threaded(f"Attempting to cancel job for bufnr {bufnr}")
         if bufnr in self.pool:
             job = self.pool[bufnr]
             if not job.isdone():
                 job.cancel()
-                DEBUG(f"Cancellation signal sent to job for bufnr {bufnr}")
+                print_debug_threaded(f"Cancellation signal sent to job for bufnr {bufnr}")
                 return True
             else:
-                DEBUG(f"Job for bufnr {bufnr} is already done.")
+                print_debug_threaded(f"Job for bufnr {bufnr} is already done.")
                 return False
-        DEBUG(f"No active job found for bufnr {bufnr} to cancel.")
+        print_debug_threaded(f"No active job found for bufnr {bufnr} to cancel.")
         return False
 
 ai_job_pool = AI_chat_jobs_pool()
