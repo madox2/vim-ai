@@ -2,6 +2,7 @@ import vim
 import threading
 import time
 import copy
+import json
 import traceback
 
 chat_py_imported = True
@@ -150,11 +151,16 @@ class AI_chat_job(threading.Thread):
         except Exception as e:
             with self.lock:
                 self.lines.append("")
-                self.lines.append(f"<<< Error getting response: {str(e)}")
+                self.lines.append(f"<<< error getting response: {str(e)}")
                 self.lines.append("")
                 self.lines.append("```python")
                 self.lines.extend(traceback.format_exc().split("\n"))
                 self.lines.append("```")
+                try:
+                    self.lines.append("")
+                    self.lines.append(json.loads(e.read().decode())["error"]["message"])
+                except:
+                    pass
         finally:
             with self.lock:
                 self.lines.append(self.buffer)
@@ -181,7 +187,6 @@ class AI_chat_jobs_pool(object):
         self.pool = {}
 
     def newJob(self, context, messages, provider):
-        # TODO prevent running two at the same time
         bufnr = context["bufnr"]
         update_debug_variables()
         self.pool[bufnr] = AI_chat_job(context, messages, provider)
@@ -202,7 +207,6 @@ class AI_chat_jobs_pool(object):
     def isjobdone(self, bufnr):
         if bufnr in self.pool:
             if self.pool[bufnr].isdone():
-                clear_echo_message()
                 return 1
             return 0
         else:

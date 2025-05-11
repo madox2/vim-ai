@@ -306,6 +306,11 @@ function! vim_ai#AIChatRun(uses_range, config, ...) range abort
   let l:context['bufnr'] = bufnr()
   let l:bufnr = bufnr()
 
+  if py3eval("ai_job_pool.isjobdone(unwrap('l:bufnr'))") == 0
+    echoerr "Operation in progress, wait or stop it with :AIStopChat"
+    return
+  endif
+
   try
     call s:set_paste(l:config)
     call s:ReuseOrCreateChatWindow(l:config)
@@ -352,6 +357,9 @@ function! vim_ai#AIChatWatch(bufnr, anim, timerid) abort
     endif
   else
     call appendbufline(a:bufnr, '$', ["", ">>> user", "", ""])
+    " Clear message
+    " https://neovim.discourse.group/t/how-to-clear-the-echo-message-in-the-command-line/268/3
+    call feedkeys(':','nx')
   end
 
   " if window is visible, scroll down
