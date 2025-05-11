@@ -32,6 +32,8 @@ See this simple [guide](#example-create-custom-roles-to-interact-with-openrouter
 
 🚨 **Announcement** 🚨
 
+AIChat is now asynchronous, you can continue using vim while the completion is happening in the background. You can even have multiple chat completions running in parallel in one vim instance. Tips: Use `options.streaming=1` to see the results coming in. Use `:AIStopChat` to stop completion.
+
 `vim-ai` can now be extended with custom provider plugins.
 However, there aren't many available yet, so developing new ones is welcome!
 For more, see the [providers](#providers) section.
@@ -99,10 +101,11 @@ To use an AI command, type the command followed by an instruction prompt. You ca
 ```
 ========== Basic AI commands ==========
 
-:AI       complete text
-:AIEdit   edit text
-:AIChat   continue or open new chat
-:AIImage  generate image
+:AI          complete text
+:AIEdit      edit text
+:AIChat      continue or open new chat
+:AIStopChat  stop the generation of the AI response for the AIChat
+:AIImage     generate image
 
 ============== Utilities ==============
 

@@ -99,6 +99,7 @@ def run_ai_chat(context):
         # if empty :AIC has been called outside of the chat, just init/switch to the chat but don't trigger the request (#147)
         should_imediately_answer = prompt or started_from_chat
         awaiting_response = last_content['type'] != 'text' or last_content['text']
+        print_debug(f"BREKEKE: {should_imediately_answer} ,  {awaiting_response}")
         if awaiting_response and should_imediately_answer:
             vim.command("redraw")
 
@@ -108,7 +109,9 @@ def run_ai_chat(context):
             provider = provider_class(command_type, options, ai_provider_utils)
 
             ai_job_pool.newJob(context, messages, provider)
-            return
+            return True
+        else:
+            return False
     except BaseException as error:
         handle_completion_error(provider, error)
         print_debug("[{}] error: {}", command_type, traceback.format_exc())
@@ -182,6 +185,8 @@ class AI_chat_job(threading.Thread):
         with self.lock:
             self.cancelled = True
 
+# Pool of AI chat jobs accessible by bufnr
+# There can be only one in progress per bufnr
 class AI_chat_jobs_pool(object):
     def __init__(self):
         self.pool = {}
