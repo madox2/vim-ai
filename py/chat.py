@@ -67,7 +67,7 @@ def run_ai_chat(context):
         vim.command("redraw")
 
         last_role = re.match(r".*^(>>>|<<<) (\w+)", file_content, flags=re.DOTALL | re.MULTILINE)
-        if last_role and last_role.group(2) not in ('user', 'include', 'exec'):
+        if last_role and last_role.group(2) not in ('user', 'include', 'exec', 'tool_call', 'tool_response', 'info'):
             # last role is not a user role, most likely completion was cancelled before
             vim.command("normal! o")
             vim.command("normal! i\n>>> user\n\n")
@@ -99,7 +99,7 @@ def run_ai_chat(context):
 
         # if empty :AIC has been called outside of the chat, just init/switch to the chat but don't trigger the request (#147)
         should_imediately_answer = prompt or started_from_chat
-        awaiting_response = last_content['type'] != 'text' or last_content['text']
+        awaiting_response = last_content['type'] != 'text' or last_content['text'] or "tool_calls" in messages[-1]
         if awaiting_response and should_imediately_answer:
             vim.command("redraw")
 
@@ -160,7 +160,9 @@ class AI_chat_job(threading.Thread):
                 with self.lock:
                     # For now, we only append whole lines to the buffer
                     print_debug(f"Received chunk: '{chunk['type']}' => '{chunk['content']}'")
-                    if self.previous_type != chunk["type"]:
+                    if self.previous_type != chunk["type"] or "newsegment" in chunk:
+                        if self.previous_type != "":
+                            self.buffer += "\n"
                         self.buffer += "\n<<< " + chunk["type"] + "\n\n"
                         self.previous_type = chunk["type"]
                     self.buffer += chunk["content"]

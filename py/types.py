@@ -14,7 +14,7 @@ class AIImageUrlContent(TypedDict):
 AIMessageContent = Union[AITextContent, AIImageUrlContent]
 
 class AIMessage(TypedDict):
-    role: Literal['system', 'user', 'assistant']
+    role: Literal['system', 'user', 'assistant', 'tool']
     content: List[AIMessageContent]
 
 class AIUtils(Protocol):

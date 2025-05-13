@@ -187,6 +187,14 @@ def parse_chat_messages(chat_content):
                 else:
                     messages.append({'role': 'user', 'content': [{ 'type': 'text', 'text': '' }]})
                 current_type = 'user'
+            case '<<< tool_call':
+                messages.append({'role': 'assistant', 'content': [{ 'type': 'text', 'text': '' }], 'tool_calls':[]})
+                current_type = 'tool_call'
+            case '<<< tool_response':
+                messages.append({'role': 'tool', 'content': [{ 'type': 'text', 'text': '' }]})
+                current_type = 'tool_response'
+            case '<<< info':
+                current_type = 'info'
             case '>>> include':
                 if not messages or messages[-1]['role'] != 'user':
                     messages.append({'role': 'user', 'content': []})
@@ -210,6 +218,13 @@ def parse_chat_messages(chat_content):
                         cmd = line.strip()
                         if cmd:
                             messages[-1]['content'].append(make_exec_output_message(cmd))
+                    case 'tool_call' | 'tool_response':
+                        l = line.strip()
+                        if l:
+                            messages[-1] = json.loads(l)
+                    case 'info':
+                        pass
+
 
     for message in messages:
         # strip newlines from the text content as it causes empty responses
