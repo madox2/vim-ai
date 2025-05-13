@@ -108,7 +108,7 @@ def run_ai_chat(context):
             provider_class = load_provider(provider)
             provider = provider_class(command_type, options, ai_provider_utils)
 
-            ai_job_pool.newJob(context, messages, provider)
+            ai_job_pool.new_job(context, messages, provider)
             return True
         else:
             return False
@@ -176,7 +176,7 @@ class AI_chat_job(threading.Thread):
             self.lines = []
         return lines
 
-    def isdone(self):
+    def is_done(self):
         with self.lock:
             done = self.done
         return done
@@ -191,7 +191,7 @@ class AI_chat_jobs_pool(object):
     def __init__(self):
         self.pool = {}
 
-    def newJob(self, context, messages, provider):
+    def new_job(self, context, messages, provider):
         bufnr = context["bufnr"]
         update_debug_variables()
         self.pool[bufnr] = AI_chat_job(context, messages, provider)
@@ -199,7 +199,7 @@ class AI_chat_jobs_pool(object):
         return self.pool[bufnr]
 
     # pickup lines from a job based on bufnr
-    def pickuplines(self, bufnr):
+    def pickup_lines(self, bufnr):
         if bufnr in self.pool:
             lines = self.pool[bufnr].pickup()
             ret = []
@@ -209,9 +209,9 @@ class AI_chat_jobs_pool(object):
         else:
             return []
 
-    def isjobdone(self, bufnr):
+    def is_job_done(self, bufnr):
         if bufnr in self.pool:
-            if self.pool[bufnr].isdone():
+            if self.pool[bufnr].is_done():
                 return 1
             return 0
         else:
@@ -221,7 +221,7 @@ class AI_chat_jobs_pool(object):
         print_debug_threaded(f"Attempting to cancel job for bufnr {bufnr}")
         if bufnr in self.pool:
             job = self.pool[bufnr]
-            if not job.isdone():
+            if not job.is_done():
                 job.cancel()
                 print_debug_threaded(f"Cancellation signal sent to job for bufnr {bufnr}")
                 return True

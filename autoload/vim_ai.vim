@@ -311,7 +311,7 @@ function! vim_ai#AIChatRun(uses_range, config, ...) range abort
     let l:context['bufnr'] = bufnr()
     let l:bufnr = bufnr()
 
-    if py3eval("ai_job_pool.isjobdone(unwrap('l:bufnr'))") == 0
+    if py3eval("ai_job_pool.is_job_done(unwrap('l:bufnr'))") == 0
       echoerr "Operation in progress, wait or stop it with :AIStopChat"
       return
     endif
@@ -347,8 +347,8 @@ endfunction
 function! vim_ai#AIChatWatch(bufnr, anim, timerid) abort
   " inject new lines, first check if it is done to avoid data race, we do not
   " mind if we run the timer one more time, but we want all the data
-  let l:done = py3eval("ai_job_pool.isjobdone(unwrap('a:bufnr'))")
-  let l:result = py3eval("ai_job_pool.pickuplines(unwrap('a:bufnr'))")
+  let l:done = py3eval("ai_job_pool.is_job_done(unwrap('a:bufnr'))")
+  let l:result = py3eval("ai_job_pool.pickup_lines(unwrap('a:bufnr'))")
   call deletebufline(a:bufnr, '$')
   call deletebufline(a:bufnr, '$')
   call appendbufline(a:bufnr, '$', l:result)
