@@ -32,6 +32,10 @@ See this simple [guide](#example-create-custom-roles-to-interact-with-openrouter
 
 🚨 **Announcement** 🚨
 
+Basic MCP support now available via [vim-ai-provider-openai-mcp](https://github.com/kracejic/vim-ai-provider-openai-mcp) plugin.
+
+AIChat is now asynchronous, you can continue using vim while the completion is happening in the background. You can even have multiple chat completions running in parallel in one vim instance. Tips: Use `options.streaming=1` to see the results coming in. Use `:AIStopChat` to stop completion. You can enable this with: `let g:vim_ai_async_chat = 1`.
+
 `vim-ai` can now be extended with custom provider plugins.
 However, there aren't many available yet, so developing new ones is welcome!
 For more, see the [providers](#providers) section.
@@ -99,10 +103,11 @@ To use an AI command, type the command followed by an instruction prompt. You ca
 ```
 ========== Basic AI commands ==========
 
-:AI       complete text
-:AIEdit   edit text
-:AIChat   continue or open new chat
-:AIImage  generate image
+:AI          complete text
+:AIEdit      edit text
+:AIChat      continue or open new chat
+:AIStopChat  stop the generation of the AI response for the AIChat
+:AIImage     generate image
 
 ============== Utilities ==============
 
@@ -134,6 +139,7 @@ This is the list of 3rd party provider plugins allowing to use different AI prov
 
 - [google provider](https://github.com/madox2/vim-ai-provider-google) - Google's Gemini models
 - [OpenAI Responses API Provider](https://github.com/kevincojean/vim-ai-provider-openai-responses) - OpenAI Responses API compatibility plug-in
+- [OpenAI Provider with MCP support](https://github.com/kracejic/vim-ai-provider-openai-mcp)
 
 In case you are interested in developing one, have a look at reference [google provider](https://github.com/madox2/vim-ai-provider-google).
 Do not forget to open PR updating this list.
@@ -488,6 +494,9 @@ let g:vim_ai_token_file_path = "~/.config/openai.token"
 
 " custom fn to load token, e.g. "g:GetAIToken()"
 let g:vim_ai_token_load_fn = ""
+
+" enable asynchronout AIChat (disabled by default)
+let g:vim_ai_async_chat = 1
 
 " enables/disables full markdown highlighting in aichat files
 " NOTE: code syntax highlighting works out of the box without this option enabled

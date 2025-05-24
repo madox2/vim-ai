@@ -16,6 +16,7 @@ class OpenAIProvider():
         self.command_type = command_type
         raw_default_options = vim.eval(f"g:vim_ai_openai_{command_type}")
         self.options = self._parse_raw_options({**raw_default_options, **raw_options})
+        self._load_api_key()
 
     def _protocol_type_check(self) -> None:
         # dummy method, just to ensure type safety
@@ -45,7 +46,7 @@ class OpenAIProvider():
             'messages': _flatten_content(messages),
             **openai_options
         }
-        self.utils.print_debug("openai: [{}] request: {}", self.command_type, request)
+        self.utils.print_debug_threaded("openai: [{}] request: {}", self.command_type, request)
         url = options['endpoint_url']
         response = self._openai_request(url, request, http_options)
 
@@ -56,7 +57,7 @@ class OpenAIProvider():
             return choices[0].get(_choice_key, {})
 
         def _map_chunk(resp):
-            self.utils.print_debug("openai: [{}] response: {}", self.command_type, resp)
+            self.utils.print_debug_threaded("openai: [{}] response: {}", self.command_type, resp)
             delta = _get_delta(resp)
             if delta.get('reasoning_content'):
                 # NOTE: support for deepseek's reasoning_content
@@ -88,6 +89,8 @@ class OpenAIProvider():
         if len(elements) > 1:
             org_id = elements[1].strip()
 
+        self.api_key = api_key
+        self.org_id = org_id
         return (api_key, org_id)
 
     def _parse_raw_options(self, raw_options: Mapping[str, Any]):
@@ -139,10 +142,10 @@ class OpenAIProvider():
             'response_format': 'b64_json',
         }
         request = { 'prompt': prompt, **openai_options }
-        self.utils.print_debug("openai: [{}] request: {}", self.command_type, request)
+        self.utils.print_debug_threaded("openai: [{}] request: {}", self.command_type, request)
         url = options['endpoint_url']
         response, *_ = self._openai_request(url, request, http_options)
-        self.utils.print_debug("openai: [{}] response: {}", self.command_type, { 'images_count': len(response['data']) })
+        self.utils.print_debug_threaded("openai: [{}] response: {}", self.command_type, { 'images_count': len(response['data']) })
         b64_data = response['data'][0]['b64_json']
         return [{ 'b64_data': b64_data }]
 
@@ -157,15 +160,13 @@ class OpenAIProvider():
         }
 
         if auth_type == 'bearer':
-            (OPENAI_API_KEY, OPENAI_ORG_ID) = self._load_api_key()
-            headers['Authorization'] = f"Bearer {OPENAI_API_KEY}"
+            headers['Authorization'] = f"Bearer {self.api_key}"
 
-            if OPENAI_ORG_ID is not None:
-                headers["OpenAI-Organization"] =  f"{OPENAI_ORG_ID}"
+            if self.org_id is not None:
+                headers["OpenAI-Organization"] =  f"{self.org_id}"
 
         if auth_type == 'api-key':
-            (OPENAI_API_KEY, _) = self._load_api_key()
-            headers['api-key'] = f"{OPENAI_API_KEY}"
+            headers['api-key'] = f"{self.api_key}"
 
         request_timeout=options['request_timeout']
         req = urllib.request.Request(
