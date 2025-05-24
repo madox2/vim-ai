@@ -320,9 +320,11 @@ function! vim_ai#AIChatRun(uses_range, config, ...) range abort
     let s:last_config = a:config
 
     if py3eval("run_ai_chat(unwrap('l:context'))")
-      call appendbufline(l:bufnr, '$', "")
-      call appendbufline(l:bufnr, '$', "<<< thinking -")
-      call timer_start(1000, function('vim_ai#AIChatWatch', [l:bufnr, 0]))
+      if g:vim_ai_async_chat == 1
+        call appendbufline(l:bufnr, '$', "")
+        call appendbufline(l:bufnr, '$', "<<< thinking -")
+        call timer_start(1000, function('vim_ai#AIChatWatch', [l:bufnr, 0]))
+      endif
     endif
   finally
     call s:set_nopaste(l:config)
@@ -365,7 +367,6 @@ function! vim_ai#AIChatWatch(bufnr, anim, timerid) abort
       call appendbufline(a:bufnr, '$', "<<< thinking \\")
     endif
   else
-    call appendbufline(a:bufnr, '$', ["", ">>> user", "", ""])
     " Clear message
     " https://neovim.discourse.group/t/how-to-clear-the-echo-message-in-the-command-line/268/3
     call feedkeys(':','nx')

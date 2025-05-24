@@ -133,6 +133,9 @@ endif
 if !exists("g:vim_ai_roles_config_file")
   let g:vim_ai_roles_config_file = s:plugin_root . "/roles-example.ini"
 endif
+if !exists("g:vim_ai_async_chat")
+  let g:vim_ai_async_chat = 0
+endif
 
 function! vim_ai_config#ExtendDeep(defaults, override) abort
   let l:result = a:defaults

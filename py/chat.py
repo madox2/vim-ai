@@ -108,7 +108,29 @@ def run_ai_chat(context):
             provider_class = load_provider(provider)
             provider = provider_class(command_type, options, ai_provider_utils)
 
-            ai_job_pool.new_job(context, messages, provider)
+            if vim.eval("g:vim_ai_async_chat") == "1":
+                ai_job_pool.new_job(context, messages, provider)
+            else:
+                response_chunks = provider.request(messages)
+
+                def _chunks_to_sections(chunks):
+                    first_thinking_chunk = True
+                    first_content_chunk = True
+                    for chunk in chunks:
+                        if chunk['type'] == 'thinking' and first_thinking_chunk:
+                            first_thinking_chunk = False
+                            vim.command("normal! Go\n<<< thinking\n\n")
+                        if chunk['type'] == 'assistant' and first_content_chunk:
+                            first_content_chunk = False
+                            vim.command("normal! Go\n<<< assistant\n\n")
+                        yield chunk['content']
+
+                render_text_chunks(_chunks_to_sections(response_chunks), append_to_eol=True)
+
+                vim.command("normal! a\n\n>>> user\n\n")
+                vim.command("redraw")
+                clear_echo_message()
+
             return True
         else:
             return False
@@ -167,6 +189,8 @@ class AI_chat_job(threading.Thread):
         finally:
             with self.lock:
                 self.lines.append(self.buffer)
+                if self.previous_type == "assistant":
+                    self.lines.extend("\n>>> user\n\n".split("\n"))
                 self.done = True
         print_debug_threaded("AI_chat_job thread DONE")
 
