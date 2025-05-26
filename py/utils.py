@@ -18,26 +18,18 @@ DEFAULT_ROLE_NAME = 'default'
 _vimai_thread_is_debug_active = False
 _vimai_thread_log_file_path = "/tmp/vim_ai_debug.log"
 
-def update_debug_variables():
+def update_thread_shared_variables():
     global _vimai_thread_is_debug_active
     global _vimai_thread_log_file_path
     _vimai_thread_is_debug_active = vim.eval("g:vim_ai_debug") == "1"
     _vimai_thread_log_file_path = vim.eval("g:vim_ai_debug_log_file")
 
-def print_debug_threaded(text, *args):
+def print_debug(text, *args):
     global _vimai_thread_is_debug_active
     global _vimai_thread_log_file_path
     if not _vimai_thread_is_debug_active:
         return
     with open(_vimai_thread_log_file_path, "a") as file:
-        message = text.format(*args) if len(args) else text
-        file.write(f"[{datetime.datetime.now()}] " + message + "\n")
-
-# Do not use this from thread (in AI provider)
-def print_debug(text, *args):
-    if not is_ai_debugging():
-        return
-    with open(vim.eval("g:vim_ai_debug_log_file"), "a") as file:
         message = text.format(*args) if len(args) else text
         file.write(f"[{datetime.datetime.now()}] " + message + "\n")
 
@@ -64,9 +56,6 @@ def load_token_from_fn(expression):
 class AIProviderUtils():
     def print_debug(self, text, *args):
         print_debug(text, *args)
-
-    def print_debug_threaded(self, text, *args):
-        print_debug_threaded(text, *args)
 
     def make_known_error(self, message: str):
         return KnownError(message)

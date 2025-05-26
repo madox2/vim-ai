@@ -46,7 +46,7 @@ class OpenAIProvider():
             'messages': _flatten_content(messages),
             **openai_options
         }
-        self.utils.print_debug_threaded("openai: [{}] request: {}", self.command_type, request)
+        self.utils.print_debug("openai: [{}] request: {}", self.command_type, request)
         url = options['endpoint_url']
         response = self._openai_request(url, request, http_options)
 
@@ -57,7 +57,7 @@ class OpenAIProvider():
             return choices[0].get(_choice_key, {})
 
         def _map_chunk(resp):
-            self.utils.print_debug_threaded("openai: [{}] response: {}", self.command_type, resp)
+            self.utils.print_debug("openai: [{}] response: {}", self.command_type, resp)
             delta = _get_delta(resp)
             if delta.get('reasoning_content'):
                 # NOTE: support for deepseek's reasoning_content
@@ -142,10 +142,10 @@ class OpenAIProvider():
             'response_format': 'b64_json',
         }
         request = { 'prompt': prompt, **openai_options }
-        self.utils.print_debug_threaded("openai: [{}] request: {}", self.command_type, request)
+        self.utils.print_debug("openai: [{}] request: {}", self.command_type, request)
         url = options['endpoint_url']
         response, *_ = self._openai_request(url, request, http_options)
-        self.utils.print_debug_threaded("openai: [{}] response: {}", self.command_type, { 'images_count': len(response['data']) })
+        self.utils.print_debug("openai: [{}] response: {}", self.command_type, { 'images_count': len(response['data']) })
         b64_data = response['data'][0]['b64_json']
         return [{ 'b64_data': b64_data }]
 

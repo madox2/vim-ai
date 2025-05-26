@@ -28,6 +28,7 @@ def _populate_options(config):
         vim.command("normal! ioptions." + key + "=" + value + "\n")
 
 def run_ai_chat(context):
+    update_thread_shared_variables()
     command_type = context['command_type']
     prompt = context['prompt']
     config = make_config(context['config'])
@@ -99,7 +100,6 @@ def run_ai_chat(context):
         # if empty :AIC has been called outside of the chat, just init/switch to the chat but don't trigger the request (#147)
         should_imediately_answer = prompt or started_from_chat
         awaiting_response = last_content['type'] != 'text' or last_content['text']
-        print_debug(f"BREKEKE: {should_imediately_answer} ,  {awaiting_response}")
         if awaiting_response and should_imediately_answer:
             vim.command("redraw")
 
@@ -154,19 +154,19 @@ class AI_chat_job(threading.Thread):
         self.lock = threading.RLock()
 
     def run(self):
-        print_debug_threaded("AI_chat_job thread STARTED")
+        print_debug("AI_chat_job thread STARTED")
         try:
             for chunk in self.provider.request(self.messages):
                 with self.lock:
                     # For now, we only append whole lines to the buffer
-                    print_debug_threaded(f"Received chunk: '{chunk["type"]}' => '{chunk["content"]}'")
+                    print_debug(f"Received chunk: '{chunk["type"]}' => '{chunk["content"]}'")
                     if self.previous_type != chunk["type"]:
                         self.buffer += "\n<<< " + chunk["type"] + "\n\n"
                         self.previous_type = chunk["type"]
                     self.buffer += chunk["content"]
                     if self.cancelled:
                         self.buffer += "\n\nCANCELLED by user"
-                        print_debug_threaded("AI_chat_job cancelled during provider request")
+                        print_debug("AI_chat_job cancelled during provider request")
                     if "\n" in self.buffer:
                         parts = self.buffer.split("\n")
                         self.lines.extend(parts[:-1])
@@ -192,7 +192,7 @@ class AI_chat_job(threading.Thread):
                 if self.previous_type == "assistant":
                     self.lines.extend("\n>>> user\n\n".split("\n"))
                 self.done = True
-        print_debug_threaded("AI_chat_job thread DONE")
+        print_debug("AI_chat_job thread DONE")
 
     def pickup(self):
         with self.lock:
@@ -217,7 +217,6 @@ class AI_chat_jobs_pool(object):
 
     def new_job(self, context, messages, provider):
         bufnr = context["bufnr"]
-        update_debug_variables()
         self.pool[bufnr] = AI_chat_job(context, messages, provider)
         self.pool[bufnr].start()
         return self.pool[bufnr]
@@ -242,17 +241,17 @@ class AI_chat_jobs_pool(object):
             return 1
 
     def cancel_job(self, bufnr):
-        print_debug_threaded(f"Attempting to cancel job for bufnr {bufnr}")
+        print_debug(f"Attempting to cancel job for bufnr {bufnr}")
         if bufnr in self.pool:
             job = self.pool[bufnr]
             if not job.is_done():
                 job.cancel()
-                print_debug_threaded(f"Cancellation signal sent to job for bufnr {bufnr}")
+                print_debug(f"Cancellation signal sent to job for bufnr {bufnr}")
                 return True
             else:
-                print_debug_threaded(f"Job for bufnr {bufnr} is already done.")
+                print_debug(f"Job for bufnr {bufnr} is already done.")
                 return False
-        print_debug_threaded(f"No active job found for bufnr {bufnr} to cancel.")
+        print_debug(f"No active job found for bufnr {bufnr} to cancel.")
         return False
 
 ai_job_pool = AI_chat_jobs_pool()
