@@ -16,7 +16,6 @@ class OpenAIProvider():
         self.command_type = command_type
         raw_default_options = vim.eval(f"g:vim_ai_openai_{command_type}")
         self.options = self._parse_raw_options({**raw_default_options, **raw_options})
-        self._load_api_key()
 
     def _protocol_type_check(self) -> None:
         # dummy method, just to ensure type safety
@@ -89,8 +88,6 @@ class OpenAIProvider():
         if len(elements) > 1:
             org_id = elements[1].strip()
 
-        self.api_key = api_key
-        self.org_id = org_id
         return (api_key, org_id)
 
     def _parse_raw_options(self, raw_options: Mapping[str, Any]):
@@ -160,13 +157,15 @@ class OpenAIProvider():
         }
 
         if auth_type == 'bearer':
-            headers['Authorization'] = f"Bearer {self.api_key}"
+            (OPENAI_API_KEY, OPENAI_ORG_ID) = self._load_api_key()
+            headers['Authorization'] = f"Bearer {OPENAI_API_KEY}"
 
-            if self.org_id is not None:
-                headers["OpenAI-Organization"] =  f"{self.org_id}"
+            if OPENAI_ORG_ID is not None:
+                headers["OpenAI-Organization"] =  f"{OPENAI_ORG_ID}"
 
         if auth_type == 'api-key':
-            headers['api-key'] = f"{self.api_key}"
+            (OPENAI_API_KEY, _) = self._load_api_key()
+            headers['api-key'] = f"{OPENAI_API_KEY}"
 
         request_timeout=options['request_timeout']
         req = urllib.request.Request(

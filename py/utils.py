@@ -15,14 +15,20 @@ utils_py_imported = True
 
 DEFAULT_ROLE_NAME = 'default'
 
-_vimai_thread_is_debug_active = False
-_vimai_thread_log_file_path = "/tmp/vim_ai_debug.log"
+_vimai_thread_is_debug_active = vim.eval("g:vim_ai_debug") == "1"
+_vimai_thread_log_file_path = vim.eval("g:vim_ai_debug_log_file")
+_vimai_thread_token_file_path = vim.eval("g:vim_ai_token_file_path")
+_vimai_thread_token_load_fn = vim.eval("g:vim_ai_token_load_fn")
 
 def update_thread_shared_variables():
     global _vimai_thread_is_debug_active
     global _vimai_thread_log_file_path
+    global _vimai_thread_token_file_path
+    global _vimai_thread_token_load_fn
     _vimai_thread_is_debug_active = vim.eval("g:vim_ai_debug") == "1"
     _vimai_thread_log_file_path = vim.eval("g:vim_ai_debug_log_file")
+    _vimai_thread_token_file_path = vim.eval("g:vim_ai_token_file_path")
+    _vimai_thread_token_load_fn = vim.eval("g:vim_ai_token_load_fn")
 
 def print_debug(text, *args):
     global _vimai_thread_is_debug_active
@@ -32,9 +38,6 @@ def print_debug(text, *args):
     with open(_vimai_thread_log_file_path, "a") as file:
         message = text.format(*args) if len(args) else text
         file.write(f"[{datetime.datetime.now()}] " + message + "\n")
-
-def is_ai_debugging():
-    return vim.eval("g:vim_ai_debug") == "1"
 
 class KnownError(Exception):
     pass
@@ -65,8 +68,8 @@ class AIProviderUtils():
             lambda: load_token_from_file_path(token_file_path),
             lambda: load_token_from_fn(token_load_fn),
             lambda: load_token_from_env_variable(env_variable_name),
-            lambda: load_token_from_file_path(vim.eval("g:vim_ai_token_file_path")),
-            lambda: load_token_from_fn(vim.eval("g:vim_ai_token_load_fn")),
+            lambda: load_token_from_file_path(_vimai_thread_token_file_path),
+            lambda: load_token_from_fn(_vimai_thread_token_load_fn),
         )
         for loader in loaders:
             try:
