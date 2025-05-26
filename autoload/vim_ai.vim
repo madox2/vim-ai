@@ -360,7 +360,7 @@ function! vim_ai#AIChatWatch(bufnr, anim_index, timerid) abort
     call appendbufline(a:bufnr, '$', "")
     let l:animations = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']
     let l:current_animation = l:animations[a:anim_index % len(l:animations)]
-    call appendbufline(a:bufnr, '$', "<<< thinking " . l:current_animation)
+    call appendbufline(a:bufnr, '$', "<<< answering " . l:current_animation)
   else
     " Clear message
     " https://neovim.discourse.group/t/how-to-clear-the-echo-message-in-the-command-line/268/3
