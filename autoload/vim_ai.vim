@@ -11,6 +11,7 @@ let s:last_command = ""
 let s:last_config = {}
 
 let s:scratch_buffer_name = ">>> AI chat"
+let s:chat_redraw_interval = 250 " milliseconds
 
 function! s:ImportPythonModules()
   for py_module in ['types', 'utils', 'context', 'chat', 'complete', 'roles', 'image']
@@ -321,9 +322,7 @@ function! vim_ai#AIChatRun(uses_range, config, ...) range abort
 
     if py3eval("run_ai_chat(unwrap('l:context'))")
       if g:vim_ai_async_chat == 1
-        call appendbufline(l:bufnr, '$', "")
-        call appendbufline(l:bufnr, '$', "<<< thinking -")
-        call timer_start(1000, function('vim_ai#AIChatWatch', [l:bufnr, 0]))
+        call timer_start(0, function('vim_ai#AIChatWatch', [l:bufnr, 0]))
       endif
     endif
   finally
@@ -346,7 +345,7 @@ endfunction
 " Function called in a timer that check if there are new lines from AI and
 " appned them in a buffer. It ends when AI thread is finished (or when
 " stopped).
-function! vim_ai#AIChatWatch(bufnr, anim, timerid) abort
+function! vim_ai#AIChatWatch(bufnr, anim_index, timerid) abort
   " inject new lines, first check if it is done to avoid data race, we do not
   " mind if we run the timer one more time, but we want all the data
   let l:done = py3eval("ai_job_pool.is_job_done(unwrap('a:bufnr'))")
@@ -357,15 +356,11 @@ function! vim_ai#AIChatWatch(bufnr, anim, timerid) abort
 
   " if not done, queue timer and animate
   if l:done == 0
-    if a:anim == 0
-      call timer_start(1000, function('vim_ai#AIChatWatch', [a:bufnr, 1]))
-      call appendbufline(a:bufnr, '$', "")
-      call appendbufline(a:bufnr, '$', "<<< thinking /")
-    else
-      call timer_start(1000, function('vim_ai#AIChatWatch', [a:bufnr, 0]))
-      call appendbufline(a:bufnr, '$', "")
-      call appendbufline(a:bufnr, '$', "<<< thinking \\")
-    endif
+    call timer_start(s:chat_redraw_interval, function('vim_ai#AIChatWatch', [a:bufnr, a:anim_index + 1]))
+    call appendbufline(a:bufnr, '$', "")
+    let l:animations = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']
+    let l:current_animation = l:animations[a:anim_index % len(l:animations)]
+    call appendbufline(a:bufnr, '$', "<<< thinking " . l:current_animation)
   else
     " Clear message
     " https://neovim.discourse.group/t/how-to-clear-the-echo-message-in-the-command-line/268/3

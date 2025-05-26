@@ -194,7 +194,7 @@ class AI_chat_job(threading.Thread):
                 self.done = True
         print_debug("AI_chat_job thread DONE")
 
-    def pickup(self):
+    def pickup_lines(self):
         with self.lock:
             lines = copy.deepcopy(self.lines)
             self.lines = []
@@ -224,21 +224,13 @@ class AI_chat_jobs_pool(object):
     # pickup lines from a job based on bufnr
     def pickup_lines(self, bufnr):
         if bufnr in self.pool:
-            lines = self.pool[bufnr].pickup()
-            ret = []
-            for line in lines:
-                ret.append(line)
-            return ret
-        else:
-            return []
+            return self.pool[bufnr].pickup_lines()
+        return []
 
     def is_job_done(self, bufnr):
         if bufnr in self.pool:
-            if self.pool[bufnr].is_done():
-                return 1
-            return 0
-        else:
-            return 1
+            return self.pool[bufnr].is_done()
+        return True
 
     def cancel_job(self, bufnr):
         print_debug(f"Attempting to cancel job for bufnr {bufnr}")
