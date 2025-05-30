@@ -322,6 +322,8 @@ function! vim_ai#AIChatRun(uses_range, config, ...) range abort
 
     if py3eval("run_ai_chat(unwrap('l:context'))")
       if g:vim_ai_async_chat == 1
+        call appendbufline(l:bufnr, '$', "")
+        call appendbufline(l:bufnr, '$', "<<< answering")
         call timer_start(0, function('vim_ai#AIChatWatch', [l:bufnr, 0]))
       endif
     endif
