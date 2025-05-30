@@ -3,6 +3,7 @@ import vim
 complete_py_imported = True
 
 def run_ai_completition(context):
+    update_thread_shared_variables()
     command_type = context['command_type']
     prompt = context['prompt']
     config = make_config(context['config'])

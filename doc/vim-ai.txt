@@ -137,6 +137,13 @@ Options: >
 Check OpenAI docs for more information:
 https://platform.openai.com/docs/api-reference/chat
 
+                                                *:AIStopChat*
+AIStopChat                          Cancel the currently running AI chat
+                                    generation for the active chat buffer.
+                                    If no task is running or if it has already
+                                    completed, this command has no effect.
+
+
 INCLUDE FILES                                  *vim-ai-include*
 
 To include files in the chat a special `include` role is used: >

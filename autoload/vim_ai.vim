@@ -11,6 +11,7 @@ let s:last_command = ""
 let s:last_config = {}
 
 let s:scratch_buffer_name = ">>> AI chat"
+let s:chat_redraw_interval = 250 " milliseconds
 
 function! s:ImportPythonModules()
   for py_module in ['types', 'utils', 'context', 'chat', 'complete', 'roles', 'image']
@@ -308,13 +309,71 @@ function! vim_ai#AIChatRun(uses_range, config, ...) range abort
     call s:set_paste(l:config)
     call s:ReuseOrCreateChatWindow(l:config)
 
+    let l:context['bufnr'] = bufnr()
+    let l:bufnr = bufnr()
+
+    if py3eval("ai_job_pool.is_job_done(unwrap('l:bufnr'))") == 0
+      echoerr "Operation in progress, wait or stop it with :AIStopChat"
+      return
+    endif
+
     let s:last_command = "chat"
     let s:last_config = a:config
 
-    py3 run_ai_chat(unwrap('l:context'))
+    if py3eval("run_ai_chat(unwrap('l:context'))")
+      if g:vim_ai_async_chat == 1
+        call appendbufline(l:bufnr, '$', "")
+        call appendbufline(l:bufnr, '$', "<<< answering")
+        call timer_start(0, function('vim_ai#AIChatWatch', [l:bufnr, 0]))
+      endif
+    endif
   finally
     call s:set_nopaste(l:config)
   endtry
+endfunction
+
+" Stop current chat job
+function! vim_ai#AIChatStopRun() abort
+  if &filetype !=# 'aichat'
+    echoerr "Not in an AI chat buffer."
+    return
+  endif
+  let l:bufnr = bufnr('%')
+  call s:ImportPythonModules() " Ensure chat.py is loaded
+  py3 ai_job_pool.cancel_job(unwrap('l:bufnr'))
+endfunction
+
+
+" Function called in a timer that check if there are new lines from AI and
+" appned them in a buffer. It ends when AI thread is finished (or when
+" stopped).
+function! vim_ai#AIChatWatch(bufnr, anim_index, timerid) abort
+  " inject new lines, first check if it is done to avoid data race, we do not
+  " mind if we run the timer one more time, but we want all the data
+  let l:done = py3eval("ai_job_pool.is_job_done(unwrap('a:bufnr'))")
+  let l:result = py3eval("ai_job_pool.pickup_lines(unwrap('a:bufnr'))")
+  call deletebufline(a:bufnr, '$')
+  call deletebufline(a:bufnr, '$')
+  call appendbufline(a:bufnr, '$', l:result)
+
+  " if not done, queue timer and animate
+  if l:done == 0
+    call timer_start(s:chat_redraw_interval, function('vim_ai#AIChatWatch', [a:bufnr, a:anim_index + 1]))
+    call appendbufline(a:bufnr, '$', "")
+    let l:animations = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']
+    let l:current_animation = l:animations[a:anim_index % len(l:animations)]
+    call appendbufline(a:bufnr, '$', "<<< answering " . l:current_animation)
+  else
+    " Clear message
+    " https://neovim.discourse.group/t/how-to-clear-the-echo-message-in-the-command-line/268/3
+    call feedkeys(':','nx')
+  end
+
+  " if window is visible, scroll down
+  let winid = bufwinid(a:bufnr)
+  if winid != -1
+    call win_execute(winid, "normal! G")
+  endif
 endfunction
 
 " Start a new chat
