@@ -2,17 +2,16 @@ import vim
 import datetime
 import os
 
-try:
-    utc = datetime.UTC  # Python 3.11+
-except AttributeError:
-    utc = datetime.timezone.utc  # Older versions
-
-timestamp = datetime.datetime.now(utc).strftime("%Y%m%dT%H%M%SZ")
 image_py_imported = True
 
 def make_image_path(ui):
     download_dir = ui.get('download_dir', vim.eval('getcwd()'))
-    timestamp = datetime.datetime.now(datetime.UTC).strftime("%Y%m%dT%H%M%SZ")
+    
+    try:
+        utc = datetime.UTC  # Python 3.11+
+    except AttributeError:
+        utc = datetime.timezone.utc  # Older versions
+    timestamp = datetime.datetime.now(utc).strftime("%Y%m%dT%H%M%SZ")
     filename = f'vim_ai_{timestamp}.png'
     return os.path.join(download_dir, filename)
 
