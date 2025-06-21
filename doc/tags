@@ -5,7 +5,7 @@
 :AIRedo	vim-ai.txt	/*:AIRedo*
 :AIUtilDebugOff	vim-ai.txt	/*:AIUtilDebugOff*
 :AIUtilDebugOn	vim-ai.txt	/*:AIUtilDebugOn*
-:AIUtilOpenRoles	vim-ai.txt	/*:AIUtilOpenRoles*
+:AIUtilRolesOpen	vim-ai.txt	/*:AIUtilRolesOpen*
 g:aichat_markdown	vim-ai.txt	/*g:aichat_markdown*
 vim-ai	vim-ai.txt	/*vim-ai*
 vim-ai-about	vim-ai.txt	/*vim-ai-about*
