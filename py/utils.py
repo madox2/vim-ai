@@ -225,7 +225,7 @@ def parse_chat_header_config():
                 if line == '':
                     # stop at the end of the region
                     break
-                (key, value) = line.strip().split('=')
+                (key, value) = line.strip().split('=', 1)
                 if key == 'provider':
                     config['provider'] = value
                 else:
