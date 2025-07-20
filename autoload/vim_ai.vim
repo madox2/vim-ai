@@ -292,6 +292,7 @@ function! s:AIChatUndoCleanup()
     return
   endif
 
+  let l:line_num = line('.')
   execute 'normal! G'
   call search('^<<< assistant', 'b')
   execute 'normal! k'
@@ -303,7 +304,8 @@ function! s:AIChatUndoCleanup()
     execute "normal! u"
   endwhile
   " paste assistat message as a whole
-  execute 'normal! "dpG'
+  execute 'normal! "dp'
+  execute l:line_num
 
   call setbufvar(l:bufnr, 'vim_ai_chat_undo_cleaned', 1)
 endfunction
@@ -357,9 +359,7 @@ function! vim_ai#AIChatRun(uses_range, config, ...) range abort
           au!
           autocmd BufEnter <buffer> call s:AIChatUndoCleanup()
         augroup END
-
-        call appendbufline(l:bufnr, '$', "")
-        call appendbufline(l:bufnr, '$', "<<< answering")
+        execute "normal! Go\n<<< answering"
         call timer_start(0, function('vim_ai#AIChatWatch', [l:bufnr, 0]))
       endif
     endif
@@ -389,6 +389,10 @@ function! vim_ai#AIChatWatch(bufnr, anim_index, timerid) abort
   " mind if we run the timer one more time, but we want all the data
   let l:done = py3eval("ai_job_pool.is_job_done(unwrap('a:bufnr'))")
   let l:result = py3eval("ai_job_pool.pickup_lines(unwrap('a:bufnr'))")
+
+  " if user scroling over chat while answering, do not auto-scroll
+  let l:should_prevent_autoscroll = bufnr('%') == a:bufnr && line('.') != line('$')
+
   call deletebufline(a:bufnr, '$')
   call deletebufline(a:bufnr, '$')
   call appendbufline(a:bufnr, '$', l:result)
@@ -407,9 +411,9 @@ function! vim_ai#AIChatWatch(bufnr, anim_index, timerid) abort
     call feedkeys(':','nx')
   end
 
-  " if window is visible, scroll down
+  " if window is visible and user not scrolling, auto-scroll down
   let winid = bufwinid(a:bufnr)
-  if winid != -1
+  if winid != -1 && !l:should_prevent_autoscroll
     call win_execute(winid, "normal! G")
   endif
 endfunction
