@@ -281,6 +281,33 @@ function! s:ReuseOrCreateChatWindow(config)
   endif
 endfunction
 
+" Undo history is cluttered when using async chat.
+" There doesn't seem to be a way to use standard undojoin feature,
+" therefore working around with undoing and pasting changes manually.
+function! s:AIChatUndoCleanup()
+  let l:bufnr = bufnr()
+  let l:done = py3eval("ai_job_pool.is_job_done(unwrap('l:bufnr'))")
+  let l:undo_cleaned = getbufvar('%', 'vim_ai_chat_undo_cleaned', 1)
+  if !l:done || l:undo_cleaned
+    return
+  endif
+
+  execute 'normal! G'
+  call search('^<<< assistant', 'b')
+  execute 'normal! k'
+  let l:assistant_start_line = line('.')
+  " copy whole assistant message to the `d` register
+  execute 'normal! "dyG'
+  " undo until user message
+  while line('$') >= l:assistant_start_line
+    execute "normal! u"
+  endwhile
+  " paste assistat message as a whole
+  execute 'normal! "dpG'
+
+  call setbufvar(l:bufnr, 'vim_ai_chat_undo_cleaned', 1)
+endfunction
+
 " Start and answer the chat
 " - uses_range   - truty if range passed
 " - config       - function scoped vim_ai_chat config
@@ -322,6 +349,15 @@ function! vim_ai#AIChatRun(uses_range, config, ...) range abort
 
     if py3eval("run_ai_chat(unwrap('l:context'))")
       if g:vim_ai_async_chat == 1
+
+        call setbufvar(l:bufnr, 'vim_ai_chat_undo_cleaned', 0)
+        " if user switches to a different buffer, setup autocommand that
+        " will clean undo history after returning back
+        augroup AichatUndo
+          au!
+          autocmd BufEnter <buffer> call s:AIChatUndoCleanup()
+        augroup END
+
         call appendbufline(l:bufnr, '$', "")
         call appendbufline(l:bufnr, '$', "<<< answering")
         call timer_start(0, function('vim_ai#AIChatWatch', [l:bufnr, 0]))
@@ -341,6 +377,7 @@ function! vim_ai#AIChatStopRun() abort
   let l:bufnr = bufnr('%')
   call s:ImportPythonModules() " Ensure chat.py is loaded
   py3 ai_job_pool.cancel_job(unwrap('l:bufnr'))
+  call s:AIChatUndoCleanup()
 endfunction
 
 
@@ -364,6 +401,7 @@ function! vim_ai#AIChatWatch(bufnr, anim_index, timerid) abort
     let l:current_animation = l:animations[a:anim_index % len(l:animations)]
     call appendbufline(a:bufnr, '$', "<<< answering " . l:current_animation)
   else
+    call s:AIChatUndoCleanup()
     " Clear message
     " https://neovim.discourse.group/t/how-to-clear-the-echo-message-in-the-command-line/268/3
     call feedkeys(':','nx')
