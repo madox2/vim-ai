@@ -99,10 +99,11 @@ To use an AI command, type the command followed by an instruction prompt. You ca
 ```
 ========== Basic AI commands ==========
 
-:AI       complete text
-:AIEdit   edit text
-:AIChat   continue or open new chat
-:AIImage  generate image
+:AI          complete text
+:AIEdit      edit text
+:AIChat      continue or open new chat
+:AIStopChat  stop the generation of the AI response for the AIChat
+:AIImage     generate image
 
 ============== Utilities ==============
 
@@ -114,9 +115,9 @@ To use an AI command, type the command followed by an instruction prompt. You ca
 :help vim-ai
 ```
 
-**Tip:** Press `Ctrl-c` anytime to cancel completion
+**Tip:** Press `Ctrl-c` anytime to cancel `:AI` and `:AIEdit` completion
 
-**Tip:** Use command shortcuts - `:AIE`, `:AIC`, `:AIR`, `:AII` or setup your own [key bindings](#key-bindings)
+**Tip:** Use command shortcuts - `:AIE`, `:AIC`, `:AIS`,`:AIR`, `:AII` or setup your own [key bindings](#key-bindings)
 
 **Tip:** Define and use [custom roles](#roles), e.g. `:AIEdit /grammar`.
 
@@ -489,6 +490,9 @@ let g:vim_ai_token_file_path = "~/.config/openai.token"
 " custom fn to load token, e.g. "g:GetAIToken()"
 let g:vim_ai_token_load_fn = ""
 
+" disable asynchronous AIChat (enabled by default)
+let g:vim_ai_async_chat = 0
+
 " enables/disables full markdown highlighting in aichat files
 " NOTE: code syntax highlighting works out of the box without this option enabled
 " NOTE: highlighting may be corrupted when using together with the `preservim/vim-markdown`
@@ -561,6 +565,9 @@ I was created by Google.
 This plugin does not set any key binding. Create your own bindings in the `.vimrc` to trigger AI commands, for example:
 
 ```vim
+" stop async chat generation
+nnoremap <leader>s :AIStopChat<CR>
+
 " complete text on the current line or in visual selection
 nnoremap <leader>a :AI<CR>
 xnoremap <leader>a :AI<CR>

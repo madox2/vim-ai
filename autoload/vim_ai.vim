@@ -11,6 +11,7 @@ let s:last_command = ""
 let s:last_config = {}
 
 let s:scratch_buffer_name = ">>> AI chat"
+let s:chat_redraw_interval = 250 " milliseconds
 
 function! s:ImportPythonModules()
   for py_module in ['types', 'utils', 'context', 'chat', 'complete', 'roles', 'image']
@@ -280,6 +281,35 @@ function! s:ReuseOrCreateChatWindow(config)
   endif
 endfunction
 
+" Undo history is cluttered when using async chat.
+" There doesn't seem to be a way to use standard undojoin feature,
+" therefore working around with undoing and pasting changes manually.
+function! s:AIChatUndoCleanup()
+  let l:bufnr = bufnr()
+  let l:done = py3eval("ai_job_pool.is_job_done(unwrap('l:bufnr'))")
+  let l:undo_cleaned = getbufvar('%', 'vim_ai_chat_undo_cleaned', 1)
+  if !l:done || l:undo_cleaned
+    return
+  endif
+
+  let l:line_num = line('.')
+  execute 'normal! G'
+  call search('^<<< assistant', 'b')
+  execute 'normal! k'
+  let l:assistant_start_line = line('.')
+  " copy whole assistant message to the `d` register
+  execute 'normal! "dyG'
+  " undo until user message
+  while line('$') >= l:assistant_start_line
+    execute "normal! u"
+  endwhile
+  " paste assistat message as a whole
+  execute 'normal! "dp'
+  execute l:line_num
+
+  call setbufvar(l:bufnr, 'vim_ai_chat_undo_cleaned', 1)
+endfunction
+
 " Start and answer the chat
 " - uses_range   - truty if range passed
 " - config       - function scoped vim_ai_chat config
@@ -308,13 +338,84 @@ function! vim_ai#AIChatRun(uses_range, config, ...) range abort
     call s:set_paste(l:config)
     call s:ReuseOrCreateChatWindow(l:config)
 
+    let l:context['bufnr'] = bufnr()
+    let l:bufnr = bufnr()
+
+    if py3eval("ai_job_pool.is_job_done(unwrap('l:bufnr'))") == 0
+      echoerr "Operation in progress, wait or stop it with :AIStopChat"
+      return
+    endif
+
     let s:last_command = "chat"
     let s:last_config = a:config
 
-    py3 run_ai_chat(unwrap('l:context'))
+    if py3eval("run_ai_chat(unwrap('l:context'))")
+      if g:vim_ai_async_chat == 1
+
+        call setbufvar(l:bufnr, 'vim_ai_chat_undo_cleaned', 0)
+        " if user switches to a different buffer, setup autocommand that
+        " will clean undo history after returning back
+        augroup AichatUndo
+          au!
+          autocmd BufEnter <buffer> call s:AIChatUndoCleanup()
+        augroup END
+        execute "normal! Go\n<<< answering"
+        call timer_start(0, function('vim_ai#AIChatWatch', [l:bufnr, 0]))
+      endif
+    endif
   finally
     call s:set_nopaste(l:config)
   endtry
+endfunction
+
+" Stop current chat job
+function! vim_ai#AIChatStopRun() abort
+  if &filetype !=# 'aichat'
+    echoerr "Not in an AI chat buffer."
+    return
+  endif
+  let l:bufnr = bufnr('%')
+  call s:ImportPythonModules() " Ensure chat.py is loaded
+  py3 ai_job_pool.cancel_job(unwrap('l:bufnr'))
+  call s:AIChatUndoCleanup()
+endfunction
+
+
+" Function called in a timer that check if there are new lines from AI and
+" appned them in a buffer. It ends when AI thread is finished (or when
+" stopped).
+function! vim_ai#AIChatWatch(bufnr, anim_index, timerid) abort
+  " inject new lines, first check if it is done to avoid data race, we do not
+  " mind if we run the timer one more time, but we want all the data
+  let l:done = py3eval("ai_job_pool.is_job_done(unwrap('a:bufnr'))")
+  let l:result = py3eval("ai_job_pool.pickup_lines(unwrap('a:bufnr'))")
+
+  " if user scroling over chat while answering, do not auto-scroll
+  let l:should_prevent_autoscroll = bufnr('%') == a:bufnr && line('.') != line('$')
+
+  call deletebufline(a:bufnr, '$')
+  call deletebufline(a:bufnr, '$')
+  call appendbufline(a:bufnr, '$', l:result)
+
+  " if not done, queue timer and animate
+  if l:done == 0
+    call timer_start(s:chat_redraw_interval, function('vim_ai#AIChatWatch', [a:bufnr, a:anim_index + 1]))
+    call appendbufline(a:bufnr, '$', "")
+    let l:animations = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']
+    let l:current_animation = l:animations[a:anim_index % len(l:animations)]
+    call appendbufline(a:bufnr, '$', "<<< answering " . l:current_animation)
+  else
+    call s:AIChatUndoCleanup()
+    " Clear message
+    " https://neovim.discourse.group/t/how-to-clear-the-echo-message-in-the-command-line/268/3
+    call feedkeys(':','nx')
+  end
+
+  " if window is visible and user not scrolling, auto-scroll down
+  let winid = bufwinid(a:bufnr)
+  if winid != -1 && !l:should_prevent_autoscroll
+    call win_execute(winid, "normal! G")
+  endif
 endfunction
 
 " Start a new chat
