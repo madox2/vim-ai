@@ -490,8 +490,8 @@ let g:vim_ai_token_file_path = "~/.config/openai.token"
 " custom fn to load token, e.g. "g:GetAIToken()"
 let g:vim_ai_token_load_fn = ""
 
-" disable asynchronous AIChat (enabled by default)
-let g:vim_ai_async_chat = 0
+" enable/disable asynchronous AIChat (enabled by default)
+let g:vim_ai_async_chat = 1
 
 " enables/disables full markdown highlighting in aichat files
 " NOTE: code syntax highlighting works out of the box without this option enabled
