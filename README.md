@@ -32,9 +32,6 @@ See this simple [guide](#example-create-custom-roles-to-interact-with-openrouter
 
 🚨 **Announcement** 🚨
 
-AIChat is now asynchronous, you can continue using vim while the completion is happening in the background. You can even have multiple chat completions running in parallel in one vim instance. Tips: Use `options.streaming=1` to see the results coming in. Use `:AIStopChat` to stop completion. You can enable this with: `let g:vim_ai_async_chat = 1`.
-
-
 `vim-ai` can now be extended with custom provider plugins.
 However, there aren't many available yet, so developing new ones is welcome!
 For more, see the [providers](#providers) section.
@@ -118,9 +115,9 @@ To use an AI command, type the command followed by an instruction prompt. You ca
 :help vim-ai
 ```
 
-**Tip:** Press `Ctrl-c` anytime to cancel completion
+**Tip:** Press `Ctrl-c` anytime to cancel `:AI` and `:AIEdit` completion
 
-**Tip:** Use command shortcuts - `:AIE`, `:AIC`, `:AIR`, `:AII` or setup your own [key bindings](#key-bindings)
+**Tip:** Use command shortcuts - `:AIE`, `:AIC`, `:AIS`,`:AIR`, `:AII` or setup your own [key bindings](#key-bindings)
 
 **Tip:** Define and use [custom roles](#roles), e.g. `:AIEdit /grammar`.
 
@@ -493,8 +490,8 @@ let g:vim_ai_token_file_path = "~/.config/openai.token"
 " custom fn to load token, e.g. "g:GetAIToken()"
 let g:vim_ai_token_load_fn = ""
 
-" enable asynchronout AIChat (disabled by default)
-let g:vim_ai_async_chat = 1
+" disable asynchronous AIChat (enabled by default)
+let g:vim_ai_async_chat = 0
 
 " enables/disables full markdown highlighting in aichat files
 " NOTE: code syntax highlighting works out of the box without this option enabled
@@ -568,6 +565,9 @@ I was created by Google.
 This plugin does not set any key binding. Create your own bindings in the `.vimrc` to trigger AI commands, for example:
 
 ```vim
+" stop async chat generation
+nnoremap <leader>s :AIStopChat<CR>
+
 " complete text on the current line or in visual selection
 nnoremap <leader>a :AI<CR>
 xnoremap <leader>a :AI<CR>
