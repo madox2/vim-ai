@@ -196,9 +196,9 @@ https://platform.openai.com/docs/api-reference/images/create
 :AIRedo                             repeat last AI command in order to re-try
                                     or get an alternative completion.
 
-                                                *:AIUtilOpenRoles*
+                                                *:AIUtilRolesOpen*
 
-:AIUtilOpenRoles                    open role configuration file
+:AIUtilRolesOpen                    open role configuration file
 
                                                 *:AIUtilDebugOn*
 
