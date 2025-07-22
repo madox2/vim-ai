@@ -159,7 +159,7 @@ class AI_chat_job(threading.Thread):
             for chunk in self.provider.request(self.messages):
                 with self.lock:
                     # For now, we only append whole lines to the buffer
-                    print_debug(f"Received chunk: '{chunk["type"]}' => '{chunk["content"]}'")
+                    print_debug(f"Received chunk: '{chunk['type']}' => '{chunk['content']}'")
                     if self.previous_type != chunk["type"]:
                         self.buffer += "\n<<< " + chunk["type"] + "\n\n"
                         self.previous_type = chunk["type"]
