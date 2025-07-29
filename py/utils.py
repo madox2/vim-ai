@@ -194,6 +194,7 @@ def parse_chat_messages(chat_content):
                 messages.append({'role': 'tool', 'content': [{ 'type': 'text', 'text': '' }]})
                 current_type = 'tool_response'
             case '<<< info':
+                # can be used to ask user for confirmation (by running :AIChat again)
                 current_type = 'info'
             case '>>> include':
                 if not messages or messages[-1]['role'] != 'user':
