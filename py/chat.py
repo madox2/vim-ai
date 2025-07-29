@@ -112,17 +112,14 @@ def run_ai_chat(context):
                 ai_job_pool.new_job(context, messages, provider)
             else:
                 response_chunks = provider.request(messages)
+                previous_type = ""
 
                 def _chunks_to_sections(chunks):
-                    first_thinking_chunk = True
-                    first_content_chunk = True
+                    nonlocal previous_type
                     for chunk in chunks:
-                        if chunk['type'] == 'thinking' and first_thinking_chunk:
-                            first_thinking_chunk = False
-                            vim.command("normal! Go\n<<< thinking\n\n")
-                        if chunk['type'] == 'assistant' and first_content_chunk:
-                            first_content_chunk = False
-                            vim.command("normal! Go\n<<< assistant\n\n")
+                        if previous_type != chunk["type"] or "newsegment" in chunk:
+                            vim.command(f"normal! Go\n<<< {chunk['type']}\n\n")
+                            previous_type = chunk["type"]
                         yield chunk['content']
 
                 render_text_chunks(_chunks_to_sections(response_chunks), append_to_eol=True)
