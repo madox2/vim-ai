@@ -12,6 +12,15 @@ default_config = {
     "token_load_fn": "",
     "selection_boundary": "",
     "initial_prompt": "You are a general assistant.",
+    "frequency_penalty": "",
+    "logit_bias": "",
+    "logprobs": "",
+    "presence_penalty": "",
+    "reasoning_effort": "",
+    "seed": "",
+    "stop": "",
+    "top_logprobs": "",
+    "top_p": "",
   },
   "ui": {
     "open_chat_command": "preset_below",
@@ -195,14 +204,33 @@ def test_selection_boundary():
     assert 'fix grammar:\n###\nhelo word\n###' == make_prompt( '', 'fix grammar', 'helo word', '###')
     assert 'fix grammar:\n###\nhelo word\n###' == make_prompt( 'fix grammar', '', 'helo word', '###')
 
-def test_markdown_selection_boundary(mocker):
+def test_markdown_selection_boundary():
     # add file type to markdown boundary
-    mocker.patch('vim.eval').return_value = "python"
-    assert 'fix grammar:\n```python\nhelo word\n```' == make_prompt( '', 'fix grammar', 'helo word', '```')
+    with patch('vim.eval', return_value = "python") as mock_eval:
+        assert 'fix grammar:\n```python\nhelo word\n```' == make_prompt( '', 'fix grammar', 'helo word', '```')
 
     # do not add filetype if not appropriate
-    mocker.patch('vim.eval').return_value = "aichat"
-    assert 'fix grammar:\n```\nhelo word\n```' == make_prompt( '', 'fix grammar', 'helo word', '```')
-    mocker.patch('vim.eval').return_value = ""
-    assert 'fix grammar:\n```\nhelo word\n```' == make_prompt( '', 'fix grammar', 'helo word', '```')
+    with patch('vim.eval', return_value = "aichat") as mock_eval:
+        assert 'fix grammar:\n```\nhelo word\n```' == make_prompt( '', 'fix grammar', 'helo word', '```')
+    with patch('vim.eval', return_value = "") as mock_eval:
+        assert 'fix grammar:\n```\nhelo word\n```' == make_prompt( '', 'fix grammar', 'helo word', '```')
+
+def test_role_config_all_params():
+    context = make_ai_context({
+        'config_default': default_config,
+        'config_extension': {},
+        'user_instruction': '/all_params user instruction',
+        'user_selection': '',
+        'command_type': 'chat',
+    })
+    actual_options = context['config']['options']
+    assert actual_options['frequency_penalty'] == '0.5'
+    assert actual_options['logit_bias'] == '{"2435": -100}'
+    assert actual_options['logprobs'] == '1'
+    assert actual_options['presence_penalty'] == '-0.5'
+    assert actual_options['reasoning_effort'] == 'low'
+    assert actual_options['seed'] == '12345'
+    assert actual_options['stop'] == 'stop_sequence'
+    assert actual_options['top_logprobs'] == '5'
+    assert actual_options['top_p'] == '0.9'
 

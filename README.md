@@ -340,7 +340,7 @@ END
 " :AI
 " - provider: AI provider
 " - prompt: optional prepended prompt
-" - options: openai config (see https://platform.openai.com/docs/api-reference/completions)
+" - options: openai config (see https://platform.openai.com/docs/api-reference/chat)
 " - options.initial_prompt: prompt prepended to every chat request (list of lines or string)
 " - options.temperature: use -1 to disable this parameter
 " - options.request_timeout: request timeout in seconds
@@ -365,6 +365,15 @@ let g:vim_ai_complete = {
 \    "token_load_fn": "",
 \    "selection_boundary": "#####",
 \    "initial_prompt": s:initial_complete_prompt,
+\    "frequency_penalty": "",
+\    "logit_bias": "",
+\    "logprobs": "",
+\    "presence_penalty": "",
+\    "reasoning_effort": "",
+\    "seed": "",
+\    "stop": "",
+\    "top_logprobs": "",
+\    "top_p": "",
 \  },
 \  "ui": {
 \    "paste_mode": 1,
@@ -374,7 +383,7 @@ let g:vim_ai_complete = {
 " :AIEdit
 " - provider: AI provider
 " - prompt: optional prepended prompt
-" - options: openai config (see https://platform.openai.com/docs/api-reference/completions)
+" - options: openai config (see https://platform.openai.com/docs/api-reference/chat)
 " - options.initial_prompt: prompt prepended to every chat request (list of lines or string)
 " - options.temperature: use -1 to disable this parameter
 " - options.request_timeout: request timeout in seconds
@@ -399,6 +408,15 @@ let g:vim_ai_edit = {
 \    "token_load_fn": "",
 \    "selection_boundary": "#####",
 \    "initial_prompt": s:initial_complete_prompt,
+\    "frequency_penalty": "",
+\    "logit_bias": "",
+\    "logprobs": "",
+\    "presence_penalty": "",
+\    "reasoning_effort": "",
+\    "seed": "",
+\    "stop": "",
+\    "top_logprobs": "",
+\    "top_p": "",
 \  },
 \  "ui": {
 \    "paste_mode": 1,
@@ -445,6 +463,15 @@ let g:vim_ai_chat = {
 \    "token_load_fn": "",
 \    "selection_boundary": "",
 \    "initial_prompt": s:initial_chat_prompt,
+\    "frequency_penalty": "",
+\    "logit_bias": "",
+\    "logprobs": "",
+\    "presence_penalty": "",
+\    "reasoning_effort": "",
+\    "seed": "",
+\    "stop": "",
+\    "top_logprobs": "",
+\    "top_p": "",
 \  },
 \  "ui": {
 \    "open_chat_command": "preset_below",

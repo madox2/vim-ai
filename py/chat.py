@@ -25,6 +25,10 @@ def _populate_options(config):
 
         if default_value == value:
             continue # do not show default values
+
+        if not isinstance(value, str):
+            value = str(value)
+
         vim.command("normal! ioptions." + key + "=" + value + "\n")
 
 def run_ai_chat(context):

@@ -27,7 +27,7 @@ class OpenAIProvider():
         options = self.options
         openai_options = self._make_openai_options(options)
         http_options = {
-            'request_timeout': options['request_timeout'],
+            'request_timeout': options.get('request_timeout') or 20,
             'auth_type': options['auth_type'],
             'token_file_path': options['token_file_path'],
             'token_load_fn': options['token_load_fn'],
@@ -49,7 +49,7 @@ class OpenAIProvider():
         url = options['endpoint_url']
         response = self._openai_request(url, request, http_options)
 
-        _choice_key = 'delta' if openai_options['stream'] else 'message'
+        _choice_key = 'delta' if openai_options.get('stream') else 'message'
 
         def _get_delta(resp):
             choices = resp.get('choices') or [{}]
@@ -96,31 +96,76 @@ class OpenAIProvider():
             raise self.utils.make_known_error("`enable_auth = 0` option is no longer supported. use `auth_type = none` instead")
 
         options = {**raw_options}
-        options['request_timeout'] = float(options['request_timeout'])
+
+        def _convert_option(name, converter):
+            if name in options and isinstance(options[name], str) and options[name] != '':
+                try:
+                    options[name] = converter(options[name])
+                except (ValueError, TypeError, json.JSONDecodeError) as e:
+                    raise self.utils.make_known_error(f"Invalid value for option '{name}': {options[name]}. Error: {e}")
+
+        _convert_option('request_timeout', float)
+
         if self.command_type != 'image':
-            options['max_tokens'] = int(options['max_tokens'])
-            options['max_completion_tokens'] = int(options['max_completion_tokens'])
-            options['temperature'] = float(options['temperature'])
-            options['stream'] = bool(int(options['stream']))
+            _convert_option('stream', lambda x: bool(int(x)))
+            # existing options
+            _convert_option('max_tokens', int)
+            _convert_option('max_completion_tokens', int)
+            _convert_option('temperature', float)
+            # new options
+            _convert_option('frequency_penalty', float)
+            _convert_option('presence_penalty', float)
+            _convert_option('top_p', float)
+            _convert_option('seed', int)
+            _convert_option('top_logprobs', int)
+            _convert_option('logprobs', lambda x: bool(int(x)))
+            # reasoning_effort is a string, no conversion needed
+            # stop is a string or array. For now I'll assume string, so no conversion.
+            _convert_option('logit_bias', json.loads)
+
         return options
 
     def _make_openai_options(self, options):
-        max_tokens = options['max_tokens']
-        max_completion_tokens = options['max_completion_tokens']
         result = {
             'model': options['model'],
-            'stream': options['stream'],
         }
-        if options['temperature'] > -1:
-            result['temperature'] = options['temperature']
 
-        if 'web_search_options' in options:
-            result['web_search_options'] = options['web_search_options']
+        option_keys = [
+            'stream',
+            'temperature',
+            'max_tokens',
+            'max_completion_tokens',
+            'web_search_options',
+            'frequency_penalty',
+            'logit_bias',
+            'logprobs',
+            'presence_penalty',
+            'reasoning_effort',
+            'seed',
+            'stop',
+            'top_logprobs',
+            'top_p',
+        ]
 
-        if max_tokens > 0:
-            result['max_tokens'] = max_tokens
-        if max_completion_tokens > 0:
-            result['max_completion_tokens'] = max_completion_tokens
+        for key in option_keys:
+            if key not in options:
+                continue
+
+            value = options[key]
+
+            if value == '':
+                continue
+
+            # Backward compatibility checks
+            if key == 'temperature' and value == -1:
+                continue
+            if key == 'max_tokens' and value == 0:
+                continue
+            if key == 'max_completion_tokens' and value == 0:
+                continue
+
+            result[key] = value
+
         return result
 
     def request_image(self, prompt: str) -> list[AIImageResponseChunk]:
