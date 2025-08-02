@@ -154,7 +154,8 @@ class OpenAIProvider():
             if value == '':
                 continue
 
-            # Backward compatibility checks
+            # Backward compatibility: before using empty string "", values below
+            # were used to exclude these params from the request
             if key == 'temperature' and value == -1:
                 continue
             if key == 'max_tokens' and value == 0:
