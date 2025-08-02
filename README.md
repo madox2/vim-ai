@@ -342,7 +342,6 @@ END
 " - prompt: optional prepended prompt
 " - options: openai config (see https://platform.openai.com/docs/api-reference/chat)
 " - options.initial_prompt: prompt prepended to every chat request (list of lines or string)
-" - options.temperature: use -1 to disable this parameter
 " - options.request_timeout: request timeout in seconds
 " - options.auth_type: API authentication method (bearer, api-key, none)
 " - options.token_file_path: override global token configuration
@@ -385,7 +384,6 @@ let g:vim_ai_complete = {
 " - prompt: optional prepended prompt
 " - options: openai config (see https://platform.openai.com/docs/api-reference/chat)
 " - options.initial_prompt: prompt prepended to every chat request (list of lines or string)
-" - options.temperature: use -1 to disable this parameter
 " - options.request_timeout: request timeout in seconds
 " - options.auth_type: API authentication method (bearer, api-key, none)
 " - options.token_file_path: override global token configuration
@@ -436,7 +434,6 @@ END
 " - prompt: optional prepended prompt
 " - options: openai config (see https://platform.openai.com/docs/api-reference/chat)
 " - options.initial_prompt: prompt prepended to every chat request (list of lines or string)
-" - options.temperature: use -1 to disable this parameter
 " - options.request_timeout: request timeout in seconds
 " - options.auth_type: API authentication method (bearer, api-key, none)
 " - options.token_file_path: override global token configuration
@@ -537,7 +534,7 @@ let g:vim_ai_debug_log_file = "/tmp/vim_ai_debug.log"
 " - find out more in vim's help `:help paste`
 " options.max_tokens
 " - note that prompt + max_tokens must be less than model's token limit, see #42, #46
-" - setting max tokens to 0 will exclude it from the OpenAI API request parameters, it is
+" - setting max tokens to "" will exclude it from the OpenAI API request parameters, it is
 "   unclear/undocumented what it exactly does, but it seems to resolve issues when the model
 "   hits token limit, which respond with `OpenAI: HTTPError 400`
 " options.selection_boundary

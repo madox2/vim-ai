@@ -108,20 +108,18 @@ class OpenAIProvider():
 
         if self.command_type != 'image':
             _convert_option('stream', lambda x: bool(int(x)))
-            # existing options
             _convert_option('max_tokens', int)
             _convert_option('max_completion_tokens', int)
             _convert_option('temperature', float)
-            # new options
             _convert_option('frequency_penalty', float)
             _convert_option('presence_penalty', float)
             _convert_option('top_p', float)
             _convert_option('seed', int)
             _convert_option('top_logprobs', int)
             _convert_option('logprobs', lambda x: bool(int(x)))
-            # reasoning_effort is a string, no conversion needed
-            # stop is a string or array. For now I'll assume string, so no conversion.
+            _convert_option('stop', json.loads)
             _convert_option('logit_bias', json.loads)
+            # reasoning_effort is a string, no conversion needed
 
         return options
 
