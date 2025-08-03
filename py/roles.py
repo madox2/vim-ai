@@ -22,5 +22,6 @@ def load_ai_role_names(command_type):
                 role_names.add(parts[0])
 
     role_names = [name for name in role_names if name != DEFAULT_ROLE_NAME]
+    role_names.sort()
 
     return list(role_names)
