@@ -11,10 +11,15 @@ if "VIMAI_DUMMY_IMPORT" in os.environ:
 
 class OpenAIProvider():
 
+    default_options_varname_chat = "g:vim_ai_openai_chat"
+    default_options_varname_complete = "g:vim_ai_openai_complete"
+    default_options_varname_edit = "g:vim_ai_openai_edit"
+
     def __init__(self, command_type: AICommandType, raw_options: Mapping[str, str], utils: AIUtils) -> None:
         self.utils = utils
         self.command_type = command_type
-        raw_default_options = vim.eval(f"g:vim_ai_openai_{command_type}")
+        config_varname = getattr(self, f"default_options_varname_{command_type}")
+        raw_default_options = vim.eval(config_varname)
         self.options = self._parse_raw_options({**raw_default_options, **raw_options})
 
     def _protocol_type_check(self) -> None:

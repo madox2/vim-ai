@@ -86,11 +86,14 @@ ai_provider_utils = AIProviderUtils()
 def unwrap(input_var):
     return vim.eval(input_var)
 
-def make_config(config):
-    options = config['options']
+def make_options(options):
     # initial prompt can be both a string and a list of strings, normalize it to list
     if 'initial_prompt' in options and isinstance(options['initial_prompt'], str):
         options['initial_prompt'] = options['initial_prompt'].split('\n')
+    return options
+
+def make_config(config):
+    config['options'] = make_options(config['options'])
     return config
 
 # when running AIEdit on selection and cursor ends on the first column, it needs to

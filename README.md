@@ -123,7 +123,7 @@ To use an AI command, type the command followed by an instruction prompt. You ca
 
 **Tip:** Use pre-defined roles `/right`, `/below`, `/tab` to choose how chat is open, e.g. `:AIC /right`
 
-**Tip:** Use special role `/populate` to dump options to chat header, e.g. `:AIC /populate /gemini`
+**Tip:** Use special role `/populate` or `/populate-all` to show options in the chat header config, e.g. `:AIC /populate /gemini`
 
 **Tip:** Combine commands with a range `:help range`, e.g. to select the whole buffer - `:%AIE fix grammar`
 
@@ -440,7 +440,8 @@ END
 " - options.token_load_fn: expression/vim function to load token
 " - options.selection_boundary: selection prompt wrapper (eliminates empty responses, see #20)
 " - ui.open_chat_command: preset (preset_below, preset_tab, preset_right) or a custom command
-" - ui.populate_options: dump [chat] config to the chat header
+" - ui.populate_options: show changed options in the chat header config
+" - ui.populate_all_options: show all options in the chat header config
 " - ui.scratch_buffer_keep_open: re-use scratch buffer within the vim session
 " - ui.force_new_chat: force new chat window (used in chat opening roles e.g. `/tab`)
 " - ui.paste_mode: use paste mode (see more info in the Notes below)
@@ -474,6 +475,7 @@ let g:vim_ai_chat = {
 \    "open_chat_command": "preset_below",
 \    "scratch_buffer_keep_open": 0,
 \    "populate_options": 0,
+\    "populate_all_options": 0,
 \    "force_new_chat": 0,
 \    "paste_mode": 1,
 \  },

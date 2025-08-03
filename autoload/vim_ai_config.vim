@@ -49,6 +49,7 @@ let g:vim_ai_chat_default = {
 \    "open_chat_command": "preset_below",
 \    "scratch_buffer_keep_open": 0,
 \    "populate_options": 0,
+\    "populate_all_options": 0,
 \    "force_new_chat": 0,
 \    "paste_mode": 1,
 \  },
@@ -77,6 +78,15 @@ let g:vim_ai_openai_complete = {
 \  "token_load_fn": "",
 \  "selection_boundary": "#####",
 \  "initial_prompt": s:initial_complete_prompt,
+\  "frequency_penalty": "",
+\  "logit_bias": "",
+\  "logprobs": "",
+\  "presence_penalty": "",
+\  "reasoning_effort": "",
+\  "seed": "",
+\  "stop": "",
+\  "top_logprobs": "",
+\  "top_p": "",
 \}
 let g:vim_ai_openai_edit = g:vim_ai_openai_complete
 let g:vim_ai_openai_chat = {
@@ -92,6 +102,15 @@ let g:vim_ai_openai_chat = {
 \  "token_load_fn": "",
 \  "selection_boundary": "",
 \  "initial_prompt": s:initial_chat_prompt,
+\  "frequency_penalty": "",
+\  "logit_bias": "",
+\  "logprobs": "",
+\  "presence_penalty": "",
+\  "reasoning_effort": "",
+\  "seed": "",
+\  "stop": "",
+\  "top_logprobs": "",
+\  "top_p": "",
 \}
 let g:vim_ai_openai_image = {
 \  "model": "dall-e-3",

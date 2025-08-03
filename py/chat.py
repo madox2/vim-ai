@@ -7,23 +7,17 @@ import traceback
 
 chat_py_imported = True
 
-def _populate_options(config):
-    default_config = make_config(vim.eval('g:vim_ai_chat_default'))
-
-    default_options = default_config['options']
-    options = config['options']
-
+def _populate_options(provider, options, default_options, show_default = False):
     vim.command("normal! O[chat]")
     vim.command("normal! o")
-    vim.command("normal! iprovider=" + config['provider'] + "\n")
+    vim.command("normal! iprovider=" + provider + "\n")
     for key, value in options.items():
         default_value = default_options.get(key, '')
         if key == 'initial_prompt':
             value = "\\n".join(value)
-            if default_value:
-                default_value = "\\n".join(default_value)
+            default_value = "\\n".join(default_value)
 
-        if default_value == value:
+        if not show_default and default_value == value:
             continue # do not show default values
 
         if not isinstance(value, str):
@@ -47,9 +41,10 @@ def run_ai_chat(context):
 
         # if populate is set in config, populate once
         # it shouldn't re-populate after chat header options are modified (#158)
-        populate = config['ui']['populate_options'] == '1' and not '[chat]' in lines
+        populate = not '[chat]' in lines and (config['ui']['populate_options'] == '1' or config['ui']['populate_all_options'] == '1')
         # when called special `populate` role, force chat header re-population
-        re_populate = 'populate' in roles
+        re_populate = 'populate' in roles or 'populate-all' in roles
+        is_populating_all = 'populate-all' in roles or config['ui']['populate_all_options'] == '1'
 
         if re_populate:
             if '[chat]' in lines:
@@ -64,7 +59,23 @@ def run_ai_chat(context):
 
         if populate or re_populate:
             vim.command("normal! gg")
-            _populate_options(config)
+
+            default_config = make_config(vim.eval('g:vim_ai_chat_default'))
+            default_options = default_config['options']
+
+            if is_populating_all:
+                # get default options from the provider if available
+                provider_class = load_provider(config['provider'])
+                default_provider_options = {}
+                # backward compatibility, provider does not have to implement it or it is empty
+                if hasattr(provider_class, "default_options_varname_chat") and provider_class.default_options_varname_chat:
+                    default_provider_options = make_options(vim.eval(provider_class.default_options_varname_chat))
+
+                populated_options = {**default_options, **default_provider_options, **config['options']}
+                _populate_options(config['provider'], populated_options, {}, show_default = True)
+            else:
+                _populate_options(config['provider'], config['options'], default_options, show_default = False)
+
 
         vim.command("normal! G")
         vim_break_undo_sequence()

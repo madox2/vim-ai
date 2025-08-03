@@ -23,6 +23,7 @@ def test_role_chat_only():
         'below',
         'tab',
         'populate',
+        'populate-all',
     }
 
 def test_explicit_image_roles():

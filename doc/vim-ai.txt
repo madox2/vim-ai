@@ -155,6 +155,7 @@ Options: >
   \  },
   \  "ui": {
   \    "populate_options": 0,
+  \    "populate_all_options": 0,
   \    "open_chat_command": "preset_below",
   \    "scratch_buffer_keep_open": 0,
   \    "paste_mode": 1,
