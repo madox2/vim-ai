@@ -174,60 +174,91 @@ def parse_chat_messages(chat_content):
 
     current_type = ''
     for line in lines:
-        match line:
-            case '>>> system':
-                messages.append({'role': 'system', 'content': [{ 'type': 'text', 'text': '' }]})
+        for line in lines:
+            # Top‐level markers
+            if line == '>>> system':
+                messages.append({
+                    'role': 'system',
+                    'content': [{'type': 'text', 'text': ''}]
+                })
                 current_type = 'system'
-            case '<<< thinking':
-                # nothing to do here, thinking messages are omited
+
+            elif line == '<<< thinking':
                 current_type = 'thinking'
-            case '<<< assistant':
-                messages.append({'role': 'assistant', 'content': [{ 'type': 'text', 'text': '' }]})
+
+            elif line == '<<< assistant':
+                messages.append({
+                    'role': 'assistant',
+                    'content': [{'type': 'text', 'text': ''}]
+                })
                 current_type = 'assistant'
-            case '>>> user':
+
+            elif line == '>>> user':
                 if messages and messages[-1]['role'] == 'user':
-                    messages[-1]['content'].append({ 'type': 'text', 'text': '' })
+                    messages[-1]['content'].append({'type': 'text', 'text': ''})
                 else:
-                    messages.append({'role': 'user', 'content': [{ 'type': 'text', 'text': '' }]})
+                    messages.append({
+                        'role': 'user',
+                        'content': [{'type': 'text', 'text': ''}]
+                    })
                 current_type = 'user'
-            case '<<< tool_call':
-                messages.append({'role': 'assistant', 'content': [{ 'type': 'text', 'text': '' }], 'tool_calls':[]})
+
+            elif line == '<<< tool_call':
+                messages.append({
+                    'role': 'assistant',
+                    'content': [{'type': 'text', 'text': ''}],
+                    'tool_calls': []
+                })
                 current_type = 'tool_call'
-            case '<<< tool_response':
-                messages.append({'role': 'tool', 'content': [{ 'type': 'text', 'text': '' }]})
+
+            elif line == '<<< tool_response':
+                messages.append({
+                    'role': 'tool',
+                    'content': [{'type': 'text', 'text': ''}]
+                })
                 current_type = 'tool_response'
-            case '<<< info':
-                # can be used to ask user for confirmation (by running :AIChat again)
+
+            elif line == '<<< info':
                 current_type = 'info'
-            case '>>> include':
+
+            elif line == '>>> include':
                 if not messages or messages[-1]['role'] != 'user':
                     messages.append({'role': 'user', 'content': []})
                 current_type = 'include'
-            case '>>> exec':
+
+            elif line == '>>> exec':
                 if not messages or messages[-1]['role'] != 'user':
                     messages.append({'role': 'user', 'content': []})
                 current_type = 'exec'
-            case _:
+
+            # Content accumulation
+            else:
                 if not messages:
                     continue
-                match current_type:
-                    case 'assistant' | 'system' | 'user':
-                        messages[-1]['content'][-1]['text'] += '\n' + line
-                    case 'include':
-                        paths = parse_include_paths(line)
-                        for path in paths:
-                            content = make_image_message(path) if is_image_path(path) else make_text_file_message(path)
-                            messages[-1]['content'].append(content)
-                    case 'exec':
-                        cmd = line.strip()
-                        if cmd:
-                            messages[-1]['content'].append(make_exec_output_message(cmd))
-                    case 'tool_call' | 'tool_response':
-                        l = line.strip()
-                        if l:
-                            messages[-1] = json.loads(l)
-                    case 'info':
-                        pass
+
+                if current_type in ('assistant', 'system', 'user'):
+                    messages[-1]['content'][-1]['text'] += '\n' + line
+
+                elif current_type == 'include':
+                    paths = parse_include_paths(line)
+                    for path in paths:
+                        if is_image_path(path):
+                            content = make_image_message(path)
+                        else:
+                            content = make_text_file_message(path)
+                        messages[-1]['content'].append(content)
+
+                elif current_type == 'exec':
+                    cmd = line.strip()
+                    if cmd:
+                        messages[-1]['content'].append(make_exec_output_message(cmd))
+
+                elif current_type in ('tool_call', 'tool_response'):
+                    payload = line.strip()
+                    if payload:
+                        messages[-1] = json.loads(payload)
+
+                # 'info' yields no action
 
 
     for message in messages:
