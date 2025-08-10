@@ -17,6 +17,7 @@ syntax match aichatRole "<<< assistant"
 syntax match aichatRole "<<< tool_call"
 syntax match aichatRole "<<< tool_response"
 syntax match aichatRole "<<< info"
+syntax match aichatRole "<<< error.*"
 
 highlight default link aichatRole Comment
 

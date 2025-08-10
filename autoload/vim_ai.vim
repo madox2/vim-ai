@@ -295,7 +295,7 @@ function! s:AIChatUndoCleanup()
   let l:line_num = line('.')
   execute 'normal! G'
   call search('^>>> user', 'b')
-  call search('^<<< assistant\|^<<< tool_call')
+  call search('^<<< assistant\|^<<< tool_call\|^<<< error')
   execute 'normal! k'
   let l:assistant_start_line = line('.')
   " copy whole assistant message to the `d` register
