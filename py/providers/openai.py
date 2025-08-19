@@ -14,6 +14,7 @@ class OpenAIProvider():
     default_options_varname_chat = "g:vim_ai_openai_chat"
     default_options_varname_complete = "g:vim_ai_openai_complete"
     default_options_varname_edit = "g:vim_ai_openai_edit"
+    default_options_varname_image = "g:vim_ai_openai_image"
 
     def __init__(self, command_type: AICommandType, raw_options: Mapping[str, str], utils: AIUtils) -> None:
         self.utils = utils
