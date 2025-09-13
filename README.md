@@ -155,12 +155,17 @@ let g:vim_ai_roles_config_file = '/path/to/my/roles.ini'
 prompt = fix spelling and grammar
 options.temperature = 0.4
 
+# set options for all commands (chat, complete, edit)
 [o1-mini]
-options.stream = 0
 options.model = o1-mini
 options.max_completion_tokens = 25000
 options.temperature = 1
 options.initial_prompt =
+
+# you can also set options for a specific command
+[o1-mini.chat]
+options.stream = 0
+ui.populate_all_options = 1
 ```
 
 Now you can select text and run it with command `:AIEdit /grammar`.
@@ -293,6 +298,7 @@ let g:vim_ai_chat = {
 \    "temperature": 1,
 \    "max_completion_tokens": 25000,
 \    "initial_prompt": "",
+\    "token_file_path": "/custom/path/ai.token",
 \  },
 \}
 ```
@@ -300,12 +306,19 @@ let g:vim_ai_chat = {
 Alternatively you can use special `default` role:
 
 ```ini
+# set options for all commands (chat, complete, edit)
+[default]
+options.token_file_path = /custom/path/ai.token
+
+# set options only for a chat command
 [default.chat]
 options.model = o1-preview
 options.stream = 0
 options.temperature = 1
 options.max_completion_tokens = 25000
 options.initial_prompt =
+
+# NOTE: this role takes precedence over g:vim_ai_chat, g:vim_ai_complete, g:vim_ai_edit
 ```
 
 Or customize the options directly in the chat buffer:
@@ -317,6 +330,7 @@ options.stream = 0
 options.temperature = 1
 options.max_completion_tokens = 25000
 options.initial_prompt =
+options.token_file_path = /custom/path/ai.token
 
 >>> user
 
