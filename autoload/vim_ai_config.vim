@@ -87,6 +87,7 @@ let g:vim_ai_openai_complete = {
 \  "stop": "",
 \  "top_logprobs": "",
 \  "top_p": "",
+\  "reasoning": "",
 \}
 let g:vim_ai_openai_edit = g:vim_ai_openai_complete
 let g:vim_ai_openai_chat = {
@@ -111,6 +112,7 @@ let g:vim_ai_openai_chat = {
 \  "stop": "",
 \  "top_logprobs": "",
 \  "top_p": "",
+\  "reasoning": "",
 \}
 let g:vim_ai_openai_image = {
 \  "model": "dall-e-3",

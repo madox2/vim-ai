@@ -361,6 +361,7 @@ END
 " - options.token_file_path: override global token configuration
 " - options.token_load_fn: expression/vim function to load token
 " - options.selection_boundary: selection prompt wrapper (eliminates empty responses, see #20)
+" - options.reasoning: openrouter reasoning parameter (stringified json)
 " - ui.paste_mode: use paste mode (see more info in the Notes below)
 let g:vim_ai_complete = {
 \  "provider": "openai",
@@ -387,6 +388,7 @@ let g:vim_ai_complete = {
 \    "stop": "",
 \    "top_logprobs": "",
 \    "top_p": "",
+\    "reasoning": "",
 \  },
 \  "ui": {
 \    "paste_mode": 1,
@@ -403,6 +405,7 @@ let g:vim_ai_complete = {
 " - options.token_file_path: override global token configuration
 " - options.token_load_fn: expression/vim function to load token
 " - options.selection_boundary: selection prompt wrapper (eliminates empty responses, see #20)
+" - options.reasoning: openrouter reasoning parameter (stringified json)
 " - ui.paste_mode: use paste mode (see more info in the Notes below)
 let g:vim_ai_edit = {
 \  "provider": "openai",
@@ -429,6 +432,7 @@ let g:vim_ai_edit = {
 \    "stop": "",
 \    "top_logprobs": "",
 \    "top_p": "",
+\    "reasoning": "",
 \  },
 \  "ui": {
 \    "paste_mode": 1,
@@ -453,6 +457,7 @@ END
 " - options.token_file_path: override global token configuration
 " - options.token_load_fn: expression/vim function to load token
 " - options.selection_boundary: selection prompt wrapper (eliminates empty responses, see #20)
+" - options.reasoning: openrouter reasoning parameter (stringified json)
 " - ui.open_chat_command: preset (preset_below, preset_tab, preset_right) or a custom command
 " - ui.populate_options: show changed options in the chat header config
 " - ui.populate_all_options: show all options in the chat header config
@@ -484,6 +489,7 @@ let g:vim_ai_chat = {
 \    "stop": "",
 \    "top_logprobs": "",
 \    "top_p": "",
+\    "reasoning": "",
 \  },
 \  "ui": {
 \    "open_chat_command": "preset_below",

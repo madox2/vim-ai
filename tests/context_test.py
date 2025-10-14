@@ -95,6 +95,18 @@ def test_role_config():
     assert 'o1-preview' == actual_config['options']['model']
     assert 'simple role prompt:\nuser instruction:\nselected text' == actual_prompt
 
+def test_openrouter_reasoning_config():
+    context = make_ai_context({
+        'config_default': default_config,
+        'config_extension': {},
+        'user_instruction': '/test-role-openrouter-reasoning user instruction',
+        'user_selection': 'selected text',
+        'command_type': 'chat',
+    })
+    actual_config = context['config']
+    expected_reasoning = '{"effort": "high", "max_tokens": "2000", "exclude": "0", "enabled": "1"}'
+    assert expected_reasoning == actual_config['options']['reasoning']
+
 def test_role_config_different_commands():
     base = {
         'config_default': default_config,

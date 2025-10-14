@@ -54,6 +54,7 @@ Options: >
   \    "stop": "",
   \    "top_logprobs": "",
   \    "top_p": "",
+  \    "reasoning": "",
   \  },
   \  "ui": {
   \    "paste_mode": 1,
@@ -104,6 +105,7 @@ Options: >
   \    "stop": "",
   \    "top_logprobs": "",
   \    "top_p": "",
+  \    "reasoning": "",
   \  },
   \  "ui": {
   \    "paste_mode": 1,
@@ -152,6 +154,7 @@ Options: >
   \    "stop": "",
   \    "top_logprobs": "",
   \    "top_p": "",
+  \    "reasoning": "",
   \  },
   \  "ui": {
   \    "populate_options": 0,

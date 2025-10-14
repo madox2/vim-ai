@@ -126,6 +126,9 @@ class OpenAIProvider():
             _convert_option('logit_bias', json.loads)
             # reasoning_effort is a string, no conversion needed
 
+            # openrouter reasoning parameter: https://openrouter.ai/docs/use-cases/reasoning-tokens#controlling-reasoning-tokens
+            _convert_option('reasoning', json.loads)
+
         return options
 
     def _make_openai_options(self, options):
@@ -148,6 +151,7 @@ class OpenAIProvider():
             'stop',
             'top_logprobs',
             'top_p',
+            'reasoning', # openrouter reasoning parameter
         ]
 
         for key in option_keys:

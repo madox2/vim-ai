@@ -5,6 +5,7 @@ def test_role_completion():
     assert set(role_names) == {
         'test-role-simple',
         'test-role',
+        'test-role-openrouter-reasoning',
         'deprecated-test-role-simple',
         'deprecated-test-role',
     }
@@ -14,6 +15,7 @@ def test_role_chat_only():
     assert set(role_names) == {
         'test-role-simple',
         'test-role',
+        'test-role-openrouter-reasoning',
         'chat-only-role',
         'deprecated-test-role-simple',
         'deprecated-test-role',
