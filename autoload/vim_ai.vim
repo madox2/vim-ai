@@ -287,28 +287,27 @@ endfunction
 function! s:AIChatUndoCleanup()
   let l:bufnr = bufnr()
   let l:done = py3eval("ai_job_pool.is_job_done(unwrap('l:bufnr'))")
-  let l:undo_cleaned = getbufvar('%', 'vim_ai_chat_undo_cleaned', 1)
+  let l:chat_initiation_line = getbufvar(l:bufnr, 'vim_ai_chat_start_last_line', -1)
+  let l:undo_cleaned = l:chat_initiation_line == -1
   if !l:done || l:undo_cleaned
     return
   endif
 
-  let l:line_num = line('.')
-  execute 'normal! G'
-  call search('^>>> user', 'b')
-  call search('^<<< assistant\|^<<< tool_call\|^<<< error\|^<<< thinking')
-  execute 'normal! k'
-  let l:assistant_start_line = line('.')
+  let l:current_line_num = line('.')
+  " navigate to the line where it started generating answer
+  execute l:chat_initiation_line
+  execute 'normal! j'
   " copy whole assistant message to the `d` register
   execute 'normal! "dyG'
   " undo until user message
-  while line('$') >= l:assistant_start_line
+  while line('$') > l:chat_initiation_line
     execute "normal! u"
   endwhile
   " paste assistat message as a whole
   execute 'normal! "dp'
-  execute l:line_num
+  execute l:current_line_num
 
-  call setbufvar(l:bufnr, 'vim_ai_chat_undo_cleaned', 1)
+  call setbufvar(l:bufnr, 'vim_ai_chat_start_last_line', -1)
 endfunction
 
 " Start and answer the chat
@@ -353,7 +352,7 @@ function! vim_ai#AIChatRun(uses_range, config, ...) range abort
     if py3eval("run_ai_chat(unwrap('l:context'))")
       if g:vim_ai_async_chat == 1
 
-        call setbufvar(l:bufnr, 'vim_ai_chat_undo_cleaned', 0)
+        call setbufvar(l:bufnr, 'vim_ai_chat_start_last_line', line('$'))
         " if user switches to a different buffer, setup autocommand that
         " will clean undo history after returning back
         augroup AichatUndo
