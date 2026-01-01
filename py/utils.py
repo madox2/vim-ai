@@ -157,12 +157,14 @@ def make_image_message(path):
     return { 'type': 'image_url', 'image_url': { 'url': f"data:image/{ext.replace('.', '')};base64,{base64_image}" } }
 
 def make_text_file_message(path):
+    file_content_start = '==> {path} <==\n'
+    file_content_end = '\n==> END OF FILE <=='
     try:
         with open(path, 'r') as file:
             file_content = file.read().strip()
-            return { 'type': 'text', 'text': f'==> {path} <==\n' + file_content.strip() }
+            return { 'type': 'text', 'text': file_content_start + file_content.strip() + file_content_end }
     except UnicodeDecodeError:
-        return { 'type': 'text', 'text': f'==> {path} <==\nBinary file, cannot display' }
+        return { 'type': 'text', 'text': file_content_start + 'Binary file, cannot display' + file_content_end }
 
 def make_exec_output_message(cmd, timeout=5):
     ps = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, timeout=timeout)
