@@ -215,7 +215,7 @@ def test_parse_include_single_file_message():
                 },
                 {
                     'type': 'text',
-                    'text': f'==> {root_dir}/tests/resources/test1.include.txt <==\nhello world',
+                    'text': f'==> {root_dir}/tests/resources/test1.include.txt <==\nhello world\n==> END OF FILE <==',
                 },
             ],
         },
@@ -262,11 +262,11 @@ def test_parse_include_multiple_files_message():
                 },
                 {
                     'type': 'text',
-                    'text': f'==> {root_dir}/tests/resources/test1.include.txt <==\nhello world',
+                    'text': f'==> {root_dir}/tests/resources/test1.include.txt <==\nhello world\n==> END OF FILE <==',
                 },
                 {
                     'type': 'text',
-                    'text': f'==> tests/resources/test2.include.txt <==\nvim is awesome',
+                    'text': f'==> tests/resources/test2.include.txt <==\nvim is awesome\n==> END OF FILE <==',
                 },
             ],
         },
@@ -293,11 +293,11 @@ def test_parse_include_glob_files_message():
                 },
                 {
                     'type': 'text',
-                    'text': f'==> {root_dir}/tests/resources/test1.include.txt <==\nhello world',
+                    'text': f'==> {root_dir}/tests/resources/test1.include.txt <==\nhello world\n==> END OF FILE <==',
                 },
                 {
                     'type': 'text',
-                    'text': f'==> {root_dir}/tests/resources/test2.include.txt <==\nvim is awesome',
+                    'text': f'==> {root_dir}/tests/resources/test2.include.txt <==\nvim is awesome\n==> END OF FILE <==',
                 },
             ],
         },
@@ -347,7 +347,7 @@ def test_parse_include_image_with_files_message():
             'content': [
                 {
                     'type': 'text',
-                    'text': f'==> {root_dir}/tests/resources/test1.include.txt <==\nhello world',
+                    'text': f'==> {root_dir}/tests/resources/test1.include.txt <==\nhello world\n==> END OF FILE <==',
                 },
                 {
                     'type': 'image_url',
@@ -357,7 +357,7 @@ def test_parse_include_image_with_files_message():
                 },
                 {
                     'type': 'text',
-                    'text': f'==> {root_dir}/tests/resources/test2.include.txt <==\nvim is awesome',
+                    'text': f'==> {root_dir}/tests/resources/test2.include.txt <==\nvim is awesome\n==> END OF FILE <==',
                 },
             ],
         },
@@ -377,11 +377,11 @@ def test_parse_include_unsupported_binary_file():
             'content': [
                 {
                     'type': 'text',
-                    'text': f'==> {root_dir}/tests/resources/binary_file.bin <==\nBinary file, cannot display',
+                    'text': f'==> {root_dir}/tests/resources/binary_file.bin <==\nBinary file, cannot display\n==> END OF FILE <==',
                 },
                 {
                     'type': 'text',
-                    'text': f'==> {root_dir}/tests/resources/test1.include.txt <==\nhello world',
+                    'text': f'==> {root_dir}/tests/resources/test1.include.txt <==\nhello world\n==> END OF FILE <==',
                 },
             ],
         },

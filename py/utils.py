@@ -157,7 +157,7 @@ def make_image_message(path):
     return { 'type': 'image_url', 'image_url': { 'url': f"data:image/{ext.replace('.', '')};base64,{base64_image}" } }
 
 def make_text_file_message(path):
-    file_content_start = '==> {path} <==\n'
+    file_content_start = f'==> {path} <==\n'
     file_content_end = '\n==> END OF FILE <=='
     try:
         with open(path, 'r') as file:
