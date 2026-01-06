@@ -100,7 +100,11 @@ def get_proxy_settings():
     if not proxy_url:
         # Check standard environment variables
         proxy_url = os.getenv('https_proxy') or os.getenv('HTTPS_PROXY') or \
-                    os.getenv('http_proxy') or os.getenv('HTTP_PROXY') or ""
+                    os.getenv('http_proxy') or os.getenv('HTTP_PROXY')
+    
+    # Ensure proxy_url is a string and strip whitespace
+    if proxy_url:
+        proxy_url = str(proxy_url).strip()
     
     if proxy_url:
         # Return proxy dict for both http and https

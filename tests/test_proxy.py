@@ -13,7 +13,7 @@ def test_get_proxy_settings_with_vim_variable():
     # Mock the vim module and the proxy variable
     with patch.dict('sys.modules', {'vim': __import__('vim')}):
         import vim
-        vim.eval = lambda x: 'http://proxy.example.com:8080' if 'g:vim_ai_proxy' else ''
+        vim.eval = lambda x: 'http://proxy.example.com:8080' if x == 'g:vim_ai_proxy' else ''
         
         # Need to reload utils to pick up the new vim mock
         if 'utils' in sys.modules:
@@ -31,7 +31,7 @@ def test_get_proxy_settings_with_env_variable():
     """Test that proxy settings are read from environment variable when vim variable is empty"""
     with patch.dict('sys.modules', {'vim': __import__('vim')}):
         import vim
-        vim.eval = lambda x: ''  # Empty vim proxy variable
+        vim.eval = lambda x: '' if x == 'g:vim_ai_proxy' else ''  # Empty vim proxy variable
         
         # Need to reload utils to pick up the new vim mock
         if 'utils' in sys.modules:
@@ -50,7 +50,7 @@ def test_get_proxy_settings_no_proxy():
     """Test that None is returned when no proxy is configured"""
     with patch.dict('sys.modules', {'vim': __import__('vim')}):
         import vim
-        vim.eval = lambda x: ''  # Empty vim proxy variable
+        vim.eval = lambda x: '' if x == 'g:vim_ai_proxy' else ''  # Empty vim proxy variable
         
         # Need to reload utils to pick up the new vim mock
         if 'utils' in sys.modules:
