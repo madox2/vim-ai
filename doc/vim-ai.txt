@@ -294,15 +294,6 @@ MARKDOWN HIGHLIGHTING                            *g:vim_ai_chat_markdown*
 Set g:vim_ai_chat_markdown = 1 to enable full markdown highlighting in aichat files.
 Highlighting may be corrupted when using the preservim/vim-markdown plugin.
 
-PROXY CONFIGURATION                              *g:vim_ai_proxy*
-
-If you need to use a proxy to access the API, you can configure it in your
-.vimrc or init.vim: >
-
-  " Set proxy for all AI requests
-  let g:vim_ai_proxy = 'http://your-proxy-server:port'
-
-
 KEY BINDINGS
 
 Examples how configure key bindings and customize commands: >
