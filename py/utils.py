@@ -88,23 +88,13 @@ ai_provider_utils = AIProviderUtils()
 
 def get_proxy_settings():
     """
-    Get proxy settings from vim variable or environment variables.
+    Get proxy settings from vim variable.
     Returns a dict suitable for urllib ProxyHandler or None if no proxy is configured.
     """
     global _vimai_thread_proxy
     
-    # First check the vim variable
+    # Get proxy from vim variable only
     proxy_url = _vimai_thread_proxy.strip() if _vimai_thread_proxy else ""
-    
-    # If vim variable is not set, check environment variables
-    if not proxy_url:
-        # Check standard environment variables
-        proxy_url = os.getenv('https_proxy') or os.getenv('HTTPS_PROXY') or \
-                    os.getenv('http_proxy') or os.getenv('HTTP_PROXY')
-    
-    # Ensure proxy_url is a string and strip whitespace
-    if proxy_url:
-        proxy_url = str(proxy_url).strip()
     
     if proxy_url:
         # Return proxy dict for both http and https

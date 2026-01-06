@@ -81,15 +81,6 @@ If you need to use a proxy to access the API, you can configure it in your `.vim
 let g:vim_ai_proxy = 'http://your-proxy-server:port'
 ```
 
-Alternatively, you can use standard environment variables which will be used automatically if `g:vim_ai_proxy` is not set:
-
-```sh
-export http_proxy="http://your-proxy-server:port"
-export https_proxy="http://your-proxy-server:port"
-```
-
-The plugin will first check for `g:vim_ai_proxy`, and if not set, will fall back to the environment variables.
-
 ### Using `vim-plug`
 
 ```vim
