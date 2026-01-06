@@ -94,7 +94,7 @@ def get_proxy_settings():
     global _vimai_thread_proxy
     
     # Get proxy from vim variable only
-    proxy_url = _vimai_thread_proxy.strip() if _vimai_thread_proxy else ""
+    proxy_url = (_vimai_thread_proxy or "").strip()
     
     if proxy_url:
         # Return proxy dict for both http and https
