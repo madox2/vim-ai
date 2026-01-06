@@ -19,16 +19,19 @@ _vimai_thread_is_debug_active = vim.eval("g:vim_ai_debug") == "1"
 _vimai_thread_log_file_path = vim.eval("g:vim_ai_debug_log_file")
 _vimai_thread_token_file_path = vim.eval("g:vim_ai_token_file_path")
 _vimai_thread_token_load_fn = vim.eval("g:vim_ai_token_load_fn")
+_vimai_thread_proxy = vim.eval("g:vim_ai_proxy")
 
 def update_thread_shared_variables():
     global _vimai_thread_is_debug_active
     global _vimai_thread_log_file_path
     global _vimai_thread_token_file_path
     global _vimai_thread_token_load_fn
+    global _vimai_thread_proxy
     _vimai_thread_is_debug_active = vim.eval("g:vim_ai_debug") == "1"
     _vimai_thread_log_file_path = vim.eval("g:vim_ai_debug_log_file")
     _vimai_thread_token_file_path = vim.eval("g:vim_ai_token_file_path")
     _vimai_thread_token_load_fn = vim.eval("g:vim_ai_token_load_fn")
+    _vimai_thread_proxy = vim.eval("g:vim_ai_proxy")
 
 def print_debug(text, *args):
     global _vimai_thread_is_debug_active
@@ -63,6 +66,9 @@ class AIProviderUtils():
     def make_known_error(self, message: str):
         return KnownError(message)
 
+    def get_proxy_settings(self):
+        return get_proxy_settings()
+
     def load_api_key(self, env_variable_name: str, token_file_path: str = "", token_load_fn: str = ""):
         loaders = (
             lambda: load_token_from_file_path(token_file_path),
@@ -95,6 +101,13 @@ def make_options(options):
 def make_config(config):
     config['options'] = make_options(config['options'])
     return config
+
+
+def get_proxy_settings():
+    global _vimai_thread_proxy
+    proxy_url = (_vimai_thread_proxy or "").strip()
+    return proxy_url if proxy_url else None
+
 
 # when running AIEdit on selection and cursor ends on the first column, it needs to
 # be decided whether to append (a) or insert (i) to prevent missalignment.

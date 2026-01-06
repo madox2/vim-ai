@@ -157,6 +157,10 @@ endif
 if !exists("g:vim_ai_async_chat")
   let g:vim_ai_async_chat = 1
 endif
+if !exists("g:vim_ai_proxy")
+  let g:vim_ai_proxy = ""
+endif
+
 
 function! vim_ai_config#ExtendDeep(defaults, override) abort
   let l:result = a:defaults
