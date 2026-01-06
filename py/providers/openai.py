@@ -4,10 +4,19 @@ import urllib.request
 import os
 import json
 import vim
+import sys
 
 if "VIMAI_DUMMY_IMPORT" in os.environ:
     # TODO: figure out how to properly use imports/modules in vim, dev environment, pytest
     from py.types import AIMessage, AIResponseChunk, AIUtils, AIProvider, AICommandType, AIImageResponseChunk
+
+# Import get_proxy_settings from utils when not in dummy import mode
+if "VIMAI_DUMMY_IMPORT" not in os.environ:
+    # Add the py directory to the path so we can import utils
+    py_dir = os.path.dirname(os.path.dirname(__file__))
+    if py_dir not in sys.path:
+        sys.path.insert(0, py_dir)
+    from utils import get_proxy_settings
 
 class OpenAIProvider():
 
@@ -228,7 +237,16 @@ class OpenAIProvider():
             method="POST",
         )
 
-        with urllib.request.urlopen(req, timeout=request_timeout) as response:
+        # Configure proxy if available
+        proxy_settings = get_proxy_settings() if "VIMAI_DUMMY_IMPORT" not in os.environ else None
+        if proxy_settings:
+            proxy_handler = urllib.request.ProxyHandler(proxy_settings)
+            opener = urllib.request.build_opener(proxy_handler)
+            response = opener.open(req, timeout=request_timeout)
+        else:
+            response = urllib.request.urlopen(req, timeout=request_timeout)
+
+        with response:
             if not data.get('stream', 0):
                 yield json.loads(response.read().decode())
                 return

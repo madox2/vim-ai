@@ -19,16 +19,19 @@ _vimai_thread_is_debug_active = vim.eval("g:vim_ai_debug") == "1"
 _vimai_thread_log_file_path = vim.eval("g:vim_ai_debug_log_file")
 _vimai_thread_token_file_path = vim.eval("g:vim_ai_token_file_path")
 _vimai_thread_token_load_fn = vim.eval("g:vim_ai_token_load_fn")
+_vimai_thread_proxy = vim.eval("g:vim_ai_proxy")
 
 def update_thread_shared_variables():
     global _vimai_thread_is_debug_active
     global _vimai_thread_log_file_path
     global _vimai_thread_token_file_path
     global _vimai_thread_token_load_fn
+    global _vimai_thread_proxy
     _vimai_thread_is_debug_active = vim.eval("g:vim_ai_debug") == "1"
     _vimai_thread_log_file_path = vim.eval("g:vim_ai_debug_log_file")
     _vimai_thread_token_file_path = vim.eval("g:vim_ai_token_file_path")
     _vimai_thread_token_load_fn = vim.eval("g:vim_ai_token_load_fn")
+    _vimai_thread_proxy = vim.eval("g:vim_ai_proxy")
 
 def print_debug(text, *args):
     global _vimai_thread_is_debug_active
@@ -82,6 +85,31 @@ class AIProviderUtils():
         raise KnownError("Missing API key")
 
 ai_provider_utils = AIProviderUtils()
+
+def get_proxy_settings():
+    """
+    Get proxy settings from vim variable or environment variables.
+    Returns a dict suitable for urllib ProxyHandler or None if no proxy is configured.
+    """
+    global _vimai_thread_proxy
+    
+    # First check the vim variable
+    proxy_url = _vimai_thread_proxy.strip() if _vimai_thread_proxy else ""
+    
+    # If vim variable is not set, check environment variables
+    if not proxy_url:
+        # Check standard environment variables
+        proxy_url = os.getenv('https_proxy') or os.getenv('HTTPS_PROXY') or \
+                    os.getenv('http_proxy') or os.getenv('HTTP_PROXY') or ""
+    
+    if proxy_url:
+        # Return proxy dict for both http and https
+        return {
+            'http': proxy_url,
+            'https': proxy_url,
+        }
+    
+    return None
 
 def unwrap(input_var):
     return vim.eval(input_var)
