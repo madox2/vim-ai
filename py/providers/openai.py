@@ -228,7 +228,15 @@ class OpenAIProvider():
             method="POST",
         )
 
-        with urllib.request.urlopen(req, timeout=request_timeout) as response:
+        proxy_settings = self.utils.get_proxy_settings()
+        if proxy_settings:
+            proxy_handler = urllib.request.ProxyHandler(proxy_settings)
+            opener = urllib.request.build_opener(proxy_handler)
+            response = opener.open(req, timeout=request_timeout)
+        else:
+            response = urllib.request.urlopen(req, timeout=request_timeout)
+
+        with response:
             if not data.get('stream', 0):
                 yield json.loads(response.read().decode())
                 return
