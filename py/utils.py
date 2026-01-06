@@ -106,7 +106,7 @@ def make_config(config):
 def get_proxy_settings():
     global _vimai_thread_proxy
     proxy_url = (_vimai_thread_proxy or "").strip()
-    return proxy_url if proxy_url else None
+    return {'http': proxy_url, 'https': proxy_url} if proxy_url else None
 
 
 # when running AIEdit on selection and cursor ends on the first column, it needs to
