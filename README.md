@@ -136,6 +136,7 @@ This is the list of 3rd party provider plugins allowing to use different AI prov
 - [google provider](https://github.com/madox2/vim-ai-provider-google) - Google's Gemini models
 - [OpenAI Responses API Provider](https://github.com/kevincojean/vim-ai-provider-openai-responses) - OpenAI Responses API compatibility plug-in
 - [OpenAI Provider with MCP support](https://github.com/kracejic/vim-ai-provider-openai-mcp) - OpenAI chat with MCP
+- [LiteLLM provider](https://github.com/kevincojean/vim-ai-provider-litellm) - LiteLLM proxy integration
 
 In case you are interested in developing one, have a look at reference [google provider](https://github.com/madox2/vim-ai-provider-google).
 Do not forget to open PR updating this list.
