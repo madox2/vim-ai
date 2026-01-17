@@ -99,10 +99,11 @@ To use an AI command, type the command followed by an instruction prompt. You ca
 ```
 ========== Basic AI commands ==========
 
-:AI       complete text
-:AIEdit   edit text
-:AIChat   continue or open new chat
-:AIImage  generate image
+:AI          complete text
+:AIEdit      edit text
+:AIChat      continue or open new chat
+:AIStopChat  stop the generation of the AI response for the AIChat
+:AIImage     generate image
 
 ============== Utilities ==============
 
@@ -114,15 +115,15 @@ To use an AI command, type the command followed by an instruction prompt. You ca
 :help vim-ai
 ```
 
-**Tip:** Press `Ctrl-c` anytime to cancel completion
+**Tip:** Press `Ctrl-c` anytime to cancel `:AI` and `:AIEdit` completion
 
-**Tip:** Use command shortcuts - `:AIE`, `:AIC`, `:AIR`, `:AII` or setup your own [key bindings](#key-bindings)
+**Tip:** Use command shortcuts - `:AIE`, `:AIC`, `:AIS`,`:AIR`, `:AII` or setup your own [key bindings](#key-bindings)
 
 **Tip:** Define and use [custom roles](#roles), e.g. `:AIEdit /grammar`.
 
 **Tip:** Use pre-defined roles `/right`, `/below`, `/tab` to choose how chat is open, e.g. `:AIC /right`
 
-**Tip:** Use special role `/populate` to dump options to chat header, e.g. `:AIC /populate /gemini`
+**Tip:** Use special role `/populate` or `/populate-all` to show options in the chat header config, e.g. `:AIC /populate /gemini`
 
 **Tip:** Combine commands with a range `:help range`, e.g. to select the whole buffer - `:%AIE fix grammar`
 
@@ -133,6 +134,9 @@ If you are interested in more tips or would like to level up your Vim with more 
 This is the list of 3rd party provider plugins allowing to use different AI providers.
 
 - [google provider](https://github.com/madox2/vim-ai-provider-google) - Google's Gemini models
+- [LiteLLM provider](https://github.com/kevincojean/vim-ai-provider-litellm) - LiteLLM proxy server integration (100+ LLM providers)
+- [OpenAI Responses API Provider](https://github.com/kevincojean/vim-ai-provider-openai-responses) - OpenAI Responses API compatibility plug-in
+- [OpenAI Provider with MCP support](https://github.com/kracejic/vim-ai-provider-openai-mcp) - OpenAI chat with MCP
 
 In case you are interested in developing one, have a look at reference [google provider](https://github.com/madox2/vim-ai-provider-google).
 Do not forget to open PR updating this list.
@@ -152,12 +156,17 @@ let g:vim_ai_roles_config_file = '/path/to/my/roles.ini'
 prompt = fix spelling and grammar
 options.temperature = 0.4
 
+# set options for all commands (chat, complete, edit)
 [o1-mini]
-options.stream = 0
 options.model = o1-mini
 options.max_completion_tokens = 25000
 options.temperature = 1
 options.initial_prompt =
+
+# you can also set options for a specific command
+[o1-mini.chat]
+options.stream = 0
+ui.populate_all_options = 1
 ```
 
 Now you can select text and run it with command `:AIEdit /grammar`.
@@ -290,6 +299,7 @@ let g:vim_ai_chat = {
 \    "temperature": 1,
 \    "max_completion_tokens": 25000,
 \    "initial_prompt": "",
+\    "token_file_path": "/custom/path/ai.token",
 \  },
 \}
 ```
@@ -297,12 +307,19 @@ let g:vim_ai_chat = {
 Alternatively you can use special `default` role:
 
 ```ini
+# set options for all commands (chat, complete, edit)
+[default]
+options.token_file_path = /custom/path/ai.token
+
+# set options only for a chat command
 [default.chat]
 options.model = o1-preview
 options.stream = 0
 options.temperature = 1
 options.max_completion_tokens = 25000
 options.initial_prompt =
+
+# NOTE: this role takes precedence over g:vim_ai_chat, g:vim_ai_complete, g:vim_ai_edit
 ```
 
 Or customize the options directly in the chat buffer:
@@ -314,6 +331,7 @@ options.stream = 0
 options.temperature = 1
 options.max_completion_tokens = 25000
 options.initial_prompt =
+options.token_file_path = /custom/path/ai.token
 
 >>> user
 
@@ -337,14 +355,14 @@ END
 " :AI
 " - provider: AI provider
 " - prompt: optional prepended prompt
-" - options: openai config (see https://platform.openai.com/docs/api-reference/completions)
+" - options: openai config (see https://platform.openai.com/docs/api-reference/chat)
 " - options.initial_prompt: prompt prepended to every chat request (list of lines or string)
-" - options.temperature: use -1 to disable this parameter
 " - options.request_timeout: request timeout in seconds
 " - options.auth_type: API authentication method (bearer, api-key, none)
 " - options.token_file_path: override global token configuration
 " - options.token_load_fn: expression/vim function to load token
 " - options.selection_boundary: selection prompt wrapper (eliminates empty responses, see #20)
+" - options.reasoning: openrouter reasoning parameter (stringified json)
 " - ui.paste_mode: use paste mode (see more info in the Notes below)
 let g:vim_ai_complete = {
 \  "provider": "openai",
@@ -362,6 +380,16 @@ let g:vim_ai_complete = {
 \    "token_load_fn": "",
 \    "selection_boundary": "#####",
 \    "initial_prompt": s:initial_complete_prompt,
+\    "frequency_penalty": "",
+\    "logit_bias": "",
+\    "logprobs": "",
+\    "presence_penalty": "",
+\    "reasoning_effort": "",
+\    "seed": "",
+\    "stop": "",
+\    "top_logprobs": "",
+\    "top_p": "",
+\    "reasoning": "",
 \  },
 \  "ui": {
 \    "paste_mode": 1,
@@ -371,14 +399,14 @@ let g:vim_ai_complete = {
 " :AIEdit
 " - provider: AI provider
 " - prompt: optional prepended prompt
-" - options: openai config (see https://platform.openai.com/docs/api-reference/completions)
+" - options: openai config (see https://platform.openai.com/docs/api-reference/chat)
 " - options.initial_prompt: prompt prepended to every chat request (list of lines or string)
-" - options.temperature: use -1 to disable this parameter
 " - options.request_timeout: request timeout in seconds
 " - options.auth_type: API authentication method (bearer, api-key, none)
 " - options.token_file_path: override global token configuration
 " - options.token_load_fn: expression/vim function to load token
 " - options.selection_boundary: selection prompt wrapper (eliminates empty responses, see #20)
+" - options.reasoning: openrouter reasoning parameter (stringified json)
 " - ui.paste_mode: use paste mode (see more info in the Notes below)
 let g:vim_ai_edit = {
 \  "provider": "openai",
@@ -396,6 +424,16 @@ let g:vim_ai_edit = {
 \    "token_load_fn": "",
 \    "selection_boundary": "#####",
 \    "initial_prompt": s:initial_complete_prompt,
+\    "frequency_penalty": "",
+\    "logit_bias": "",
+\    "logprobs": "",
+\    "presence_penalty": "",
+\    "reasoning_effort": "",
+\    "seed": "",
+\    "stop": "",
+\    "top_logprobs": "",
+\    "top_p": "",
+\    "reasoning": "",
 \  },
 \  "ui": {
 \    "paste_mode": 1,
@@ -415,14 +453,15 @@ END
 " - prompt: optional prepended prompt
 " - options: openai config (see https://platform.openai.com/docs/api-reference/chat)
 " - options.initial_prompt: prompt prepended to every chat request (list of lines or string)
-" - options.temperature: use -1 to disable this parameter
 " - options.request_timeout: request timeout in seconds
 " - options.auth_type: API authentication method (bearer, api-key, none)
 " - options.token_file_path: override global token configuration
 " - options.token_load_fn: expression/vim function to load token
 " - options.selection_boundary: selection prompt wrapper (eliminates empty responses, see #20)
+" - options.reasoning: openrouter reasoning parameter (stringified json)
 " - ui.open_chat_command: preset (preset_below, preset_tab, preset_right) or a custom command
-" - ui.populate_options: dump [chat] config to the chat header
+" - ui.populate_options: show changed options in the chat header config
+" - ui.populate_all_options: show all options in the chat header config
 " - ui.scratch_buffer_keep_open: re-use scratch buffer within the vim session
 " - ui.force_new_chat: force new chat window (used in chat opening roles e.g. `/tab`)
 " - ui.paste_mode: use paste mode (see more info in the Notes below)
@@ -442,11 +481,22 @@ let g:vim_ai_chat = {
 \    "token_load_fn": "",
 \    "selection_boundary": "",
 \    "initial_prompt": s:initial_chat_prompt,
+\    "frequency_penalty": "",
+\    "logit_bias": "",
+\    "logprobs": "",
+\    "presence_penalty": "",
+\    "reasoning_effort": "",
+\    "seed": "",
+\    "stop": "",
+\    "top_logprobs": "",
+\    "top_p": "",
+\    "reasoning": "",
 \  },
 \  "ui": {
 \    "open_chat_command": "preset_below",
 \    "scratch_buffer_keep_open": 0,
 \    "populate_options": 0,
+\    "populate_all_options": 0,
 \    "force_new_chat": 0,
 \    "paste_mode": 1,
 \  },
@@ -488,6 +538,9 @@ let g:vim_ai_token_file_path = "~/.config/openai.token"
 " custom fn to load token, e.g. "g:GetAIToken()"
 let g:vim_ai_token_load_fn = ""
 
+" enable/disable asynchronous AIChat (enabled by default)
+let g:vim_ai_async_chat = 1
+
 " enables/disables full markdown highlighting in aichat files
 " NOTE: code syntax highlighting works out of the box without this option enabled
 " NOTE: highlighting may be corrupted when using together with the `preservim/vim-markdown`
@@ -504,7 +557,7 @@ let g:vim_ai_debug_log_file = "/tmp/vim_ai_debug.log"
 " - find out more in vim's help `:help paste`
 " options.max_tokens
 " - note that prompt + max_tokens must be less than model's token limit, see #42, #46
-" - setting max tokens to 0 will exclude it from the OpenAI API request parameters, it is
+" - setting max tokens to "" will exclude it from the OpenAI API request parameters, it is
 "   unclear/undocumented what it exactly does, but it seems to resolve issues when the model
 "   hits token limit, which respond with `OpenAI: HTTPError 400`
 " options.selection_boundary
@@ -560,6 +613,9 @@ I was created by Google.
 This plugin does not set any key binding. Create your own bindings in the `.vimrc` to trigger AI commands, for example:
 
 ```vim
+" stop async chat generation
+nnoremap <leader>s :AIStopChat<CR>
+
 " complete text on the current line or in visual selection
 nnoremap <leader>a :AI<CR>
 xnoremap <leader>a :AI<CR>
