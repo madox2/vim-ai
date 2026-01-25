@@ -24,6 +24,8 @@ class AIUtils(Protocol):
         pass
     def load_api_key(self, env_variable: str, token_file_path: str = "", token_load_fn: str = ""):
         pass
+    def get_proxy_settings(self):
+        pass
 
 class AIResponseChunk(TypedDict):
     type: Literal['assistant', 'thinking']
