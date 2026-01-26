@@ -72,15 +72,6 @@ The default api key file location is `~/.config/openai.token`, but you can chang
 let g:vim_ai_token_file_path = '~/.config/openai.token'
 ```
 
-### Proxy Configuration
-
-If you need to use a proxy to access the API, you can configure it in your `.vimrc` or `init.vim`:
-
-```vim
-" Set proxy for all AI requests
-let g:vim_ai_proxy = 'http://your-proxy-server:port'
-```
-
 ### Using `vim-plug`
 
 ```vim
@@ -546,6 +537,9 @@ let g:vim_ai_token_file_path = "~/.config/openai.token"
 " custom fn to load token, e.g. "g:GetAIToken()"
 let g:vim_ai_token_load_fn = ""
 
+" set proxy for all AI requests
+let g:vim_ai_proxy = 'http://your-proxy-server:port'
+
 " enable/disable asynchronous AIChat (enabled by default)
 let g:vim_ai_async_chat = 1
 
@@ -570,6 +564,7 @@ let g:vim_ai_debug_log_file = "/tmp/vim_ai_debug.log"
 "   hits token limit, which respond with `OpenAI: HTTPError 400`
 " options.selection_boundary
 " - setting ``` value behaves in markdown-like fasion - adds filetype to the boundary
+```
 
 ### Using custom API
 
