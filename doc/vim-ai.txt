@@ -350,3 +350,5 @@ ABOUT                                           *vim-ai-about*
 Contributions are welcome on GitHub:
 
 https://github.com/madox2/vim-ai
+
+vim:filetype=help
