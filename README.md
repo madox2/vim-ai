@@ -102,6 +102,7 @@ To use an AI command, type the command followed by an instruction prompt. You ca
 :AI          complete text
 :AIEdit      edit text
 :AIChat      continue or open new chat
+:AIStop      stop async generation for :AI and :AIEdit
 :AIStopChat  stop the generation of the AI response for the AIChat
 :AIImage     generate image
 
@@ -115,9 +116,9 @@ To use an AI command, type the command followed by an instruction prompt. You ca
 :help vim-ai
 ```
 
-**Tip:** Press `Ctrl-c` anytime to cancel `:AI` and `:AIEdit` completion
+**Tip:** Press `Ctrl-c` anytime to cancel synchronous `:AI` and `:AIEdit` completion. Use `:AIStop` for async runs.
 
-**Tip:** Use command shortcuts - `:AIE`, `:AIC`, `:AIS`,`:AIR`, `:AII` or setup your own [key bindings](#key-bindings)
+**Tip:** Use command shortcuts - `:AIE`, `:AIC`, `:AIR`, `:AII` or setup your own [key bindings](#key-bindings)
 
 **Tip:** Define and use [custom roles](#roles), e.g. `:AIEdit /grammar`.
 
@@ -543,6 +544,9 @@ let g:vim_ai_proxy = 'http://your-proxy-server:port'
 " enable/disable asynchronous AIChat (enabled by default)
 let g:vim_ai_async_chat = 1
 
+" enable/disable asynchronous AI and AIEdit (enabled by default)
+let g:vim_ai_async_complete = 1
+
 " enables/disables full markdown highlighting in aichat files
 " NOTE: code syntax highlighting works out of the box without this option enabled
 " NOTE: highlighting may be corrupted when using together with the `preservim/vim-markdown`
@@ -618,6 +622,9 @@ This plugin does not set any key binding. Create your own bindings in the `.vimr
 ```vim
 " stop async chat generation
 nnoremap <leader>s :AIStopChat<CR>
+
+" stop async AI/AIEdit generation
+nnoremap <leader>x :AIStop<CR>
 
 " complete text on the current line or in visual selection
 nnoremap <leader>a :AI<CR>

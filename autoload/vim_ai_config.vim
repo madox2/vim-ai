@@ -157,6 +157,9 @@ endif
 if !exists("g:vim_ai_async_chat")
   let g:vim_ai_async_chat = 1
 endif
+if !exists("g:vim_ai_async_complete")
+  let g:vim_ai_async_complete = 1
+endif
 if !exists("g:vim_ai_proxy")
   let g:vim_ai_proxy = ""
 endif
