@@ -61,6 +61,11 @@ Options: >
   \  },
   \}
 
+To use the Responses API set `endpoint_url` to
+`https://api.openai.com/v1/responses`. When using the Responses API,
+`max_output_tokens` is supported and `max_completion_tokens`/`max_tokens`
+are mapped if set.
+
 Check OpenAI docs for more information:
 https://platform.openai.com/docs/api-reference/completions
 
@@ -111,6 +116,11 @@ Options: >
   \    "paste_mode": 1,
   \  },
   \}
+
+To use the Responses API set `endpoint_url` to
+`https://api.openai.com/v1/responses`. When using the Responses API,
+`max_output_tokens` is supported and `max_completion_tokens`/`max_tokens`
+are mapped if set.
 
 Check OpenAI docs for more information:
 https://platform.openai.com/docs/api-reference/completions
@@ -164,6 +174,11 @@ Options: >
   \    "paste_mode": 1,
   \  },
   \}
+
+To use the Responses API set `endpoint_url` to
+`https://api.openai.com/v1/responses`. When using the Responses API,
+`max_output_tokens` is supported and `max_completion_tokens`/`max_tokens`
+are mapped if set.
 
 Check OpenAI docs for more information:
 https://platform.openai.com/docs/api-reference/chat

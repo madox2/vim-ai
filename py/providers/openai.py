@@ -31,7 +31,8 @@ class OpenAIProvider():
 
     def request(self, messages: Sequence[AIMessage]) -> Iterator[AIResponseChunk]:
         options = self.options
-        openai_options = self._make_openai_options(options)
+        is_responses = self._is_responses_endpoint(options['endpoint_url'])
+        openai_options = self._make_responses_options(options) if is_responses else self._make_openai_options(options)
         http_options = {
             'request_timeout': options.get('request_timeout') or 20,
             'auth_type': options['auth_type'],
@@ -41,42 +42,32 @@ class OpenAIProvider():
 
         def _flatten_content(messages):
             # NOTE: Some providers like api.deepseek.com & api.groq.com expect a flat 'content' field.
+            flattened = []
             for message in messages:
+                message = {**message}
                 if message['role'] in ('system', 'assistant'):
                     message['content'] = '\n'.join(map(lambda c: c['text'], message['content']))
-            return messages
+                flattened.append(message)
+            return flattened
+
+        url = options['endpoint_url']
+
+        if is_responses:
+            request = {
+                'input': self._make_responses_input(messages),
+                **openai_options
+            }
+            self.utils.print_debug("openai: [{}] request: {}", self.command_type, request)
+            response = self._openai_request(url, request, http_options)
+            return self._responses_chunks(response, openai_options)
 
         request = {
             'messages': _flatten_content(messages),
             **openai_options
         }
         self.utils.print_debug("openai: [{}] request: {}", self.command_type, request)
-        url = options['endpoint_url']
         response = self._openai_request(url, request, http_options)
-
-        _choice_key = 'delta' if openai_options.get('stream') else 'message'
-
-        def _get_delta(resp):
-            choices = resp.get('choices') or [{}]
-            return choices[0].get(_choice_key, {})
-
-        def _map_chunk(resp):
-            self.utils.print_debug("openai: [{}] response: {}", self.command_type, resp)
-            delta = _get_delta(resp)
-            if delta.get('reasoning_content'):
-                # NOTE: support for deepseek's reasoning_content
-                return {'type': 'thinking', 'content': delta.get('reasoning_content')}
-            if delta.get('reasoning'):
-                # NOTE: support for `reasoning` from openrouter
-                return {'type': 'thinking', 'content': delta.get('reasoning')}
-            if delta.get('content'):
-                return {'type': 'assistant', 'content': delta.get('content')}
-            return None # invalid chunk, this occured in deepseek models
-
-        def _filter_valid_chunks(chunk):
-            return chunk is not None
-
-        return filter(_filter_valid_chunks, map(_map_chunk, response))
+        return self._chat_completions_chunks(response, openai_options)
 
     def _load_api_key(self):
         raw_api_key = self.utils.load_api_key(
@@ -115,6 +106,7 @@ class OpenAIProvider():
             _convert_option('stream', lambda x: bool(int(x)))
             _convert_option('max_tokens', int)
             _convert_option('max_completion_tokens', int)
+            _convert_option('max_output_tokens', int)
             _convert_option('temperature', float)
             _convert_option('frequency_penalty', float)
             _convert_option('presence_penalty', float)
@@ -175,6 +167,168 @@ class OpenAIProvider():
             result[key] = value
 
         return result
+
+    def _make_responses_options(self, options):
+        result = {
+            'model': options['model'],
+        }
+
+        option_keys = [
+            'stream',
+            'temperature',
+            'top_p',
+            'seed',
+            'stop',
+            'reasoning',
+        ]
+
+        for key in option_keys:
+            if key not in options:
+                continue
+
+            value = options[key]
+            if value == '':
+                continue
+
+            result[key] = value
+
+        max_output_tokens = options.get('max_output_tokens')
+        if max_output_tokens in ('', None, 0):
+            max_completion_tokens = options.get('max_completion_tokens')
+            if max_completion_tokens not in ('', None, 0):
+                max_output_tokens = max_completion_tokens
+            else:
+                max_tokens = options.get('max_tokens')
+                if max_tokens not in ('', None, 0):
+                    max_output_tokens = max_tokens
+
+        if max_output_tokens not in ('', None, 0):
+            result['max_output_tokens'] = max_output_tokens
+
+        if 'reasoning' not in result:
+            reasoning_effort = options.get('reasoning_effort')
+            if reasoning_effort not in ('', None):
+                result['reasoning'] = { 'effort': reasoning_effort }
+
+        return result
+
+    def _make_responses_input(self, messages: Sequence[AIMessage]):
+        input_items = []
+        for message in messages:
+            role = message.get('role')
+            content = message.get('content') or []
+            if not content:
+                input_items.append({
+                    'type': 'message',
+                    'role': role,
+                    'content': "",
+                })
+                continue
+            response_content = []
+            for part in content:
+                if part.get('type') == 'text':
+                    response_content.append({
+                        'type': 'input_text',
+                        'text': part.get('text', ''),
+                    })
+                elif part.get('type') == 'image_url':
+                    image_url = part.get('image_url', {})
+                    if image_url.get('url'):
+                        response_content.append({
+                            'type': 'input_image',
+                            'image_url': image_url.get('url'),
+                        })
+            input_items.append({
+                'type': 'message',
+                'role': role,
+                'content': response_content if response_content else "",
+            })
+        return input_items
+
+    def _responses_chunks(self, response: Iterator[Mapping[str, Any]], options: Mapping[str, Any]):
+        if options.get('stream'):
+            def _map_chunk(resp):
+                return self._map_responses_stream_event(resp)
+            return filter(lambda chunk: chunk is not None, map(_map_chunk, response))
+
+        def _non_stream_chunks():
+            resp = next(response, None)
+            if resp is None:
+                return
+            chunk = self._map_responses_response(resp)
+            if chunk is not None:
+                yield chunk
+        return _non_stream_chunks()
+
+    def _map_responses_stream_event(self, resp: Mapping[str, Any]):
+        self.utils.print_debug("openai: [{}] response: {}", self.command_type, resp)
+        event_type = resp.get('type')
+
+        if event_type == 'response.output_text.delta':
+            delta = resp.get('delta') or ''
+            return {'type': 'assistant', 'content': delta} if delta else None
+
+        if event_type == 'response.content_part.added':
+            part = resp.get('part') or {}
+            text = part.get('text') or ''
+            return {'type': 'assistant', 'content': text} if text else None
+
+        if event_type == 'error':
+            message = resp.get('message') or 'OpenAI Responses API error'
+            raise Exception(message)
+
+        return None
+
+    def _map_responses_response(self, resp: Mapping[str, Any]):
+        self.utils.print_debug("openai: [{}] response: {}", self.command_type, resp)
+        if resp.get('error'):
+            raise Exception(resp['error'])
+
+        output_text = resp.get('output_text')
+        if isinstance(output_text, str) and output_text:
+            return {'type': 'assistant', 'content': output_text}
+
+        output = resp.get('output') or []
+        text_parts = []
+        for item in output:
+            if item.get('type') == 'message':
+                for part in item.get('content', []):
+                    if part.get('type') in ('output_text', 'text'):
+                        text_parts.append(part.get('text', ''))
+            elif item.get('type') == 'output_text':
+                text_parts.append(item.get('text', ''))
+
+        if text_parts:
+            return {'type': 'assistant', 'content': ''.join(text_parts)}
+        return None
+
+    def _chat_completions_chunks(self, response, openai_options):
+        _choice_key = 'delta' if openai_options.get('stream') else 'message'
+
+        def _get_delta(resp):
+            choices = resp.get('choices') or [{}]
+            return choices[0].get(_choice_key, {})
+
+        def _map_chunk(resp):
+            self.utils.print_debug("openai: [{}] response: {}", self.command_type, resp)
+            delta = _get_delta(resp)
+            if delta.get('reasoning_content'):
+                # NOTE: support for deepseek's reasoning_content
+                return {'type': 'thinking', 'content': delta.get('reasoning_content')}
+            if delta.get('reasoning'):
+                # NOTE: support for `reasoning` from openrouter
+                return {'type': 'thinking', 'content': delta.get('reasoning')}
+            if delta.get('content'):
+                return {'type': 'assistant', 'content': delta.get('content')}
+            return None # invalid chunk, this occured in deepseek models
+
+        def _filter_valid_chunks(chunk):
+            return chunk is not None
+
+        return filter(_filter_valid_chunks, map(_map_chunk, response))
+
+    def _is_responses_endpoint(self, url: str) -> bool:
+        return '/responses' in url
 
     def request_image(self, prompt: str) -> list[AIImageResponseChunk]:
         options = self.options
