@@ -101,7 +101,7 @@ To use an AI command, type the command followed by an instruction prompt. You ca
 
 :AI          complete text
 :AIEdit      edit text
-:AIChat      continue or open new chat
+:AIChat      toggle chat window (tab-local)
 :AIStopChat  stop the generation of the AI response for the AIChat
 :AIImage     generate image
 
@@ -208,13 +208,14 @@ In the documentation below,  `<selection>` denotes a visual selection or any oth
 
 ### `:AIChat`
 
-`:AIChat` - continue or start a new conversation.
+`:AIChat` - open chat window on current tab, jump to it if already open, reopen it if hidden.
+Each tab keeps its own chat buffer.
 
-`<selection>? :AIChat {instruction}?` - start a new conversation given the selection, the instruction or both
+`<selection>? :AIChat {instruction}?` - open or focus the tab-local chat and optionally initialize it with selection/instruction
 
-`<selection>? :AIChat /{role} {instruction}?` - use role to complete
+`<selection>? :AIChat /{role} {instruction}?` - open/focus chat and apply role to chat initialization
 
-When the AI finishes answering, you can continue the conversation by entering insert mode, adding your prompt, and then using the command `:AIChat` once again.
+Use `:AIChat` inside an `aichat` buffer to continue the conversation.
 
 [Pre-defined](./roles-default.ini) chat roles: `/right`, `/below`, `/tab`
 

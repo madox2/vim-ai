@@ -133,3 +133,5 @@ augroup Aichat
   autocmd InsertEnter,InsertLeave <buffer> call s:MarkdownRefreshSyntax(0)
   autocmd CursorHold,CursorHoldI <buffer> call s:MarkdownRefreshSyntax(0)
 augroup END
+
+command! -buffer -range -nargs=? -complete=customlist,vim_ai#RoleCompletionChat AI <line1>,<line2>call vim_ai#AIChatRun(<range>, {}, <q-args>)
