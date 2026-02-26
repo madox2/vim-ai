@@ -172,6 +172,34 @@ Now you can select text and run it with command `:AIEdit /grammar`.
 
 You can also combine roles `:AI /o1-mini /grammar helo world!`
 
+Alternatively, `g:vim_ai_roles_config_file` can point to a directory.
+Each `*.md` file in that directory is loaded as one role, where the file name is the role name.
+Use markdown frontmatter to configure role options.
+The markdown body is added to `options.initial_prompt` as a `>>> system` block.
+
+```vim
+let g:vim_ai_roles_config_file = '/path/to/my/roles'
+```
+
+```markdown
+---
+model: openai:gpt-5.2-high
+temperature: 0.3
+chat.max_tokens: 1200
+---
+fix spelling and grammar
+```
+
+The example above maps to role config values:
+
+```ini
+provider = openai
+options.model = gpt-5.2
+options.reasoning_effort = high
+options.temperature = 0.3
+options.initial_prompt = >>> system\n\nfix spelling and grammar
+```
+
 See [roles-example.ini](./roles-example.ini) for more examples.
 
 ## Reference

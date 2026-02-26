@@ -10,6 +10,7 @@ from urllib.error import HTTPError
 import traceback
 import configparser
 import base64
+import re
 
 utils_py_imported = True
 
@@ -335,6 +336,119 @@ def enhance_roles_with_custom_function(roles):
         else:
             roles.update(vim.eval(roles_config_function + "()"))
 
+def _parse_markdown_frontmatter(content, role_file_path):
+    lines = content.splitlines()
+    if not lines or lines[0].strip() != '---':
+        return {}, content.strip()
+
+    header = {}
+    end_index = -1
+    for index, raw_line in enumerate(lines[1:], start=1):
+        line = raw_line.strip()
+        if line == '---':
+            end_index = index
+            break
+        if not line or line.startswith('#'):
+            continue
+        if ':' not in line:
+            raise Exception(f"Invalid markdown header in role file: {role_file_path}")
+        key, value = line.split(':', 1)
+        value = value.strip()
+        if len(value) >= 2 and value[0] == value[-1] and value[0] in ('"', "'"):
+            value = value[1:-1]
+        header[key.strip()] = value
+
+    if end_index == -1:
+        raise Exception(f"Missing closing markdown header in role file: {role_file_path}")
+
+    prompt = '\n'.join(lines[end_index + 1:]).strip()
+    return header, prompt
+
+def _parse_model_header_value(value):
+    parsed_provider = ''
+    parsed_model = value.strip()
+
+    provider_match = re.match(r'^([a-zA-Z0-9_-]+):(.*)$', parsed_model)
+    if provider_match:
+        parsed_provider = provider_match.group(1)
+        parsed_model = provider_match.group(2).strip()
+
+    reasoning_effort = ''
+    for suffix, effort in [('-high', 'high'), ('-medium', 'medium'), ('-low', 'low')]:
+        if parsed_model.endswith(suffix):
+            parsed_model = parsed_model[:-len(suffix)]
+            reasoning_effort = effort
+            break
+
+    return parsed_provider, parsed_model, reasoning_effort
+
+def _make_markdown_section_name(role_name, key):
+    chunks = key.split('.', 1)
+    if len(chunks) > 1 and chunks[0] in ('chat', 'complete', 'edit', 'image'):
+        return f"{role_name}.{chunks[0]}", chunks[1]
+    return role_name, key
+
+def _as_system_initial_prompt(text):
+    text = text.strip()
+    if not text:
+        return ''
+    if text.startswith('>>>'):
+        return text
+    return f">>> system\n\n{text}"
+
+def _parse_markdown_role_file(role_name, role_file_path):
+    with open(role_file_path, 'r', encoding='utf-8') as file:
+        content = file.read()
+
+    header, prompt = _parse_markdown_frontmatter(content, role_file_path)
+    sections = {}
+
+    for key, value in header.items():
+        section_name, parsed_key = _make_markdown_section_name(role_name, key)
+        if not section_name in sections:
+            sections[section_name] = {}
+
+        if parsed_key == 'model':
+            provider, model, reasoning_effort = _parse_model_header_value(value)
+            if provider:
+                sections[section_name]['provider'] = provider
+            sections[section_name]['options.model'] = model
+            if reasoning_effort:
+                sections[section_name]['options.reasoning_effort'] = reasoning_effort
+        elif parsed_key == 'provider':
+            sections[section_name]['provider'] = value
+        elif parsed_key == 'prompt':
+            sections[section_name]['prompt'] = value
+        elif parsed_key.startswith('options.') or parsed_key.startswith('ui.'):
+            sections[section_name][parsed_key] = value
+        else:
+            sections[section_name][f"options.{parsed_key}"] = value
+
+    if prompt:
+        if not role_name in sections:
+            sections[role_name] = {}
+        parsed_prompt = _as_system_initial_prompt(prompt)
+        existing_initial_prompt = sections[role_name].get('options.initial_prompt', '').strip()
+        if existing_initial_prompt:
+            sections[role_name]['options.initial_prompt'] = f"{existing_initial_prompt}\n\n{parsed_prompt}"
+        else:
+            sections[role_name]['options.initial_prompt'] = parsed_prompt
+
+    return sections
+
+def _read_roles_from_markdown_directory(roles_dir_path):
+    markdown_files = sorted(glob.glob(os.path.join(roles_dir_path, '*.md')))
+    markdown_files += sorted(glob.glob(os.path.join(roles_dir_path, '*.markdown')))
+
+    roles = {}
+    for role_file_path in markdown_files:
+        if os.path.isdir(role_file_path):
+            continue
+        role_name = os.path.splitext(os.path.basename(role_file_path))[0]
+        role_sections = _parse_markdown_role_file(role_name, role_file_path)
+        roles.update(role_sections)
+    return roles
+
 def read_role_files():
     plugin_root = vim.eval("s:plugin_root")
     default_roles_config_path = str(os.path.join(plugin_root, "roles-default.ini"))
@@ -343,7 +457,11 @@ def read_role_files():
         raise Exception(f"Role config file does not exist: {roles_config_path}")
 
     roles = configparser.ConfigParser()
-    roles.read([default_roles_config_path, roles_config_path])
+    roles.read([default_roles_config_path])
+    if os.path.isdir(roles_config_path):
+        roles.read_dict(_read_roles_from_markdown_directory(roles_config_path))
+    else:
+        roles.read([roles_config_path])
     return roles
 
 def save_b64_to_file(path, b64_data):

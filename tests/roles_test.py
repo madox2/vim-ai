@@ -1,4 +1,10 @@
 from roles import load_ai_role_names
+import os
+from unittest.mock import patch
+import vim
+
+dirname = os.path.dirname(__file__)
+markdown_roles_dir = os.path.join(dirname, 'resources/roles-md')
 
 def test_role_completion():
     role_names = load_ai_role_names('complete')
@@ -31,3 +37,15 @@ def test_role_chat_only():
 def test_explicit_image_roles():
     role_names = load_ai_role_names('image')
     assert set(role_names) == { 'hd-image', 'hd', 'natural' }
+
+def test_load_markdown_roles_from_directory():
+    default_eval = vim.eval
+    with patch('vim.eval', side_effect=lambda cmd: markdown_roles_dir if cmd == 'g:vim_ai_roles_config_file' else default_eval(cmd)):
+        role_names = load_ai_role_names('chat')
+        assert 'markdown-role' in role_names
+
+def test_markdown_image_role_names():
+    default_eval = vim.eval
+    with patch('vim.eval', side_effect=lambda cmd: markdown_roles_dir if cmd == 'g:vim_ai_roles_config_file' else default_eval(cmd)):
+        role_names = load_ai_role_names('image')
+        assert 'markdown-image' in role_names

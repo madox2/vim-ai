@@ -1,6 +1,10 @@
 from context import make_ai_context, make_prompt
 from unittest.mock import patch
 import vim
+import os
+
+dirname = os.path.dirname(__file__)
+markdown_roles_dir = os.path.join(dirname, 'resources/roles-md')
 
 default_config = {
   "options": {
@@ -246,3 +250,35 @@ def test_role_config_all_params():
     assert actual_options['top_logprobs'] == '5'
     assert actual_options['top_p'] == '0.9'
 
+def test_markdown_role_header_model_mapping():
+    default_eval = vim.eval
+    with patch('vim.eval', side_effect=lambda cmd: markdown_roles_dir if cmd == 'g:vim_ai_roles_config_file' else default_eval(cmd)):
+        context = make_ai_context({
+            'config_default': default_config,
+            'config_extension': {},
+            'user_instruction': '/markdown-role hello',
+            'user_selection': '',
+            'command_type': 'chat',
+        })
+        actual_config = context['config']
+        assert actual_config['provider'] == 'openai'
+        assert actual_config['options']['model'] == 'gpt-5.2'
+        assert actual_config['options']['reasoning_effort'] == 'high'
+        assert actual_config['options']['temperature'] == '0.3'
+        assert actual_config['options']['max_tokens'] == '1200'
+        assert actual_config['options']['initial_prompt'] == '>>> system\n\nmarkdown role prompt'
+        assert context['prompt'] == 'hello'
+
+def test_markdown_image_role_header_mapping():
+    default_eval = vim.eval
+    with patch('vim.eval', side_effect=lambda cmd: markdown_roles_dir if cmd == 'g:vim_ai_roles_config_file' else default_eval(cmd)):
+        actual_context = make_ai_context({
+            'config_default': default_image_config,
+            'config_extension': {},
+            'user_instruction': '/markdown-image describe this image',
+            'user_selection': '',
+            'command_type': 'image',
+        })
+        assert actual_context['config']['provider'] == 'openai'
+        assert actual_context['config']['options']['model'] == 'gpt-image-1'
+        assert actual_context['config']['options']['size'] == '1024x1024'
