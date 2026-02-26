@@ -129,6 +129,25 @@ function! s:GetVisualSelection()
   return join(lines, "\n")
 endfunction
 
+" A visual range should be treated as character-wise selection only when
+" command-line invocation actually came from `'<,'>...`.
+function! s:IsVisualSelectionRange(uses_range, line_start, line_end, ...) abort
+  if !a:uses_range
+    return 0
+  endif
+
+  let l:last_cmd = a:0 > 0 ? a:1 : histget(':', -1)
+  if l:last_cmd =~# '^\s*AIRedo\>'
+    return a:line_start == line("'<") && a:line_end == line("'>")
+  endif
+
+  return l:last_cmd =~# '^\s*''<,''>' && a:line_start == line("'<") && a:line_end == line("'>")
+endfunction
+
+function! vim_ai#IsVisualSelectionRange(uses_range, line_start, line_end, ...) abort
+  return call(function('s:IsVisualSelectionRange'), [a:uses_range, a:line_start, a:line_end] + a:000)
+endfunction
+
 " Complete prompt
 " - uses_range   - truty if range passed
 " - config       - function scoped vim_ai_complete config
@@ -136,7 +155,7 @@ endfunction
 function! vim_ai#AIRun(uses_range, config, ...) range abort
   call s:ImportPythonModules()
   let l:instruction = a:0 > 0 ? a:1 : ""
-  let l:is_selection = a:uses_range && a:firstline == line("'<") && a:lastline == line("'>")
+  let l:is_selection = s:IsVisualSelectionRange(a:uses_range, a:firstline, a:lastline)
   let l:selection = s:GetSelectionOrRange(l:is_selection, a:uses_range, a:firstline, a:lastline)
 
   let l:config_input = {
@@ -179,7 +198,7 @@ endfunction
 function! vim_ai#AIEditRun(uses_range, config, ...) range abort
   call s:ImportPythonModules()
   let l:instruction = a:0 > 0 ? a:1 : ""
-  let l:is_selection = a:uses_range && a:firstline == line("'<") && a:lastline == line("'>")
+  let l:is_selection = s:IsVisualSelectionRange(a:uses_range, a:firstline, a:lastline)
   let l:selection = s:GetSelectionOrRange(l:is_selection, a:uses_range, a:firstline, a:lastline)
 
   let l:config_input = {
