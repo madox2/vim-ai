@@ -282,3 +282,15 @@ def test_markdown_image_role_header_mapping():
         assert actual_context['config']['provider'] == 'openai'
         assert actual_context['config']['options']['model'] == 'gpt-image-1'
         assert actual_context['config']['options']['size'] == '1024x1024'
+
+def test_markdown_role_prompt_with_percent_sign():
+    default_eval = vim.eval
+    with patch('vim.eval', side_effect=lambda cmd: markdown_roles_dir if cmd == 'g:vim_ai_roles_config_file' else default_eval(cmd)):
+        context = make_ai_context({
+            'config_default': default_config,
+            'config_extension': {},
+            'user_instruction': '/markdown-role-percent hello',
+            'user_selection': '',
+            'command_type': 'chat',
+        })
+        assert context['config']['options']['initial_prompt'] == '>>> system\n\nRewrite with 60 % fewer words.'

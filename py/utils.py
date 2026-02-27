@@ -456,7 +456,9 @@ def read_role_files():
     if not os.path.exists(roles_config_path):
         raise Exception(f"Role config file does not exist: {roles_config_path}")
 
-    roles = configparser.ConfigParser()
+    # Role prompts can contain '%' (for example "60 % shorter"), so interpolation
+    # must be disabled to avoid ConfigParser ValueError.
+    roles = configparser.ConfigParser(interpolation=None)
     roles.read([default_roles_config_path])
     if os.path.isdir(roles_config_path):
         roles.read_dict(_read_roles_from_markdown_directory(roles_config_path))
