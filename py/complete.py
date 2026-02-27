@@ -151,6 +151,7 @@ def apply_ai_completion_job(bufnr):
     chunks = job.pickup_chunks()
     if chunks:
         _render_text_chunks_incremental(bufnr, chunks, job.render_state)
+        vim.command("redraw")
 
     done = job.is_done()
     if done:
