@@ -273,14 +273,16 @@ ROLES
 
 Roles are defined in the `.ini` file: >
 
-    let g:vim_ai_roles_config_file = '/path/to/my/roles.ini'
+    let g:vim_ai_roles_config_path = '/path/to/my/roles.ini'
 
-Alternatively, `g:vim_ai_roles_config_file` can point to a directory with
-markdown files (`*.md`). Each file is loaded as one role, where file name is
-the role name. Markdown frontmatter defines options and markdown body is added
-to `options.initial_prompt` as `>>> system` block: >
+Alternatively, `g:vim_ai_roles_config_path` can point to a directory. All
+`*.ini` files are read in lexicographical order as one combined ini file.
+Markdown files (`*.md`) are also loaded from the same directory. Each markdown
+file is loaded as one role, where file name is the role name. Markdown
+frontmatter defines options and markdown body is added to
+`options.initial_prompt` as `>>> system` block: >
 
-    let g:vim_ai_roles_config_file = '/path/to/my/roles'
+    let g:vim_ai_roles_config_path = '/path/to/my/roles'
 
     ---
     model: openai:gpt-5.2-high
@@ -306,10 +308,12 @@ Example of a role: >
 Now you can select text and run it with command `:AIEdit /grammar`.
 See roles-example.ini for more examples.
 
-The roles in g:vim_ai_roles_config_file are converted to a Vim dictionary whose
+The roles in g:vim_ai_roles_config_path are converted to a Vim dictionary whose
 labels are the names of the roles. Optionally, roles can be added by setting
 g:vim_ai_roles_config_function to the name of a Vimscript function returning a
-dictionary of the same format as g:vim_ai_roles_config_file.
+dictionary of the same format as g:vim_ai_roles_config_path.
+
+g:vim_ai_roles_config_file is still supported for backwards compatibility.
 
 MARKDOWN HIGHLIGHTING                            *g:vim_ai_chat_markdown*
 

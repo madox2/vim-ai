@@ -466,7 +466,7 @@ function! vim_ai#RoleCompletionChat(A,L,P) abort
 endfunction
 
 function! vim_ai#AIUtilRolesOpen() abort
-  execute "e " . g:vim_ai_roles_config_file
+  execute "e " . get(g:, 'vim_ai_roles_config_path', get(g:, 'vim_ai_roles_config_file', ''))
 endfunction
 
 function! vim_ai#AIUtilSetDebug(is_debug) abort

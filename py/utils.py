@@ -449,18 +449,37 @@ def _read_roles_from_markdown_directory(roles_dir_path):
         roles.update(role_sections)
     return roles
 
+def _read_vim_global(variable_name):
+    try:
+        value = vim.eval(variable_name)
+        return value if value is not None else ''
+    except Exception:
+        return ''
+
+def _resolve_roles_config_path():
+    roles_config_path = _read_vim_global("g:vim_ai_roles_config_path")
+    if not roles_config_path:
+        roles_config_path = _read_vim_global("g:vim_ai_roles_config_file")
+    return os.path.expanduser(roles_config_path)
+
+def _read_roles_from_ini_directory(roles, roles_dir_path):
+    ini_files = sorted(glob.glob(os.path.join(roles_dir_path, '*.ini')))
+    if ini_files:
+        roles.read(ini_files)
+
 def read_role_files():
     plugin_root = vim.eval("s:plugin_root")
     default_roles_config_path = str(os.path.join(plugin_root, "roles-default.ini"))
-    roles_config_path = os.path.expanduser(vim.eval("g:vim_ai_roles_config_file"))
+    roles_config_path = _resolve_roles_config_path()
     if not os.path.exists(roles_config_path):
-        raise Exception(f"Role config file does not exist: {roles_config_path}")
+        raise Exception(f"Role config path does not exist: {roles_config_path}")
 
     # Role prompts can contain '%' (for example "60 % shorter"), so interpolation
     # must be disabled to avoid ConfigParser ValueError.
     roles = configparser.ConfigParser(interpolation=None)
     roles.read([default_roles_config_path])
     if os.path.isdir(roles_config_path):
+        _read_roles_from_ini_directory(roles, roles_config_path)
         roles.read_dict(_read_roles_from_markdown_directory(roles_config_path))
     else:
         roles.read([roles_config_path])

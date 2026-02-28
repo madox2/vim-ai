@@ -5,6 +5,7 @@ import vim
 
 dirname = os.path.dirname(__file__)
 markdown_roles_dir = os.path.join(dirname, 'resources/roles-md')
+mixed_roles_dir = os.path.join(dirname, 'resources/roles-mixed')
 
 def test_role_completion():
     role_names = load_ai_role_names('complete')
@@ -40,12 +41,27 @@ def test_explicit_image_roles():
 
 def test_load_markdown_roles_from_directory():
     default_eval = vim.eval
-    with patch('vim.eval', side_effect=lambda cmd: markdown_roles_dir if cmd == 'g:vim_ai_roles_config_file' else default_eval(cmd)):
+    with patch('vim.eval', side_effect=lambda cmd: markdown_roles_dir if cmd in ('g:vim_ai_roles_config_path', 'g:vim_ai_roles_config_file') else default_eval(cmd)):
         role_names = load_ai_role_names('chat')
         assert 'markdown-role' in role_names
 
 def test_markdown_image_role_names():
     default_eval = vim.eval
-    with patch('vim.eval', side_effect=lambda cmd: markdown_roles_dir if cmd == 'g:vim_ai_roles_config_file' else default_eval(cmd)):
+    with patch('vim.eval', side_effect=lambda cmd: markdown_roles_dir if cmd in ('g:vim_ai_roles_config_path', 'g:vim_ai_roles_config_file') else default_eval(cmd)):
         role_names = load_ai_role_names('image')
         assert 'markdown-image' in role_names
+
+def test_load_mixed_roles_from_directory_with_path_config():
+    default_eval = vim.eval
+    with patch('vim.eval', side_effect=lambda cmd: mixed_roles_dir if cmd == 'g:vim_ai_roles_config_path' else default_eval(cmd)):
+        role_names = load_ai_role_names('chat')
+        assert 'mixed-ini-role' in role_names
+        assert 'mixed-from-ini' in role_names
+        assert 'mixed-md-role' in role_names
+
+def test_path_config_takes_precedence_over_file_config():
+    default_eval = vim.eval
+    with patch('vim.eval', side_effect=lambda cmd: mixed_roles_dir if cmd == 'g:vim_ai_roles_config_path' else markdown_roles_dir if cmd == 'g:vim_ai_roles_config_file' else default_eval(cmd)):
+        role_names = load_ai_role_names('chat')
+        assert 'mixed-md-role' in role_names
+        assert 'markdown-role' not in role_names
