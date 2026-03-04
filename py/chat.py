@@ -4,8 +4,28 @@ import time
 import copy
 import json
 import traceback
+import re
+from extensions import MCPManager
 
 chat_py_imported = True
+
+TOOLS_DESCRIPTION = """
+To perform actions, you MUST use the following format:
+```tool
+{
+  "tool": "tool_name",
+  "arguments": { "arg1": "val1" }
+}
+```
+
+Available tools:
+- bash(command: str): Run a shell command.
+- read_file(path: str, max_line: int = -1): Read file contents.
+- write_file(path: str, content: str): Write content to file.
+- edit_file(path: str, old_text: str, new_text: str): Replace exact text in file.
+
+If you are providing a JSON example for the user, use standard ```json blocks. Only use ```tool for actual execution.
+"""
 
 def _populate_options(provider, options, default_options, show_default = False):
     vim.command("normal! O[chat]")
@@ -103,6 +123,14 @@ def run_ai_chat(context):
     initial_prompt = '\n'.join(options.get('initial_prompt', []))
     initial_messages = parse_chat_messages(initial_prompt)
 
+    # Inject tools description if it's a chat
+    if command_type == 'chat':
+        tools_msg = TOOLS_DESCRIPTION
+        if initial_messages and initial_messages[0]['role'] == 'system':
+            initial_messages[0]['content'][0]['text'] += "\n\n" + tools_msg
+        else:
+            initial_messages.insert(0, {'role': 'system', 'content': [{'type': 'text', 'text': tools_msg}]})
+
     chat_content = vim.eval('trim(join(getline(1, "$"), "\n"))')
     print_debug(f"[{command_type}] text:\n" + chat_content)
     chat_messages = parse_chat_messages(chat_content)
@@ -164,29 +192,91 @@ class AI_chat_job(threading.Thread):
         self.provider = provider
         self.done = False
         self.lock = threading.RLock()
+        self.mcp_manager = MCPManager()
 
     def run(self):
         print_debug("AI_chat_job thread STARTED")
+        tool_map = {
+            "bash": run_bash,
+            "read_file": run_read,
+            "write_file": run_write,
+            "edit_file": run_edit,
+        }
         try:
-            for chunk in self.provider.request(self.messages):
+            loop_count = 0
+            while loop_count < 10 and not self.cancelled:
+                loop_count += 1
+                full_response = ""
+                for chunk in self.provider.request(self.messages):
+                    with self.lock:
+                        if self.previous_type != chunk["type"] or "newsegment" in chunk:
+                            if self.previous_type != "":
+                                self.buffer += "\n"
+                            self.buffer += "\n<<< " + chunk["type"] + "\n\n"
+                            self.previous_type = chunk["type"]
+                        self.buffer += chunk["content"]
+                        full_response += chunk["content"]
+                        if self.cancelled:
+                            self.buffer += "\n\nCANCELLED by user"
+                            break
+                        if "\n" in self.buffer:
+                            parts = self.buffer.split("\n")
+                            self.lines.extend(parts[:-1])
+                            self.buffer = parts[-1]
+
+                if self.cancelled:
+                    break
+
+                self.messages.append({"role": "assistant", "content": [{"type": "text", "text": full_response}]})
+
+                # call the tools if there are any calls in the response
+                tool_calls = re.findall(r"```(?:tool|json)\n(.*?)\n```", full_response, re.DOTALL)
+                if not tool_calls:
+                    break
+
+                executed_any = False
+                results = []
+                for call_str in tool_calls:
+                    try:
+                        call = json.loads(call_str)
+                        if not isinstance(call, dict) or "tool" not in call:
+                            continue
+
+                        tool_name = call.get("tool")
+                        args = call.get("arguments", {})
+
+                        with self.lock:
+                            self.lines.append(self.buffer)
+                            self.buffer = f"\n>>> exec\n\n{tool_name}: {json.dumps(args)}"
+                            self.previous_type = "exec"
+
+                        if tool_name in tool_map:
+                            output = tool_map[tool_name](**args)
+                        else:
+                            output = self.mcp_manager.execute(tool_name, **args)
+
+                        results.append(f"Tool '{tool_name}' output:\n{output}")
+                        executed_any = True
+
+                        with self.lock:
+                            self.lines.append(self.buffer)
+                            self.buffer = f"\n{output}\n"
+
+                    except Exception as e:
+                        print_debug(f"Tool execution failed: {e}")
+                        continue
+
+                if not executed_any:
+                    break
+
+                tool_results_content = "\n\n".join(results)
+                self.messages.append({"role": "user", "content": [{"type": "text", "text": tool_results_content}]})
+                
                 with self.lock:
-                    # For now, we only append whole lines to the buffer
-                    print_debug(f"Received chunk: '{chunk['type']}' => '{chunk['content']}'")
-                    if self.previous_type != chunk["type"] or "newsegment" in chunk:
-                        if self.previous_type != "":
-                            self.buffer += "\n"
-                        self.buffer += "\n<<< " + chunk["type"] + "\n\n"
-                        self.previous_type = chunk["type"]
-                    self.buffer += chunk["content"]
-                    if self.cancelled:
-                        self.buffer += "\n\nCANCELLED by user"
-                        print_debug("AI_chat_job cancelled during provider request")
-                    if "\n" in self.buffer:
-                        parts = self.buffer.split("\n")
-                        self.lines.extend(parts[:-1])
-                        self.buffer = parts[-1]
-                    if self.cancelled:
-                        break # Exit the loop
+                    self.lines.append(self.buffer)
+                    self.buffer = "\n>>> user\n\n(Agent feedback received, thinking...)\n"
+                    self.previous_type = "user"
+
         except Exception as e:
             with self.lock:
                 self.lines.append("")
@@ -206,6 +296,7 @@ class AI_chat_job(threading.Thread):
                 if self.previous_type == "assistant":
                     self.lines.extend("\n>>> user\n\n".split("\n"))
                 self.done = True
+            self.mcp_manager.shutdown()
         print_debug("AI_chat_job thread DONE")
 
     def pickup_lines(self):
