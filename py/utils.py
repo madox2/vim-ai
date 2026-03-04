@@ -10,10 +10,65 @@ from urllib.error import HTTPError
 import traceback
 import configparser
 import base64
+from pathlib import Path
 
 utils_py_imported = True
 
 DEFAULT_ROLE_NAME = 'default'
+WORKDIR = Path.cwd()
+
+def safe_path(subpath: str) -> Path:
+    path = (WORKDIR / subpath).resolve()
+    if not path.is_relative_to(WORKDIR):
+        raise ValueError(f"Path escapes workspace: {subpath}")
+    return path
+
+def run_bash(command: str) -> str:
+    dangerous = ["rm -rf /", "sudo", "shutdown", "reboot", "> /dev/"]
+    if any(d in command for d in dangerous):
+        return "Error: Dangerous command blocked"
+    try:
+        r = subprocess.run(
+            command,
+            shell=True,
+            cwd=WORKDIR,
+            capture_output=True,
+            text=True,
+            timeout=120,
+        )
+        out = (r.stdout + r.stderr).strip()
+        return out[:50000] if out else "(no output)"
+    except subprocess.TimeoutExpired:
+        return "Error: Timeout (120s)"
+
+def run_read(path: str, max_line: int = -1) -> str:
+    try:
+        lines = safe_path(path).read_text().splitlines()
+        if max_line != -1 and max_line < len(lines):
+            lines = lines[:max_line] + [f"... ({len(lines) - max_line} more)"]
+        return "\n".join(lines)[:50000]
+    except Exception as e:
+        return f"Error: {e}"
+
+def run_write(path: str, content: str) -> str:
+    try:
+        fp = safe_path(path)
+        fp.parent.mkdir(parents=True, exist_ok=True)
+        fp.write_text(content)
+        return f"Wrote {len(content)} bytes to {path}"
+    except Exception as e:
+        return f"Error: {e}"
+
+def run_edit(path: str, old_text: str, new_text: str) -> str:
+    try:
+        fp = safe_path(path)
+        c = fp.read_text()
+        if old_text not in c:
+            return f"Error: Text not found in {path}"
+        fp.write_text(c.replace(old_text, new_text, 1))
+        return f"Edited {path}"
+    except Exception as e:
+        return f"Error: {e}"
 
 _vimai_thread_is_debug_active = vim.eval("g:vim_ai_debug") == "1"
 _vimai_thread_log_file_path = vim.eval("g:vim_ai_debug_log_file")
