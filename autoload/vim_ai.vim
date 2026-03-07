@@ -25,33 +25,15 @@ function! vim_ai#ImportPythonModules() abort
   call s:ImportPythonModules()
 endfunction
 
-function! s:GetBufferWinIdInTab(bufnr, tabnr) abort
-  for l:win_id in win_findbuf(a:bufnr)
-    if win_id2tabwin(l:win_id)[0] == a:tabnr
-      return l:win_id
-    endif
-  endfor
-  return -1
-endfunction
-
 function! s:GetTabChatBuffer(tabnr) abort
   let l:chat_bufnr = gettabvar(a:tabnr, 'vim_ai_chat_bufnr', -1)
   if l:chat_bufnr == -1 || !bufexists(l:chat_bufnr)
     return -1
   endif
-  if getbufvar(l:chat_bufnr, "&filetype") !=# "aichat"
+  if getbufvar(l:chat_bufnr, '&filetype') !=# 'aichat'
     return -1
   endif
   return l:chat_bufnr
-endfunction
-
-function! s:IsBufferVisibleOutsideTab(bufnr, tabnr) abort
-  for l:win_id in win_findbuf(a:bufnr)
-    if win_id2tabwin(l:win_id)[0] != a:tabnr
-      return 1
-    endif
-  endfor
-  return 0
 endfunction
 
 " Configures ai-chat scratch window.
@@ -61,33 +43,24 @@ endfunction
 " - scratch_buffer_keep_open = 1
 "   - keeps hidden ai-chat buffer for later reuse in the same tab
 "   - keeps the buffer in the buffer list
-function! s:OpenChatWindow(open_conf, force_new) abort
-  " open new buffer that will be used as a chat
-  let l:open_cmd = has_key(g:vim_ai_open_chat_presets, a:open_conf)
-        \ ? g:vim_ai_open_chat_presets[a:open_conf]
-        \ : a:open_conf
+function! s:OpenChatWindow(open_conf) abort
+  let l:open_cmd = get(g:vim_ai_open_chat_presets, a:open_conf, a:open_conf)
   execute l:open_cmd
 
-  let l:keep_open = g:vim_ai_chat['ui']['scratch_buffer_keep_open'] == '1'
+  let l:keep_open = g:vim_ai_chat['ui']['scratch_buffer_keep_open'] ==# '1'
 
   setlocal buftype=nofile
   setlocal noswapfile
-  setlocal ft=aichat
-  if l:keep_open
-    setlocal bufhidden=hide
-  else
-    setlocal bufhidden=wipe
-  endif
-  if bufexists(s:scratch_buffer_name)
-    " spawn another window if chat already exist
-    let l:index = 2
-    while bufexists(s:scratch_buffer_name . " " . l:index)
-      let l:index += 1
-    endwhile
-    execute "file " . s:scratch_buffer_name . " " . l:index
-  else
-    execute "file " . s:scratch_buffer_name
-  endif
+  setlocal filetype=aichat
+  execute 'setlocal bufhidden=' . (l:keep_open ? 'hide' : 'wipe')
+
+  let l:buffer_name = s:scratch_buffer_name
+  let l:index = 2
+  while bufexists(l:buffer_name)
+    let l:buffer_name = s:scratch_buffer_name . ' ' . l:index
+    let l:index += 1
+  endwhile
+  execute 'file ' . fnameescape(l:buffer_name)
 endfunction
 
 let s:is_handling_paste_mode = 0
@@ -249,56 +222,59 @@ function! vim_ai#AIImageRun(uses_range, config, ...) range abort
   py3 run_ai_image(unwrap('l:context'))
 endfunction
 
-function! s:ReuseOrCreateChatWindow(config)
-  let l:open_conf = a:config['ui']['open_chat_command']
+function! s:ReuseOrCreateChatWindow(config) abort
   let l:tabnr = tabpagenr()
-  let l:chat_bufnr = s:GetTabChatBuffer(l:tabnr)
-  let l:force_new = a:config['ui']['force_new_chat'] == '1'
+  let l:force_new = a:config['ui']['force_new_chat'] ==# '1'
 
-  if &filetype != 'aichat'
-    if l:chat_bufnr != -1
-      if s:IsBufferVisibleOutsideTab(l:chat_bufnr, l:tabnr)
-        let l:chat_bufnr = -1
-      endif
-    endif
-
-    if l:force_new
-      call s:OpenChatWindow(l:open_conf, 1)
-      let l:new_tabnr = tabpagenr()
-      let l:new_chat_bufnr = bufnr('%')
-      call settabvar(l:new_tabnr, 'vim_ai_chat_bufnr', l:new_chat_bufnr)
-      if l:new_tabnr == l:tabnr
-            \ && l:chat_bufnr != -1
-            \ && l:chat_bufnr != l:new_chat_bufnr
-            \ && !s:IsBufferVisibleOutsideTab(l:chat_bufnr, l:tabnr)
-        execute "bwipeout " . l:chat_bufnr
-      endif
-      return
-    endif
-
-    if l:chat_bufnr != -1
-      let l:chat_win_id = s:GetBufferWinIdInTab(l:chat_bufnr, l:tabnr)
-      if l:chat_win_id != -1
-        call win_gotoid(l:chat_win_id)
-        return
-      endif
-      call s:OpenChatWindow(l:open_conf, 1)
-      let l:new_buffer = bufnr('%')
-      execute "buffer " . l:chat_bufnr
-      execute "bd " . l:new_buffer
-      return
-    endif
-
-    call s:OpenChatWindow(l:open_conf, 0)
-    call settabvar(tabpagenr(), 'vim_ai_chat_bufnr', bufnr('%'))
+  if &filetype ==# 'aichat'
+    call settabvar(l:tabnr, 'vim_ai_chat_bufnr', bufnr('%'))
+    return
   endif
-endfunction
 
-function! vim_ai#AIChatToggleRun(uses_range, config, ...) range abort
-  if a:0 > 0
-    execute a:firstline . "," . a:lastline . "call vim_ai#AIChatRun(" . a:uses_range . ", " . string(a:config) . ", " . string(a:1) . ")"
-  else
-    execute a:firstline . "," . a:lastline . "call vim_ai#AIChatRun(" . a:uses_range . ", " . string(a:config) . ")"
+  let l:chat_bufnr = s:GetTabChatBuffer(l:tabnr)
+  let l:chat_win_id = -1
+  let l:is_visible_outside_tab = 0
+
+  if l:chat_bufnr != -1
+    for l:win_id in win_findbuf(l:chat_bufnr)
+      let l:win_tabnr = win_id2tabwin(l:win_id)[0]
+      if l:win_tabnr == l:tabnr
+        let l:chat_win_id = l:win_id
+      else
+        let l:is_visible_outside_tab = 1
+      endif
+    endfor
+
+    if l:is_visible_outside_tab
+      let l:chat_bufnr = -1
+      let l:chat_win_id = -1
+    endif
+  endif
+
+  if !l:force_new && l:chat_win_id != -1
+    call win_gotoid(l:chat_win_id)
+    call settabvar(tabpagenr(), 'vim_ai_chat_bufnr', bufnr('%'))
+    return
+  endif
+
+  call s:OpenChatWindow(a:config['ui']['open_chat_command'])
+  let l:new_tabnr = tabpagenr()
+  let l:new_chat_bufnr = bufnr('%')
+
+  if !l:force_new && l:chat_bufnr != -1
+    execute 'buffer ' . l:chat_bufnr
+    execute 'bwipeout ' . l:new_chat_bufnr
+    call settabvar(tabpagenr(), 'vim_ai_chat_bufnr', bufnr('%'))
+    return
+  endif
+
+  call settabvar(l:new_tabnr, 'vim_ai_chat_bufnr', l:new_chat_bufnr)
+
+  if l:force_new
+        \ && l:new_tabnr == l:tabnr
+        \ && l:chat_bufnr != -1
+        \ && l:chat_bufnr != l:new_chat_bufnr
+    execute 'bwipeout ' . l:chat_bufnr
   endif
 endfunction
 
@@ -343,12 +319,12 @@ function! vim_ai#AIChatRun(uses_range, config, ...) range abort
   let l:started_from_chat = &filetype == 'aichat'
 
   let l:config_input = {
-  \  "config_default": g:vim_ai_chat,
-  \  "config_extension": a:config,
-  \  "user_instruction": l:instruction,
-  \  "user_selection": l:selection,
-  \  "is_selection": l:is_selection,
-  \  "command_type": 'chat',
+  \  'config_default': g:vim_ai_chat,
+  \  'config_extension': a:config,
+  \  'user_instruction': l:instruction,
+  \  'user_selection': l:selection,
+  \  'is_selection': l:is_selection,
+  \  'command_type': 'chat',
   \}
   let l:context = py3eval("make_ai_context(unwrap('l:config_input'))")
   let l:config = l:context['config']
@@ -358,7 +334,6 @@ function! vim_ai#AIChatRun(uses_range, config, ...) range abort
   try
     call s:set_paste(l:config)
     call s:ReuseOrCreateChatWindow(l:config)
-    call settabvar(tabpagenr(), 'vim_ai_chat_bufnr', bufnr('%'))
 
     let l:context['bufnr'] = bufnr()
     let l:bufnr = bufnr()
@@ -368,15 +343,12 @@ function! vim_ai#AIChatRun(uses_range, config, ...) range abort
       return
     endif
 
-    let s:last_command = "chat"
+    let s:last_command = 'chat'
     let s:last_config = a:config
 
     if py3eval("run_ai_chat(unwrap('l:context'))")
       if g:vim_ai_async_chat == 1
-
         call setbufvar(l:bufnr, 'vim_ai_chat_start_last_line', line('$'))
-        " if user switches to a different buffer, setup autocommand that
-        " will clean undo history after returning back
         augroup AichatUndo
           au!
           autocmd BufEnter <buffer> call s:AIChatUndoCleanup()
@@ -401,7 +373,6 @@ function! vim_ai#AIChatStopRun() abort
   py3 ai_job_pool.cancel_job(unwrap('l:bufnr'))
   call s:AIChatUndoCleanup()
 endfunction
-
 
 " Function called in a timer that check if there are new lines from AI and
 " appned them in a buffer. It ends when AI thread is finished (or when
