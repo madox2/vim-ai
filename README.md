@@ -101,7 +101,7 @@ To use an AI command, type the command followed by an instruction prompt. You ca
 
 :AI          complete text
 :AIEdit      edit text
-:AIChat      toggle chat window (tab-local)
+:AIChat      open/focus chat window (tab-local)
 :AIStopChat  stop the generation of the AI response for the AIChat
 :AIImage     generate image
 
