@@ -261,10 +261,10 @@ function! s:ReuseOrCreateChatWindow(config) abort
   let l:new_tabnr = tabpagenr()
   let l:new_chat_bufnr = bufnr('%')
 
-  if !l:force_new && l:chat_bufnr != -1
+  if !l:force_new && l:chat_bufnr != -1 && l:new_tabnr == l:tabnr
     execute 'buffer ' . l:chat_bufnr
     execute 'bwipeout ' . l:new_chat_bufnr
-    call settabvar(tabpagenr(), 'vim_ai_chat_bufnr', bufnr('%'))
+    call settabvar(l:new_tabnr, 'vim_ai_chat_bufnr', bufnr('%'))
     return
   endif
 
