@@ -145,7 +145,7 @@ Do not forget to open PR updating this list.
 In the context of this plugin, a role means a re-usable AI instruction and/or configuration. Roles are defined in the configuration `.ini` file. For example by defining a `grammar` and `o1-mini` role:
 
 ```vim
-let g:vim_ai_roles_config_path = '/path/to/my/roles.ini'
+let g:vim_ai_roles_config_file = '/path/to/my/roles.ini'
 ```
 
 ```ini
@@ -172,14 +172,13 @@ Now you can select text and run it with command `:AIEdit /grammar`.
 
 You can also combine roles `:AI /o1-mini /grammar helo world!`
 
-Alternatively, `g:vim_ai_roles_config_path` can point to a directory.
-All `*.ini` files in that directory are read in lexicographical order as one combined ini file.
+Alternatively, `g:vim_ai_roles_config_file` can point to a directory.
 Each `*.md` file in that directory is loaded as one role, where the file name is the role name.
 Use markdown frontmatter to configure role options.
 The markdown body is added to `options.initial_prompt` as a `>>> system` block.
 
 ```vim
-let g:vim_ai_roles_config_path = '/path/to/my/roles'
+let g:vim_ai_roles_config_file = '/path/to/my/roles'
 ```
 
 ```markdown
@@ -202,7 +201,6 @@ options.initial_prompt = >>> system\n\nfix spelling and grammar
 ```
 
 See [roles-example.ini](./roles-example.ini) for more examples.
-`g:vim_ai_roles_config_file` is still supported for backwards compatibility.
 
 ## Reference
 
@@ -558,8 +556,8 @@ let g:vim_ai_image = {
 \  },
 \}
 
-" custom roles file/directory location
-let g:vim_ai_roles_config_path = s:plugin_root . "/roles-example.ini"
+" custom roles file location
+let g:vim_ai_roles_config_file = s:plugin_root . "/roles-example.ini"
 
 " custom token file location
 let g:vim_ai_token_file_path = "~/.config/openai.token"

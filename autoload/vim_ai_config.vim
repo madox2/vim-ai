@@ -151,15 +151,8 @@ endif
 if !exists("g:vim_ai_token_load_fn")
   let g:vim_ai_token_load_fn = ""
 endif
-if !exists("g:vim_ai_roles_config_path")
-  if exists("g:vim_ai_roles_config_file")
-    let g:vim_ai_roles_config_path = g:vim_ai_roles_config_file
-  else
-    let g:vim_ai_roles_config_path = s:plugin_root . "/roles-example.ini"
-  endif
-endif
 if !exists("g:vim_ai_roles_config_file")
-  let g:vim_ai_roles_config_file = g:vim_ai_roles_config_path
+  let g:vim_ai_roles_config_file = s:plugin_root . "/roles-example.ini"
 endif
 if !exists("g:vim_ai_async_chat")
   let g:vim_ai_async_chat = 1

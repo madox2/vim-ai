@@ -5,7 +5,6 @@ import os
 
 dirname = os.path.dirname(__file__)
 markdown_roles_dir = os.path.join(dirname, 'resources/roles-md')
-mixed_roles_dir = os.path.join(dirname, 'resources/roles-mixed')
 
 default_config = {
   "options": {
@@ -253,7 +252,7 @@ def test_role_config_all_params():
 
 def test_markdown_role_header_model_mapping():
     default_eval = vim.eval
-    with patch('vim.eval', side_effect=lambda cmd: markdown_roles_dir if cmd in ('g:vim_ai_roles_config_path', 'g:vim_ai_roles_config_file') else default_eval(cmd)):
+    with patch('vim.eval', side_effect=lambda cmd: markdown_roles_dir if cmd == 'g:vim_ai_roles_config_file' else default_eval(cmd)):
         context = make_ai_context({
             'config_default': default_config,
             'config_extension': {},
@@ -272,7 +271,7 @@ def test_markdown_role_header_model_mapping():
 
 def test_markdown_image_role_header_mapping():
     default_eval = vim.eval
-    with patch('vim.eval', side_effect=lambda cmd: markdown_roles_dir if cmd in ('g:vim_ai_roles_config_path', 'g:vim_ai_roles_config_file') else default_eval(cmd)):
+    with patch('vim.eval', side_effect=lambda cmd: markdown_roles_dir if cmd == 'g:vim_ai_roles_config_file' else default_eval(cmd)):
         actual_context = make_ai_context({
             'config_default': default_image_config,
             'config_extension': {},
@@ -286,7 +285,7 @@ def test_markdown_image_role_header_mapping():
 
 def test_markdown_role_prompt_with_percent_sign():
     default_eval = vim.eval
-    with patch('vim.eval', side_effect=lambda cmd: markdown_roles_dir if cmd in ('g:vim_ai_roles_config_path', 'g:vim_ai_roles_config_file') else default_eval(cmd)):
+    with patch('vim.eval', side_effect=lambda cmd: markdown_roles_dir if cmd == 'g:vim_ai_roles_config_file' else default_eval(cmd)):
         context = make_ai_context({
             'config_default': default_config,
             'config_extension': {},
@@ -295,40 +294,3 @@ def test_markdown_role_prompt_with_percent_sign():
             'command_type': 'chat',
         })
         assert context['config']['options']['initial_prompt'] == '>>> system\n\nRewrite with 60 % fewer words.'
-
-def test_mixed_directory_ini_files_are_merged():
-    default_eval = vim.eval
-    with patch('vim.eval', side_effect=lambda cmd: mixed_roles_dir if cmd == 'g:vim_ai_roles_config_path' else default_eval(cmd)):
-        context = make_ai_context({
-            'config_default': default_config,
-            'config_extension': {},
-            'user_instruction': '/mixed-ini-role hello',
-            'user_selection': '',
-            'command_type': 'chat',
-        })
-        assert context['config']['options']['model'] == 'model-override'
-        assert context['config']['options']['token_file_path'] == '/mixed/path/ai.token'
-        assert context['prompt'] == 'base prompt:\nhello'
-
-def test_mixed_directory_uses_ini_and_markdown_roles():
-    default_eval = vim.eval
-    with patch('vim.eval', side_effect=lambda cmd: mixed_roles_dir if cmd == 'g:vim_ai_roles_config_path' else default_eval(cmd)):
-        ini_context = make_ai_context({
-            'config_default': default_config,
-            'config_extension': {},
-            'user_instruction': '/mixed-from-ini hello',
-            'user_selection': '',
-            'command_type': 'chat',
-        })
-        assert ini_context['config']['options']['endpoint_url'] == 'https://example.com/override'
-
-        markdown_context = make_ai_context({
-            'config_default': default_config,
-            'config_extension': {},
-            'user_instruction': '/mixed-md-role hello',
-            'user_selection': '',
-            'command_type': 'chat',
-        })
-        assert markdown_context['config']['provider'] == 'openai'
-        assert markdown_context['config']['options']['model'] == 'gpt-5.2'
-        assert markdown_context['config']['options']['reasoning_effort'] == 'high'
