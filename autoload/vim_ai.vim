@@ -25,15 +25,34 @@ function! s:StartsWith(longer, shorter) abort
   return a:longer[0:len(a:shorter)-1] ==# a:shorter
 endfunction
 
-function! s:GetLastScratchBufferName()
-  let l:all_buffer_names = map(map(filter(copy(getbufinfo()), 'v:val.listed'), 'v:val.bufnr'), 'bufname(v:val)')
-  let l:buffer_name = -1
-  for l:name in l:all_buffer_names
-    if s:StartsWith(l:name, s:scratch_buffer_name)
-      let l:buffer_name = l:name
+function! s:GetLastChatBufferNumber()
+  let l:chat_buffers = []
+  for l:buf in reverse(getbufinfo())
+    let l:bufname = bufname(l:buf.bufnr)
+    if l:buf.listed && s:StartsWith(l:bufname, s:scratch_buffer_name)
+      return l:buf.bufnr
     endif
   endfor
-  return l:buffer_name
+  return -1
+endfunction
+
+function! s:GetTabLocalChatBufferNumber()
+  let l:chat_bufnr = gettabvar(tabpagenr(), 'vim_ai_chat_bufnr', -1)
+  if !bufexists(l:chat_bufnr) || !buflisted(l:chat_bufnr)
+    return -1
+  endif
+  return l:chat_bufnr
+endfunction
+
+function! s:GetReusedChatBufferNumber()
+  " reuse tab local buffer if available
+  let l:tab_local_buffnr = s:GetTabLocalChatBufferNumber()
+  if l:tab_local_buffnr != -1
+    return l:tab_local_buffnr
+  endif
+  " else reuse last chat buffer
+  let l:last_scratch_buffnum = s:GetLastChatBufferNumber()
+  return l:last_scratch_buffnum
 endfunction
 
 " Configures ai-chat scratch window.
@@ -52,13 +71,18 @@ function! s:OpenChatWindow(open_conf, force_new) abort
 
   " reuse chat in keep-open mode
   let l:keep_open = g:vim_ai_chat['ui']['scratch_buffer_keep_open'] == '1'
-  let l:last_scratch_buffer_name = s:GetLastScratchBufferName()
-  if l:keep_open && bufexists(l:last_scratch_buffer_name) && !a:force_new
+  let l:reused_chat_buffer_name = s:GetReusedChatBufferNumber()
+  if l:keep_open && l:reused_chat_buffer_name != -1 && !a:force_new
     let l:current_buffer = bufnr('%')
     " reuse chat buffer
-    execute "buffer " . l:last_scratch_buffer_name
+    execute "buffer " . l:reused_chat_buffer_name
     " close new buffer that was created by l:open_cmd
-    execute "bd " . l:current_buffer
+    if bufloaded(l:current_buffer)
+        " if `hidden` is turned off, the buffer is unloaded automatically
+        execute "bd " . l:current_buffer
+    endif
+    " set tab local chat buffer number
+    call settabvar(tabpagenr(), 'vim_ai_chat_bufnr', bufnr('%'))
     return
   endif
 
@@ -80,6 +104,8 @@ function! s:OpenChatWindow(open_conf, force_new) abort
   else
     execute "file " . s:scratch_buffer_name
   endif
+  " set tab local chat buffer number
+  call settabvar(tabpagenr(), 'vim_ai_chat_bufnr', bufnr('%'))
 endfunction
 
 let s:is_handling_paste_mode = 0
@@ -250,31 +276,42 @@ function! s:ReuseOrCreateChatWindow(config)
   endif
 
   if &filetype != 'aichat'
-    " reuse chat in active window or tab
-    let l:chat_win_ids = win_findbuf(bufnr(s:scratch_buffer_name))
-    if !empty(l:chat_win_ids)
-      call win_gotoid(l:chat_win_ids[0])
-      return
-    endif
+    let l:buffer_list_tab = tabpagebuflist(tabpagenr())
+
+    " reuse chat in active tab
+    for l:bufnr in l:buffer_list_tab
+      if s:StartsWith(bufname(l:bufnr), s:scratch_buffer_name)
+        call win_gotoid(bufwinid(l:bufnr))
+        return
+      endif
+    endfor
 
     " reuse .aichat file on the same tab
-    let buffer_list_tab = tabpagebuflist(tabpagenr())
-    let buffer_list_tab = filter(buffer_list_tab, 'getbufvar(v:val, "&filetype") ==# "aichat"')
-    if len(buffer_list_tab) > 0
-      call win_gotoid(win_findbuf(buffer_list_tab[0])[0])
+    for l:bufnr in l:buffer_list_tab
+      if getbufvar(l:bufnr, "&filetype") ==# "aichat"
+        call win_gotoid(bufwinid(l:bufnr))
+        return
+      endif
+    endfor
+
+    " open tab local buffer if present
+    let l:tab_local_buffer_name = s:GetTabLocalChatBufferNumber()
+    if l:tab_local_buffer_name != -1
+      call s:OpenChatWindow(l:open_conf, 0)
       return
     endif
 
     " reuse any .aichat buffer in the session
-    let buffer_list = []
+    let l:open_buffer_list = []
     for i in range(tabpagenr('$'))
-      call extend(buffer_list, tabpagebuflist(i + 1))
+      call extend(l:open_buffer_list, tabpagebuflist(i + 1))
     endfor
-    let buffer_list = filter(buffer_list, 'getbufvar(v:val, "&filetype") ==# "aichat"')
-    if len(buffer_list) > 0
-      call win_gotoid(win_findbuf(buffer_list[0])[0])
-      return
-    endif
+    for l:bufnr in reverse(sort(l:open_buffer_list))
+      if getbufvar(l:bufnr, "&filetype") ==# "aichat"
+        call win_gotoid(win_findbuf(l:bufnr)[0])
+        return
+      endif
+    endfor
 
     " open new chat window if no active buffer found
     call s:OpenChatWindow(l:open_conf, 0)
