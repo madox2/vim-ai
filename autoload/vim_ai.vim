@@ -77,7 +77,10 @@ function! s:OpenChatWindow(open_conf, force_new) abort
     " reuse chat buffer
     execute "buffer " . l:reused_chat_buffer_name
     " close new buffer that was created by l:open_cmd
-    execute "bd " . l:current_buffer
+    if bufloaded(l:current_buffer)
+        " if `hidden` is turned off, the buffer is unloaded automatically
+        execute "bd " . l:current_buffer
+    endif
     " set tab local chat buffer number
     call settabvar(tabpagenr(), 'vim_ai_chat_bufnr', bufnr('%'))
     return
