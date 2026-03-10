@@ -115,6 +115,12 @@ Options: >
 Check OpenAI docs for more information:
 https://platform.openai.com/docs/api-reference/completions
 
+                                                *:AIStop*
+AIStop                              Cancel the currently running async AI/AIEdit
+                                    generation for the active buffer.
+                                    If no task is running or if it has already
+                                    completed, this command has no effect.
+
                                                 *:AIChat*
 
 :AIChat                             continue or start a new conversation.
@@ -268,6 +274,10 @@ You can also customize the options in the chat header: >
 
   generate a paragraph of lorem ipsum
   ...
+
+Async options: >
+  let g:vim_ai_async_chat = 1
+  let g:vim_ai_async_complete = 1
 
 ROLES
 
