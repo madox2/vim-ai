@@ -4,11 +4,15 @@ let s:plugin_root = expand('<sfile>:p:h:h')
 
 " remembers last command parameters to be used in AIRedoRun
 let s:last_is_selection = 0
+let s:last_uses_range = 0
 let s:last_firstline = 1
 let s:last_lastline = 1
 let s:last_instruction = ""
 let s:last_command = ""
 let s:last_config = {}
+let s:redo_selection_hint = -1
+let s:redo_firstline = 1
+let s:redo_lastline = 1
 
 let s:scratch_buffer_name = ">>> AI chat"
 let s:chat_redraw_interval = 250 " milliseconds
@@ -138,7 +142,9 @@ function! s:SelectSelectionOrRange(is_selection, ...)
   if a:is_selection
     execute "normal! gv"
   else
-    execute 'normal!' . a:1 . 'GV' . a:2 . 'G'
+    execute a:1
+    execute "normal! V"
+    execute a:2
   endif
 endfunction
 
@@ -155,6 +161,31 @@ function! s:GetVisualSelection()
   return join(lines, "\n")
 endfunction
 
+" A visual range should be treated as character-wise selection only when
+" command-line invocation actually came from `'<,'>...`.
+function! s:IsVisualSelectionRange(uses_range, line_start, line_end, ...) abort
+  if !a:uses_range
+    return 0
+  endif
+
+  if s:redo_selection_hint >= 0
+    return s:redo_selection_hint
+      \ && a:line_start == line("'<")
+      \ && a:line_end == line("'>")
+  endif
+
+  let l:last_cmd = a:0 > 0 ? a:1 : histget(':', -1)
+  if l:last_cmd =~# '^\s*AIRedo\>'
+    return a:line_start == line("'<") && a:line_end == line("'>")
+  endif
+
+  return l:last_cmd =~# '^\s*''<,''>' && a:line_start == line("'<") && a:line_end == line("'>")
+endfunction
+
+function! vim_ai#IsVisualSelectionRange(uses_range, line_start, line_end, ...) abort
+  return call(function('s:IsVisualSelectionRange'), [a:uses_range, a:line_start, a:line_end] + a:000)
+endfunction
+
 " Complete prompt
 " - uses_range   - truty if range passed
 " - config       - function scoped vim_ai_complete config
@@ -162,8 +193,10 @@ endfunction
 function! vim_ai#AIRun(uses_range, config, ...) range abort
   call s:ImportPythonModules()
   let l:instruction = a:0 > 0 ? a:1 : ""
-  let l:is_selection = a:uses_range && a:firstline == line("'<") && a:lastline == line("'>")
-  let l:selection = s:GetSelectionOrRange(l:is_selection, a:uses_range, a:firstline, a:lastline)
+  let l:firstline = s:redo_selection_hint >= 0 ? s:redo_firstline : a:firstline
+  let l:lastline = s:redo_selection_hint >= 0 ? s:redo_lastline : a:lastline
+  let l:is_selection = s:IsVisualSelectionRange(a:uses_range, l:firstline, l:lastline)
+  let l:selection = s:GetSelectionOrRange(l:is_selection, a:uses_range, l:firstline, l:lastline)
 
   let l:config_input = {
   \  "config_default": g:vim_ai_complete,
@@ -179,20 +212,21 @@ function! vim_ai#AIRun(uses_range, config, ...) range abort
   let s:last_command = "complete"
   let s:last_config = a:config
   let s:last_instruction = l:instruction
+  let s:last_uses_range = a:uses_range
   let s:last_is_selection = l:is_selection
-  let s:last_firstline = a:firstline
-  let s:last_lastline = a:lastline
+  let s:last_firstline = l:firstline
+  let s:last_lastline = l:lastline
 
   let l:cursor_on_empty_line = empty(getline('.'))
   try
     call s:set_paste(l:config)
     if l:cursor_on_empty_line
-      execute "normal! " . a:lastline . "GA"
+      execute "normal! " . l:lastline . "GA"
     else
-      execute "normal! " . a:lastline . "Go"
+      execute "normal! " . l:lastline . "Go"
     endif
     py3 run_ai_completition(unwrap('l:context'))
-    execute "normal! " . a:lastline . "G"
+    execute "normal! " . l:lastline . "G"
   finally
     call s:set_nopaste(l:config)
   endtry
@@ -205,8 +239,10 @@ endfunction
 function! vim_ai#AIEditRun(uses_range, config, ...) range abort
   call s:ImportPythonModules()
   let l:instruction = a:0 > 0 ? a:1 : ""
-  let l:is_selection = a:uses_range && a:firstline == line("'<") && a:lastline == line("'>")
-  let l:selection = s:GetSelectionOrRange(l:is_selection, a:uses_range, a:firstline, a:lastline)
+  let l:firstline = s:redo_selection_hint >= 0 ? s:redo_firstline : a:firstline
+  let l:lastline = s:redo_selection_hint >= 0 ? s:redo_lastline : a:lastline
+  let l:is_selection = s:IsVisualSelectionRange(a:uses_range, l:firstline, l:lastline)
+  let l:selection = s:GetSelectionOrRange(l:is_selection, a:uses_range, l:firstline, l:lastline)
 
   let l:config_input = {
   \  "config_default": g:vim_ai_edit,
@@ -222,13 +258,14 @@ function! vim_ai#AIEditRun(uses_range, config, ...) range abort
   let s:last_command = "edit"
   let s:last_config = a:config
   let s:last_instruction = l:instruction
+  let s:last_uses_range = a:uses_range
   let s:last_is_selection = l:is_selection
-  let s:last_firstline = a:firstline
-  let s:last_lastline = a:lastline
+  let s:last_firstline = l:firstline
+  let s:last_lastline = l:lastline
 
   try
     call s:set_paste(l:config)
-    call s:SelectSelectionOrRange(l:is_selection, a:firstline, a:lastline)
+    call s:SelectSelectionOrRange(l:is_selection, l:firstline, l:lastline)
     execute "normal! c"
     py3 run_ai_completition(unwrap('l:context'))
   finally
@@ -243,8 +280,10 @@ endfunction
 function! vim_ai#AIImageRun(uses_range, config, ...) range abort
   call s:ImportPythonModules()
   let l:instruction = a:0 > 0 ? a:1 : ""
-  let l:is_selection = a:uses_range && a:firstline == line("'<") && a:lastline == line("'>")
-  let l:selection = s:GetSelectionOrRange(l:is_selection, a:uses_range, a:firstline, a:lastline)
+  let l:firstline = s:redo_selection_hint >= 0 ? s:redo_firstline : a:firstline
+  let l:lastline = s:redo_selection_hint >= 0 ? s:redo_lastline : a:lastline
+  let l:is_selection = s:IsVisualSelectionRange(a:uses_range, l:firstline, l:lastline)
+  let l:selection = s:GetSelectionOrRange(l:is_selection, a:uses_range, l:firstline, l:lastline)
 
   let l:config_input = {
   \  "config_default": g:vim_ai_image,
@@ -260,9 +299,10 @@ function! vim_ai#AIImageRun(uses_range, config, ...) range abort
   let s:last_command = "image"
   let s:last_config = a:config
   let s:last_instruction = l:instruction
+  let s:last_uses_range = a:uses_range
   let s:last_is_selection = l:is_selection
-  let s:last_firstline = a:firstline
-  let s:last_lastline = a:lastline
+  let s:last_firstline = l:firstline
+  let s:last_lastline = l:lastline
 
   py3 run_ai_image(unwrap('l:context'))
 endfunction
@@ -466,16 +506,25 @@ function! vim_ai#AIRedoRun() abort
   if s:last_command !=# "image"
     undo
   endif
-  if s:last_command ==# "complete"
-    exe s:last_firstline.",".s:last_lastline . "call vim_ai#AIRun(s:last_is_selection, s:last_config, s:last_instruction)"
-  elseif s:last_command ==# "edit"
-    exe s:last_firstline.",".s:last_lastline . "call vim_ai#AIEditRun(s:last_is_selection, s:last_config, s:last_instruction)"
-  elseif s:last_command ==# "image"
-    exe s:last_firstline.",".s:last_lastline . "call vim_ai#AIImageRun(s:last_is_selection, s:last_config, s:last_instruction)"
-  elseif s:last_command ==# "chat"
-    " chat does not need prompt, all information are in the buffer already
-    call vim_ai#AIChatRun(0, s:last_config)
-  endif
+  let s:redo_selection_hint = s:last_is_selection
+  let s:redo_firstline = s:last_firstline
+  let s:redo_lastline = s:last_lastline
+  try
+    if s:last_command ==# "complete"
+      call vim_ai#AIRun(s:last_uses_range, s:last_config, s:last_instruction)
+    elseif s:last_command ==# "edit"
+      call vim_ai#AIEditRun(s:last_uses_range, s:last_config, s:last_instruction)
+    elseif s:last_command ==# "image"
+      call vim_ai#AIImageRun(s:last_uses_range, s:last_config, s:last_instruction)
+    elseif s:last_command ==# "chat"
+      " chat does not need prompt, all information are in the buffer already
+      call vim_ai#AIChatRun(0, s:last_config)
+    endif
+  finally
+    let s:redo_selection_hint = -1
+    let s:redo_firstline = 1
+    let s:redo_lastline = 1
+  endtry
 endfunction
 
 function! s:RoleCompletion(A, command_type) abort
