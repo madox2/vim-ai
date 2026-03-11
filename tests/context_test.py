@@ -153,6 +153,35 @@ def test_multiple_role_configs():
     assert 'https://localhost/chat' == actual_config['options']['endpoint_url']
     assert 'simple role prompt:\nhello' == actual_prompt
 
+def test_trailing_role():
+    context = make_ai_context({
+        'config_default': default_config,
+        'config_extension': {},
+        'user_instruction': 'user instruction /test-role-simple',
+        'user_selection': '',
+        'command_type': 'chat',
+    })
+    actual_config = context['config']
+    actual_prompt = context['prompt']
+    assert 'o1-preview' == actual_config['options']['model']
+    assert 'simple role prompt:\nuser instruction' == actual_prompt
+    assert ['test-role-simple'] == context['roles']
+
+def test_trailing_role_mixed_with_leading():
+    context = make_ai_context({
+        'config_default': default_config,
+        'config_extension': {},
+        'user_instruction': '/test-role hello /test-role-simple',
+        'user_selection': '',
+        'command_type': 'chat',
+    })
+    actual_config = context['config']
+    actual_prompt = context['prompt']
+    assert 'o1-preview' == actual_config['options']['model']
+    assert 'https://localhost/chat' == actual_config['options']['endpoint_url']
+    assert 'simple role prompt:\nhello' == actual_prompt
+    assert ['test-role', 'test-role-simple'] == context['roles']
+
 def test_chat_only_role():
     context = make_ai_context({
         'config_default': default_config,

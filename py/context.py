@@ -95,27 +95,42 @@ def load_role_config(role):
     }
 
 def parse_role_names(prompt):
-    chunks = re.split(r'[ :]+', prompt)
-    roles = []
-    for chunk in chunks:
-        if not chunk.startswith("/"):
+    words = prompt.strip().split()
+    leading_count = 0
+    for word in words:
+        if not word.startswith("/"):
             break
-        roles.append(chunk)
-    return [raw_role[1:] for raw_role in roles]
+        leading_count += 1
+    trailing_count = 0
+    for word in reversed(words[leading_count:]):
+        if not word.startswith("/"):
+            break
+        trailing_count += 1
+    trailing_start = len(words) - trailing_count if trailing_count else len(words)
+    leading_roles = [w[1:] for w in words[:leading_count]]
+    trailing_roles = [w[1:] for w in words[trailing_start:]]
+    return leading_roles + trailing_roles
 
 def parse_prompt_and_role_config(user_instruction, command_type):
     user_instruction = user_instruction.strip()
+    words = user_instruction.split()
     roles = parse_role_names(user_instruction)
 
-    last_role = roles[-1] if roles else ''
-    user_prompt = user_instruction[user_instruction.index(last_role) + len(last_role):].strip() # strip roles
+    leading_count = 0
+    for word in words:
+        if not word.startswith("/"):
+            break
+        leading_count += 1
+    trailing_count = len(roles) - leading_count
+    trailing_start = len(words) - trailing_count
+    user_prompt = ' '.join(words[leading_count:trailing_start])
+
     role_results = [load_role_config(role) for role in [DEFAULT_ROLE_NAME] + roles]
     parsed_role = merge_deep(role_results)
     config = merge_deep([
         parsed_role.get('role_default', {}),
         parsed_role.get('role_' + command_type, {}),
     ])
-    role_prompt = config.get('prompt', '')
     return user_prompt, config, roles
 
 def make_selection_boundary(user_selection, selection_boundary):
