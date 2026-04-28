@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/madox2-vim-ai-badge.png)](https://mseep.ai/app/madox2-vim-ai)
+
 # vim-ai
 
 This plugin adds Artificial Intelligence (AI) capabilities to your Vim and Neovim.
