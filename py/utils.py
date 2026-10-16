@@ -193,7 +193,7 @@ def parse_chat_messages(chat_content):
             messages.append({'role': 'system', 'content': [{ 'type': 'text', 'text': '' }]})
             current_type = 'system'
         elif line == '<<< thinking':
-            # nothing to do here, thinking messages are omited
+            # nothing to do here, thinking messages are omitted
             current_type = 'thinking'
         elif line == '<<< assistant':
             messages.append({'role': 'assistant', 'content': [{ 'type': 'text', 'text': '' }]})

@@ -142,7 +142,7 @@ Do not forget to open PR updating this list.
 
 ## Roles
 
-In the context of this plugin, a role means a re-usable AI instruction and/or configuration. Roles are defined in the configuration `.ini` file. For example by defining a `grammar` and `o1-mini` role:
+In the context of this plugin, a role means a reusable AI instruction and/or configuration. Roles are defined in the configuration `.ini` file. For example by defining a `grammar` and `o1-mini` role:
 
 ```vim
 let g:vim_ai_roles_config_file = '/path/to/my/roles.ini'
@@ -200,7 +200,7 @@ In the documentation below,  `<selection>` denotes a visual selection or any oth
 
 `:AIImage {prompt}` - generate image with prompt
 
-`<selection> :AIImage` - generate image with seleciton
+`<selection> :AIImage` - generate image with selection
 
 `<selection>? :AI /{role} {instruction}?` - use role to generate
 
@@ -210,7 +210,7 @@ In the documentation below,  `<selection>` denotes a visual selection or any oth
 
 `:AIChat` - continue or start a new conversation.
 
-`<selection>? :AIChat {instruction}?` - start a new conversation given the selection, the instruction or both
+`<selection>? :AIChat {instruction}?` - start a new conversation using the selection, instruction, or both
 
 `<selection>? :AIChat /{role} {instruction}?` - use role to complete
 
@@ -221,7 +221,7 @@ When the AI finishes answering, you can continue the conversation by entering in
 #### `.aichat` files
 
 You can edit and save the chat conversation to an `.aichat` file and restore it later.
-This allows you to create re-usable custom prompts, for example:
+This allows you to create reusable custom prompts, for example:
 
 ```
 # ./refactoring-prompt.aichat
@@ -347,7 +347,7 @@ let s:initial_complete_prompt =<< trim END
 
 You are a general assistant.
 Answer shortly, consisely and only what you are asked.
-Do not provide any explanantion or comments if not requested.
+Do not provide any explanation or comments if not requested.
 If you answer in a code, do not wrap it in markdown code block.
 END
 
@@ -461,7 +461,7 @@ END
 " - ui.open_chat_command: preset (preset_below, preset_tab, preset_right) or a custom command
 " - ui.populate_options: show changed options in the chat header config
 " - ui.populate_all_options: show all options in the chat header config
-" - ui.scratch_buffer_keep_open: re-use scratch buffer within the vim session
+" - ui.scratch_buffer_keep_open: reuse scratch buffer within the vim session
 " - ui.force_new_chat: force new chat window (used in chat opening roles e.g. `/tab`)
 " - ui.paste_mode: use paste mode (see more info in the Notes below)
 let g:vim_ai_chat = {
@@ -562,7 +562,7 @@ let g:vim_ai_debug_log_file = "/tmp/vim_ai_debug.log"
 "   unclear/undocumented what it exactly does, but it seems to resolve issues when the model
 "   hits token limit, which respond with `OpenAI: HTTPError 400`
 " options.selection_boundary
-" - setting ``` value behaves in markdown-like fasion - adds filetype to the boundary
+" - setting ``` value behaves in markdown-like fashion - adds filetype to the boundary
 ```
 
 ### Using custom API

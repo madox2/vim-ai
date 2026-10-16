@@ -71,7 +71,7 @@ class OpenAIProvider():
                 return {'type': 'thinking', 'content': delta.get('reasoning')}
             if delta.get('content'):
                 return {'type': 'assistant', 'content': delta.get('content')}
-            return None # invalid chunk, this occured in deepseek models
+            return None # invalid chunk, this occurred in deepseek models
 
         def _filter_valid_chunks(chunk):
             return chunk is not None

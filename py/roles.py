@@ -14,7 +14,7 @@ def load_ai_role_names(command_type):
     for name in roles.sections():
         parts = name.split('.')
         if command_type == 'image':
-            # special case - image type have to be explicitely defined
+            # special case - the image type has to be explicitly defined
             if len(parts) > 1 and parts[-1] == command_type:
                 role_names.add(parts[0])
         else:
