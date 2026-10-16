@@ -458,8 +458,8 @@ function! vim_ai#AIChatStopRun() abort
 endfunction
 
 
-" Function called in a timer that check if there are new lines from AI and
-" appned them in a buffer. It ends when AI thread is finished (or when
+" Function called in a timer that checks if there are new lines from AI and
+" appends them in a buffer. It ends when AI thread is finished (or when
 " stopped).
 function! vim_ai#AIChatWatch(bufnr, anim_index, timerid) abort
   " inject new lines, first check if it is done to avoid data race, we do not
@@ -467,7 +467,7 @@ function! vim_ai#AIChatWatch(bufnr, anim_index, timerid) abort
   let l:done = py3eval("ai_job_pool.is_job_done(unwrap('a:bufnr'))")
   let l:result = py3eval("ai_job_pool.pickup_lines(unwrap('a:bufnr'))")
 
-  " if user scroling over chat while answering, do not auto-scroll
+  " if user scrolling over chat while answering, do not auto-scroll
   let l:should_prevent_autoscroll = bufnr('%') == a:bufnr && line('.') != line('$')
 
   call deletebufline(a:bufnr, '$')
@@ -496,7 +496,7 @@ function! vim_ai#AIChatWatch(bufnr, anim_index, timerid) abort
 endfunction
 
 " Start a new chat
-" a:1 - optional preset shorcut (below, right, tab)
+" a:1 - optional preset shortcut (below, right, tab)
 function! vim_ai#AINewChatDeprecatedRun(...)
   echoerr ":AINew is deprecated, use pre-configured roles `/tab`, `/below`, `/right` instead (e.g. `:AIChat /right`)"
 endfunction
@@ -517,7 +517,7 @@ function! vim_ai#AIRedoRun() abort
     elseif s:last_command ==# "image"
       call vim_ai#AIImageRun(s:last_uses_range, s:last_config, s:last_instruction)
     elseif s:last_command ==# "chat"
-      " chat does not need prompt, all information are in the buffer already
+      " chat does not need prompt, all information is in the buffer already
       call vim_ai#AIChatRun(0, s:last_config)
     endif
   finally

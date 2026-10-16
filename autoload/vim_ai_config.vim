@@ -6,15 +6,15 @@ let s:initial_complete_prompt =<< trim END
 >>> system
 
 You are a general assistant.
-Answer shortly, consisely and only what you are asked.
-Do not provide any explanantion or comments if not requested.
-If you answer in a code, do not wrap it in markdown code block.
+Answer shortly, concisely and only what you are asked.
+Do not provide any explanation or comments if not requested.
+If you answer in a code block, do not wrap it in a markdown code block.
 END
 let s:initial_chat_prompt =<< trim END
 >>> system
 
 You are a general assistant.
-If you attach a code block add syntax type after ``` to enable syntax highlighting.
+If you attach a code block, add the syntax type after ``` to enable syntax highlighting.
 END
 let g:vim_ai_complete_default = {
 \  "provider": "openai",

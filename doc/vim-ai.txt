@@ -24,8 +24,8 @@ Options: >
   >>> system
 
   You are a general assistant.
-  Answer shortly, consisely and only what you are asked.
-  Do not provide any explanantion or comments if not requested.
+  Answer shortly, concisely and only what you are asked.
+  Do not provide any explanation or comments if not requested.
   If you answer in a code, do not wrap it in markdown code block.
   END
 
@@ -75,8 +75,8 @@ Options: >
   >>> system
 
   You are a general assistant.
-  Answer shortly, consisely and only what you are asked.
-  Do not provide any explanantion or comments if not requested.
+  Answer shortly, concisely and only what you are asked.
+  Do not provide any explanation or comments if not requested.
   If you answer in a code, do not wrap it in markdown code block.
   END
 
